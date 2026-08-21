@@ -38,6 +38,10 @@ const AuthPage = () => {
         if (error) throw error;
         navigate('/dashboard');
       } else {
+        const passRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/;
+        if (!passRegex.test(password)) {
+          throw new Error('Password must be at least 8 characters and include uppercase, lowercase, number, and special character.');
+        }
         const { error } = await supabase.auth.signUp({
           email,
           password,

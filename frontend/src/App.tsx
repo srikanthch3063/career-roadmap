@@ -60,11 +60,11 @@ const App = () => {
           <Route path="/" element={!session ? <Landing /> : <Navigate to={role === 'admin' ? '/admin' : '/dashboard'} />} />
           <Route path="/auth" element={!session ? <AuthPage /> : <Navigate to={role === 'admin' ? '/admin' : '/dashboard'} />} />
           
-          {/* Protected Student Routes */}
-          <Route path="/dashboard" element={session && role === 'student' ? <Dashboard /> : <Navigate to="/auth" />} />
-          <Route path="/quiz" element={session && role === 'student' ? <Quiz /> : <Navigate to="/auth" />} />
-          <Route path="/results" element={session && role === 'student' ? <Results /> : <Navigate to="/auth" />} />
-          <Route path="/weekly-plan" element={session && role === 'student' ? <WeeklyPlan /> : <Navigate to="/auth" />} />
+          {/* Protected Student Routes (Admins can access too) */}
+          <Route path="/dashboard" element={session && (role === 'student' || role === 'admin') ? <Dashboard /> : <Navigate to="/auth" />} />
+          <Route path="/quiz" element={session && (role === 'student' || role === 'admin') ? <Quiz /> : <Navigate to="/auth" />} />
+          <Route path="/results" element={session && (role === 'student' || role === 'admin') ? <Results /> : <Navigate to="/auth" />} />
+          <Route path="/weekly-plan" element={session && (role === 'student' || role === 'admin') ? <WeeklyPlan /> : <Navigate to="/auth" />} />
           
           {/* Protected Admin Routes */}
           <Route path="/admin" element={session && role === 'admin' ? <AdminDashboard /> : <Navigate to="/auth" />} />

@@ -5,13 +5,16 @@
 
 .workbench {
   display: flex;
-  min-height: 100vh;
+  height: 100vh;
+  overflow: hidden;
   background-color: hsl(var(--background));
 }
 
 /* ── SIDE RAIL ── */
 .workbench-sidebar {
   width: 260px;
+  height: 100vh;
+  overflow-y: auto;
   background: hsl(var(--secondary) / 0.3);
   border-right: 1px solid hsl(var(--border));
   display: flex;
@@ -95,6 +98,7 @@
   padding: 3rem;
   max-width: 1000px;
   margin: 0 auto;
+  overflow-y: auto;
 }
 
 .workbench-loading {

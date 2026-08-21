@@ -136,7 +136,7 @@ const Dashboard = () => {
       <main className="workbench-main">
         <header className="workbench-header">
           <div>
-            <h1 className="workbench-title">Welcome back, {userName}</h1>
+            <h1 className="workbench-title">Welcome, {userName}</h1>
             <p className="workbench-subtitle">Your active career deployments and tracking metrics.</p>
           </div>
           <button className="btn btn-primary btn-generate" onClick={() => navigate('/quiz')}>
