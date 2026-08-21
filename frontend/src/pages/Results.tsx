@@ -1,13 +1,13 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { supabase } from '../supabase';
 import confetti from 'canvas-confetti';
-import { motion } from 'framer-motion';
+import { motion, AnimatePresence } from 'framer-motion';
 import toast from 'react-hot-toast';
 import { 
   Map, Printer, CheckCircle2, Circle, 
   Search, Code2, Briefcase, GraduationCap,
-  Loader2, X, ExternalLink, Lightbulb, Share2, MessageSquare, Calendar
+  Loader2, X, ExternalLink, Lightbulb, Share2, MessageSquare, Calendar, ChevronRight, Download
 } from 'lucide-react';
 import html2canvas from 'html2canvas';
 import { jsPDF } from 'jspdf';
@@ -26,10 +26,11 @@ const Results = () => {
   const [checkedItems, setCheckedItems] = useState<Record<string, boolean>>({});
   const [selectedResource, setSelectedResource] = useState<string | null>(null);
   const [isChatOpen, setIsChatOpen] = useState(false);
+  const contentRef = useRef<HTMLDivElement>(null);
 
   const loadingMessages = [
     "Analyzing your constraints and goals...",
-    "Consulting GPT-OSS 120B for tailored advice...",
+    "Consulting AI models for tailored advice...",
     "Crafting your personalized career blueprint..."
   ];
 
@@ -67,19 +68,17 @@ const Results = () => {
         angle: 60,
         spread: 55,
         origin: { x: 0 },
-        colors: ['#a855f7', '#6366f1', '#3b82f6', '#22d3ee']
+        colors: ['#8b5cf6', '#3b82f6', '#10b981']
       });
       confetti({
         particleCount: 5,
         angle: 120,
         spread: 55,
         origin: { x: 1 },
-        colors: ['#a855f7', '#6366f1', '#ec4899', '#f59e0b']
+        colors: ['#8b5cf6', '#3b82f6', '#10b981']
       });
 
-      if (Date.now() < end) {
-        requestAnimationFrame(frame);
-      }
+      if (Date.now() < end) requestAnimationFrame(frame);
     };
     frame();
   };
@@ -162,7 +161,6 @@ const Results = () => {
       const data = await response.json();
       if (!response.ok) throw new Error(data.error || 'Generation failed');
 
-      // The API returns the full roadmap object directly
       setRoadmap(data);
       triggerConfetti();
       navigate('/results', { replace: true });
@@ -197,76 +195,52 @@ const Results = () => {
   };
 
   const handleExportPDF = async () => {
-    const element = document.getElementById('roadmap-content');
-    if (!element) return;
-    
-    toast.loading('Generating PDF...', { id: 'pdf-toast' });
+    if (!contentRef.current) return;
+    toast.loading('Generating blueprint...', { id: 'pdf' });
     try {
-      // Temporarily add a class for PDF styling if needed, but let's just render it
-      const canvas = await html2canvas(element, { scale: 2, useCORS: true, backgroundColor: document.documentElement.getAttribute('data-theme') === 'light' ? '#ffffff' : '#1E1E2E' });
+      const canvas = await html2canvas(contentRef.current, { scale: 2, backgroundColor: '#000000' });
       const imgData = canvas.toDataURL('image/png');
-      const pdf = new jsPDF({
-        orientation: 'portrait',
-        unit: 'px',
-        format: [canvas.width, canvas.height]
-      });
-      
+      const pdf = new jsPDF({ orientation: 'portrait', unit: 'px', format: [canvas.width, canvas.height] });
       pdf.addImage(imgData, 'PNG', 0, 0, canvas.width, canvas.height);
-      pdf.save('Career_Roadmap.pdf');
-      toast.success('PDF Downloaded!', { id: 'pdf-toast' });
+      pdf.save('PathForge_Blueprint.pdf');
+      toast.success('Downloaded successfully', { id: 'pdf' });
     } catch (e) {
-      toast.error('Failed to generate PDF', { id: 'pdf-toast' });
+      toast.error('Failed to export', { id: 'pdf' });
     }
-  };
-
-  const handlePrint = () => {
-    window.print();
   };
 
   const handleShare = async () => {
     try {
       await navigator.clipboard.writeText(window.location.href);
-      toast.success('Link copied to clipboard!');
+      toast.success('Link copied to clipboard');
     } catch {
-      toast.error('Could not copy link. Try copying the URL manually.');
+      toast.error('Could not copy link');
     }
   };
 
   if (loading) {
     return (
-      <div className="results-layout">
-        <main className="container results-main" style={{ height: '100vh', display: 'flex', alignItems: 'center' }}>
-          <div className="loading-state" style={{ width: '100%' }}>
-            <Loader2 className="spinner" size={48} />
-            <p className="loading-text">{loadingMessages[loadingPhase]}</p>
-            <p className="text-muted">High-quality roadmaps take about 10 seconds.</p>
-          </div>
-        </main>
+      <div className="results-loading">
+        <Loader2 className="spin icon-xl" />
+        <h2>{loadingMessages[loadingPhase]}</h2>
+        <p className="text-muted">High-quality roadmaps take about 10-20 seconds.</p>
       </div>
     );
   }
 
   const renderChecklist = (items: string[], prefix: string) => (
-    <div className="checklist">
+    <div className="blueprint-checklist">
       {items.map((item: string, i: number) => {
         const id = `${prefix}-${i}`;
         const isChecked = checkedItems[id];
         return (
-          <div 
-            key={i} 
-            className={`check-item ${isChecked ? 'is-checked' : ''}`}
-            onClick={() => toggleCheck(id)}
-          >
-            {isChecked ? <CheckCircle2 className="check-icon" size={20} color="hsl(var(--success))" /> : <Circle className="check-icon" size={20} />}
-            <span className="check-text">{item}</span>
+          <div key={i} className={`blueprint-check-item ${isChecked ? 'checked' : ''}`} onClick={() => toggleCheck(id)}>
+            <div className="blueprint-check-icon">
+              {isChecked ? <CheckCircle2 size={18} /> : <Circle size={18} />}
+            </div>
+            <span className="blueprint-check-text">{item}</span>
             {prefix === 'tech' && !isChecked && (
-              <button 
-                className="resource-link"
-                onClick={(e) => {
-                  e.stopPropagation();
-                  setSelectedResource(item);
-                }}
-              >
+              <button className="blueprint-resource-btn" onClick={(e) => { e.stopPropagation(); setSelectedResource(item); }}>
                 <Search size={14} /> Find Resources
               </button>
             )}
@@ -276,214 +250,135 @@ const Results = () => {
     </div>
   );
 
-  const renderRoadmapContent = () => {
-    if (!roadmap) return null;
-    
-    if (roadmap.primary_career && roadmap.roadmap) {
-      return (
-        <div className="roadmap-sections" id="roadmap-content" style={{ padding: '20px', borderRadius: '12px', background: 'hsl(var(--background))' }}>
-          <motion.div 
-            className="roadmap-section"
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.5 }}
-          >
-            <div className="card module-card" style={{ borderTop: '4px solid hsl(var(--primary))' }}>
-              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
-                <h2 style={{ fontSize: '2rem', marginBottom: '0.5rem' }}>{roadmap.primary_career}</h2>
-                {(salaryData as Record<string, any>)[roadmap.primary_career] && (
-                  <div className="badge" style={{ backgroundColor: 'hsl(var(--success) / 0.1)', color: 'hsl(var(--success))', fontSize: '1rem', padding: '0.5rem 1rem' }}>
-                    💰 {(salaryData as Record<string, any>)[roadmap.primary_career].india}
-                  </div>
-                )}
-              </div>
-              <p className="text-muted" style={{ lineHeight: '1.6' }}>{roadmap.reasoning}</p>
-              
-              <div style={{ marginTop: '2rem' }}>
-                <h4 style={{ fontSize: '0.875rem', textTransform: 'uppercase', letterSpacing: '0.05em', color: 'hsl(var(--muted-foreground))', marginBottom: '0.75rem' }}>Alternative Paths</h4>
-                <div style={{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap' }}>
-                  {roadmap.recommended_careers.map((career: string) => (
-                    <span key={career} className="badge">{career}</span>
-                  ))}
-                </div>
-              </div>
-            </div>
-          </motion.div>
-
-          <motion.div 
-            className="roadmap-section"
-            initial="hidden"
-            animate="visible"
-            variants={{
-              hidden: { opacity: 0 },
-              visible: { opacity: 1, transition: { staggerChildren: 0.1, delayChildren: 0.2 } }
-            }}
-          >
-            <h3 className="roadmap-section-title">
-              <Code2 size={24} /> The Blueprint
-            </h3>
-            <div className="bento-grid">
-              <motion.div variants={{ hidden: { opacity: 0, y: 20 }, visible: { opacity: 1, y: 0 } }} className="card module-card">
-                <h4><CheckCircle2 size={18} color="hsl(var(--success))"/> Skills to Master</h4>
-                {renderChecklist(roadmap.roadmap.skills_to_learn, 'skill')}
-              </motion.div>
-              
-              <motion.div variants={{ hidden: { opacity: 0, y: 20 }, visible: { opacity: 1, y: 0 } }} className="card module-card">
-                <h4><Code2 size={18} color="hsl(var(--info))"/> Tech Stack</h4>
-                {renderChecklist(roadmap.roadmap.technologies, 'tech')}
-              </motion.div>
-
-              <motion.div variants={{ hidden: { opacity: 0, y: 20 }, visible: { opacity: 1, y: 0 } }} className="card module-card">
-                <h4><Lightbulb size={18} color="hsl(var(--warning))"/> Portfolio Projects</h4>
-                {renderChecklist(roadmap.roadmap.project_ideas, 'proj')}
-              </motion.div>
-
-              <motion.div variants={{ hidden: { opacity: 0, y: 20 }, visible: { opacity: 1, y: 0 } }} className="card module-card">
-                <h4><GraduationCap size={18} color="hsl(var(--accent))"/> Certifications</h4>
-                {renderChecklist(roadmap.roadmap.certifications, 'cert')}
-              </motion.div>
-            </div>
-          </motion.div>
-
-          <motion.div 
-            className="roadmap-section"
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.5, delay: 0.6 }}
-          >
-            <div className="card module-card">
-              <h4><Briefcase size={18} color="hsl(var(--primary))"/> Internship & Job Strategy</h4>
-              <p style={{ marginBottom: '1.5rem', lineHeight: '1.6' }}>{roadmap.roadmap.internship_advice}</p>
-              
-              <h4 style={{ fontSize: '0.875rem', textTransform: 'uppercase', color: 'hsl(var(--muted-foreground))', marginBottom: '0.75rem' }}>Target Job Titles</h4>
-              <div style={{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap' }}>
-                {roadmap.roadmap.job_titles.map((j: string) => (
-                  <span key={j} className="badge" style={{ backgroundColor: 'hsl(var(--primary) / 0.1)', color: 'hsl(var(--primary))' }}>
-                    {j}
-                  </span>
-                ))}
-              </div>
-            </div>
-          </motion.div>
-        </div>
-      );
-    }
-    
-    return (
-      <div className="card module-card markdown-content">
-        <p>Your roadmap data is in a legacy or unformatted state.</p>
-        <pre style={{ whiteSpace: 'pre-wrap', marginTop: '1rem', fontSize: '0.875rem' }}>
-          {JSON.stringify(roadmap, null, 2)}
-        </pre>
-      </div>
-    );
-  };
-
   return (
-    <div className="results-layout">
-      <nav className="results-nav">
-        <div className="container nav-content">
-          <div className="nav-brand">
-            <Map className="icon" size={24} />
-            <span>Career Roadmap</span>
-          </div>
-          <div className="action-buttons" style={{ display: 'flex', gap: '0.5rem', alignItems: 'center' }}>
-            <ThemeToggle />
-            <button className="btn btn-outline" onClick={() => navigate('/weekly-plan', { state: { roadmap } })}>
-              <Calendar size={16} style={{ marginRight: '0.5rem' }} /> 12-Week Plan
-            </button>
-            <button className="btn btn-outline" onClick={() => setIsChatOpen(true)}>
-              <MessageSquare size={16} style={{ marginRight: '0.5rem' }} /> Ask AI
-            </button>
-            <button className="btn btn-outline" onClick={handleShare}>
-              <Share2 size={16} style={{ marginRight: '0.5rem' }} /> Share
-            </button>
-            <button className="btn btn-outline" onClick={handleExportPDF}>
-              <Printer size={16} style={{ marginRight: '0.5rem' }} /> Export PDF
-            </button>
-            <button className="btn btn-outline" onClick={() => navigate('/dashboard')}>
-              Dashboard
-            </button>
-          </div>
+    <div className="document-layout">
+      {/* Sidebar Navigation */}
+      <aside className="document-sidebar">
+        <div className="sidebar-brand" onClick={() => navigate('/dashboard')}>
+          <Map className="brand-icon" size={24} />
+          <span className="brand-text">PathForge</span>
         </div>
-      </nav>
+        
+        <div className="sidebar-actions">
+          <button className="btn btn-primary w-full" onClick={() => navigate('/weekly-plan', { state: { roadmap } })}>
+            <Calendar size={16} /> Generate 12-Week Plan
+          </button>
+          
+          <button className="btn btn-outline w-full" onClick={() => setIsChatOpen(true)}>
+            <MessageSquare size={16} /> Ask AI Mentor
+          </button>
+          
+          <hr className="sidebar-divider" />
+          
+          <button className="btn-ghost w-full justify-start" onClick={handleShare}>
+            <Share2 size={16} /> Share Link
+          </button>
+          <button className="btn-ghost w-full justify-start" onClick={handleExportPDF}>
+            <Download size={16} /> Export PDF
+          </button>
+          <button className="btn-ghost w-full justify-start" onClick={() => navigate('/dashboard')}>
+            <ChevronRight size={16} /> Back to Dashboard
+          </button>
+        </div>
+      </aside>
 
-      <main className="container results-main">
+      {/* Main Document Content */}
+      <main className="document-main">
         {error && (
-          <div className="alert-error" style={{ marginBottom: '2rem' }}>
-            <strong>Error:</strong> {error}
-            <div style={{ marginTop: '1rem' }}>
-              <button className="btn btn-outline" onClick={generateRoadmap}>Try Again</button>
-            </div>
+          <div className="alert alert-error mb-8">
+            {error} <button className="btn btn-outline btn-sm ml-4" onClick={generateRoadmap}>Retry</button>
           </div>
         )}
 
-        <div className="results-header">
-          <h1>Your Career Roadmap</h1>
-          <p>An interactive, highly-opinionated guide to your future.</p>
-        </div>
+        {roadmap && roadmap.primary_career && (
+          <div className="blueprint-document" ref={contentRef}>
+            {/* Header / Title block */}
+            <header className="blueprint-header">
+              <span className="blueprint-eyebrow">Career Trajectory Analysis</span>
+              <h1 className="blueprint-title">{roadmap.primary_career}</h1>
+              
+              <div className="blueprint-meta">
+                {(salaryData as Record<string, any>)[roadmap.primary_career] && (
+                  <span className="blueprint-badge success">
+                    Compensation Est: {(salaryData as Record<string, any>)[roadmap.primary_career].india}
+                  </span>
+                )}
+                {roadmap.recommended_careers.slice(0,2).map((c: string) => (
+                  <span key={c} className="blueprint-badge default">Alt: {c}</span>
+                ))}
+              </div>
+            </header>
 
-        {!error && roadmap && renderRoadmapContent()}
-        
-        {!error && roadmap && (
-          <div className="action-buttons" style={{ marginTop: '4rem', textAlign: 'center', padding: '2rem', borderTop: '1px solid hsl(var(--border))' }}>
-            <h3 style={{ marginBottom: '1rem' }}>Want a different perspective?</h3>
-            <button className="btn btn-primary" onClick={generateRoadmap} disabled={loading}>
-              Regenerate Roadmap
-            </button>
+            {/* Reasoning Block */}
+            <section className="blueprint-section rationale-section">
+              <h2 className="blueprint-h2">Architectural Rationale</h2>
+              <p className="blueprint-p">{roadmap.reasoning}</p>
+            </section>
+
+            {/* Grid for Technical Details */}
+            <div className="blueprint-grid">
+              <section className="blueprint-section">
+                <h3 className="blueprint-h3"><Code2 size={18}/> Technology Stack</h3>
+                {renderChecklist(roadmap.roadmap.technologies, 'tech')}
+              </section>
+
+              <section className="blueprint-section">
+                <h3 className="blueprint-h3"><CheckCircle2 size={18}/> Core Competencies</h3>
+                {renderChecklist(roadmap.roadmap.skills_to_learn, 'skill')}
+              </section>
+
+              <section className="blueprint-section full-width">
+                <h3 className="blueprint-h3"><Lightbulb size={18}/> Portfolio Architecture (Projects)</h3>
+                {renderChecklist(roadmap.roadmap.project_ideas, 'proj')}
+              </section>
+
+              <section className="blueprint-section">
+                <h3 className="blueprint-h3"><Briefcase size={18}/> Market Strategy</h3>
+                <p className="blueprint-p text-sm">{roadmap.roadmap.internship_advice}</p>
+                <div className="blueprint-tags mt-4">
+                  {roadmap.roadmap.job_titles.map((t: string) => <span key={t} className="blueprint-tag">{t}</span>)}
+                </div>
+              </section>
+
+              <section className="blueprint-section">
+                <h3 className="blueprint-h3"><GraduationCap size={18}/> Validation (Certifications)</h3>
+                {renderChecklist(roadmap.roadmap.certifications, 'cert')}
+              </section>
+            </div>
+            
+            <footer className="blueprint-footer">
+              Generated by PathForge Intelligence
+            </footer>
           </div>
         )}
       </main>
 
       {/* Resource Modal */}
-      {selectedResource && (
-        <div className="modal-overlay" onClick={() => setSelectedResource(null)}>
-          <div className="modal-content" onClick={e => e.stopPropagation()}>
-            <button className="modal-close" onClick={() => setSelectedResource(null)}>
-              <X size={20} />
-            </button>
-            <h3 style={{ fontSize: '1.25rem', marginBottom: '0.5rem' }}>Learn {selectedResource}</h3>
-            <p className="text-muted" style={{ marginBottom: '1.5rem', fontSize: '0.875rem' }}>
-              Select a platform to search for the best tutorials and documentation.
-            </p>
-            <div className="modal-links">
-              <a 
-                href={`https://www.youtube.com/results?search_query=${encodeURIComponent(selectedResource + ' tutorial for beginners')}`} 
-                target="_blank" 
-                rel="noreferrer"
-                className="modal-btn"
-              >
-                <span>YouTube Tutorials</span>
-                <ExternalLink size={16} />
-              </a>
-              <a 
-                href={`https://www.freecodecamp.org/news/search/?query=${encodeURIComponent(selectedResource)}`} 
-                target="_blank" 
-                rel="noreferrer"
-                className="modal-btn"
-              >
-                <span>freeCodeCamp Articles</span>
-                <ExternalLink size={16} />
-              </a>
-              <a 
-                href={`https://roadmap.sh/search?q=${encodeURIComponent(selectedResource)}`} 
-                target="_blank" 
-                rel="noreferrer"
-                className="modal-btn"
-              >
-                <span>Roadmap.sh Guides</span>
-                <ExternalLink size={16} />
-              </a>
-            </div>
-          </div>
-        </div>
-      )}
+      <AnimatePresence>
+        {selectedResource && (
+          <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="resource-modal-overlay" onClick={() => setSelectedResource(null)}>
+            <motion.div initial={{ y: 20, opacity: 0 }} animate={{ y: 0, opacity: 1 }} exit={{ y: 20, opacity: 0 }} className="resource-modal" onClick={e => e.stopPropagation()}>
+              <button className="resource-modal-close" onClick={() => setSelectedResource(null)}><X size={20} /></button>
+              <h3>Resource Locator: {selectedResource}</h3>
+              <p className="text-muted mb-6">Select a destination to query knowledge paths.</p>
+              
+              <div className="resource-links">
+                <a href={`https://www.youtube.com/results?search_query=${encodeURIComponent(selectedResource + ' tutorial for beginners')}`} target="_blank" rel="noreferrer" className="resource-btn">
+                  YouTube <ExternalLink size={16} />
+                </a>
+                <a href={`https://www.freecodecamp.org/news/search/?query=${encodeURIComponent(selectedResource)}`} target="_blank" rel="noreferrer" className="resource-btn">
+                  freeCodeCamp <ExternalLink size={16} />
+                </a>
+                <a href={`https://roadmap.sh/search?q=${encodeURIComponent(selectedResource)}`} target="_blank" rel="noreferrer" className="resource-btn">
+                  Roadmap.sh <ExternalLink size={16} />
+                </a>
+              </div>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
 
-      <ChatDrawer 
-        isOpen={isChatOpen} 
-        onClose={() => setIsChatOpen(false)} 
-        roadmapContext={roadmap} 
-      />
+      <ChatDrawer isOpen={isChatOpen} onClose={() => setIsChatOpen(false)} roadmapContext={roadmap} />
     </div>
   );
 };

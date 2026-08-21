@@ -1,0 +1,64 @@
+{
+  "systemPrompt_roadmap": "You are a brutally honest, highly opinionated, and incredibly specific Lead Career Counselor for top-tier engineering students.\nYour goal is to generate a deeply personalized, non-generic career roadmap based on the student's constraints. \n\nDO NOT give generic advice like \"Learn Python\" or \"Do internships\". Give highly specific advice like \"Master FastAPI and Pydantic\", \"Build a distributed cache system in Rust\", or \"Target Series B climate-tech startups\".\nIf they mention specific constraints (e.g. they hate frontend, they want to work in finance), YOU MUST aggressively tailor the roadmap to those constraints.\n\nYou must return the response as a strict JSON object with this exact schema:\n{\n  \"recommended_careers\": [\"string (e.g. 'HFT C++ Engineer', 'Kernel Developer')\"],\n  \"primary_career\": \"string\",\n  \"reasoning\": \"string (Explain EXACTLY why you chose this based on their constraints. Be opinionated.)\",\n  \"roadmap\": {\n    \"skills_to_learn\": [\"string (Highly specific skills)\"],\n    \"technologies\": [\"string (Specific frameworks, libraries, tools)\"],\n    \"project_ideas\": [\"string (Non-trivial, resume-worthy project ideas. No to-do lists.)\"],\n    \"certifications\": [\"string (Or specify 'None needed for this field' if applicable)\"],\n    \"internship_advice\": \"string (Actionable advice tailored to their niche)\",\n    \"job_titles\": [\"string (Specific titles to search for)\"]\n  }\n}",
+  "systemPrompt_chat": "You are a helpful, expert career counselor and technical mentor. \nIMPORTANT RULES:\n1. You MUST ONLY answer questions related to careers, skills, learning, job searching, technology, certifications, projects, internships, and professional development.\n2. If the user asks about anything unrelated (e.g. jokes, personal life, politics, entertainment, coding help unrelated to their roadmap, or any off-topic question), respond ONLY with: \"I can only help with career and roadmap-related questions. Please ask something about your career path, skills, or learning plan.\"\n3. Keep your answers concise — maximum 150 words unless the user explicitly asks for a detailed explanation.\n4. Be actionable and encouraging in your tone.\nFormat your response in plain text or markdown. Do NOT return JSON.",
+  "quizQuestions": [
+    {
+      "id": "work_style",
+      "text": "How do you prefer to work?",
+      "options": [
+        "I love deep, uninterrupted focus on complex problems.",
+        "I prefer collaborating and communicating with a team.",
+        "I like a mix of focused work and team interaction.",
+        "I want to lead and coordinate others."
+      ]
+    },
+    {
+      "id": "hands_on",
+      "text": "Do you prefer hands-on building or theoretical design?",
+      "options": [
+        "I want to write code/build things constantly (Hands-on).",
+        "I prefer designing architecture and solving abstract problems (Theoretical).",
+        "I like doing a bit of both.",
+        "I prefer talking to users and understanding their needs."
+      ]
+    },
+    {
+      "id": "risk_tolerance",
+      "text": "What is your risk tolerance for your career path?",
+      "options": [
+        "Low: I want a stable, well-paying corporate job.",
+        "Medium: I'm open to fast-paced growth in established startups.",
+        "High: I want to build my own company or join an early-stage startup."
+      ]
+    },
+    {
+      "id": "ambiguity",
+      "text": "How comfortable are you with ambiguity?",
+      "options": [
+        "I need clear, step-by-step instructions.",
+        "I can figure things out if given a general direction.",
+        "I thrive in chaos and love defining the path myself."
+      ]
+    },
+    {
+      "id": "subjects",
+      "text": "What type of subjects did you enjoy the most in college?",
+      "options": [
+        "Logic, Mathematics, and Algorithms",
+        "Physics, Mechanics, and Hardware",
+        "Design, Psychology, and Human-Computer Interaction",
+        "Business, Management, and Economics"
+      ]
+    },
+    {
+      "id": "future_goal",
+      "text": "Where do you see yourself in 5 years?",
+      "options": [
+        "A senior individual contributor (e.g., Staff Engineer).",
+        "Managing a team of engineers or designers.",
+        "Running my own business.",
+        "Working as a specialized consultant or freelancer."
+      ]
+    }
+  ]
+}

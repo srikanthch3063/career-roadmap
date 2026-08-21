@@ -1,6 +1,7 @@
+import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { supabase } from '../supabase';
-import { Map, LogOut, FileText, ChevronRight, Compass, Award, Trash2 } from 'lucide-react';
+import { Map, LogOut, FileText, ChevronRight, Compass, Award, Trash2, Plus, Terminal, Settings } from 'lucide-react';
 import { motion } from 'framer-motion';
 import toast from 'react-hot-toast';
 import ThemeToggle from '../components/ThemeToggle';
@@ -12,7 +13,7 @@ const Dashboard = () => {
   const [userName, setUserName] = useState('Student');
   const [history, setHistory] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
-  const [stats, setStats] = useState({ totalChecked: 0, level: 'Beginner' });
+  const [stats, setStats] = useState({ totalChecked: 0, level: 'Beginner', totalRoadmaps: 0 });
 
   useEffect(() => {
     fetchUserData();
@@ -63,7 +64,7 @@ const Dashboard = () => {
         if (totalChecked > 30) level = 'Expert';
         if (totalChecked > 50) level = 'Master';
         
-        setStats({ totalChecked, level });
+        setStats({ totalChecked, level, totalRoadmaps: historyData.length });
       }
     } catch (error) {
       console.error('Error fetching user data:', error);
@@ -92,6 +93,7 @@ const Dashboard = () => {
       toast.error('Failed to delete roadmap');
     } else {
       setHistory(prev => prev.filter(r => r.id !== roadmapId));
+      setStats(prev => ({ ...prev, totalRoadmaps: prev.totalRoadmaps - 1 }));
       toast.success('Roadmap deleted');
     }
   };
@@ -102,131 +104,139 @@ const Dashboard = () => {
   };
 
   if (loading) {
-    return <div style={{ display: 'flex', height: '100vh', alignItems: 'center', justifyContent: 'center' }}>Loading...</div>;
+    return <div className="workbench-loading"><Terminal className="spin" size={24} /> Loading Workspace...</div>;
   }
 
   return (
-    <div className="dashboard-layout">
-      <nav className="dashboard-nav">
-        <div className="container nav-content">
-          <div className="nav-brand">
-            <Map className="icon" size={24} />
-            <span>Career Roadmap</span>
-          </div>
-          <div style={{ display: 'flex', gap: '1rem', alignItems: 'center' }}>
-            <ThemeToggle />
-            <button className="btn btn-ghost" onClick={handleLogout}>
-              <LogOut size={16} style={{ marginRight: '0.5rem' }} />
-              Log Out
-            </button>
-          </div>
+    <div className="workbench">
+      {/* Side Rail Navigation */}
+      <aside className="workbench-sidebar">
+        <div className="sidebar-brand" onClick={() => navigate('/')}>
+          <Map className="brand-icon" size={24} />
+          <span className="brand-text">PathForge</span>
         </div>
-      </nav>
+        
+        <nav className="sidebar-nav">
+          <button className="nav-item active"><Compass size={18} /> <span>Command Center</span></button>
+          <button className="nav-item text-muted" onClick={() => navigate('/quiz')}><Plus size={18} /> <span>New Roadmap</span></button>
+          {profile?.role === 'admin' && (
+            <button className="nav-item text-muted" onClick={() => navigate('/admin')}><Settings size={18} /> <span>Admin Console</span></button>
+          )}
+        </nav>
 
-      <main className="container dashboard-main">
-        <motion.div 
-          className="dashboard-header"
-          initial={{ opacity: 0, y: -20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.5 }}
-        >
-          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '1rem', marginBottom: '0.5rem' }}>
-            <h1 style={{ margin: 0 }}>Welcome back, {userName}</h1>
-            <div className="badge" style={{ display: 'flex', alignItems: 'center', gap: '0.25rem', backgroundColor: 'hsl(var(--accent) / 0.1)', color: 'hsl(var(--accent))' }}>
-              <Award size={14} /> Level: {stats.level}
-            </div>
+        <div className="sidebar-footer">
+          <ThemeToggle />
+          <button className="nav-item text-muted logout-btn" onClick={handleLogout}>
+            <LogOut size={18} /> <span>Disconnect</span>
+          </button>
+        </div>
+      </aside>
+
+      {/* Main Command Center */}
+      <main className="workbench-main">
+        <header className="workbench-header">
+          <div>
+            <h1 className="workbench-title">Welcome back, {userName}</h1>
+            <p className="workbench-subtitle">Your active career deployments and tracking metrics.</p>
           </div>
-          <p>Your personalized command center for career growth. You have completed {stats.totalChecked} tasks!</p>
-        </motion.div>
+          <button className="btn btn-primary btn-generate" onClick={() => navigate('/quiz')}>
+            <Plus size={16} /> Deploy New Roadmap
+          </button>
+        </header>
 
-        <div className="dashboard-grid">
-          <motion.div 
-            initial={{ opacity: 0, x: -20 }}
-            animate={{ opacity: 1, x: 0 }}
-            transition={{ duration: 0.5, delay: 0.1 }}
-          >
-            <div className="card action-card">
-              <div>
-                <h3 style={{ fontSize: '1.5rem', marginBottom: '0.5rem' }}>Ready for your next step?</h3>
-                <p className="text-muted">Take the assessment to generate a new highly-tailored career roadmap based on your current constraints and goals.</p>
-              </div>
-              <button className="btn btn-primary" onClick={() => navigate('/quiz')} style={{ width: '100%' }}>
-                Start Assessment
-              </button>
-            </div>
-          </motion.div>
+        {/* Dense Stats Row */}
+        <section className="workbench-stats">
+          <div className="stat-card">
+            <span className="stat-label">Active Roadmaps</span>
+            <span className="stat-value">{stats.totalRoadmaps}</span>
+          </div>
+          <div className="stat-card">
+            <span className="stat-label">Tasks Completed</span>
+            <span className="stat-value">{stats.totalChecked}</span>
+          </div>
+          <div className="stat-card">
+            <span className="stat-label">Current Rank</span>
+            <span className="stat-value text-accent">
+              <Award size={18} style={{ display: 'inline', marginRight: '4px', verticalAlign: 'text-bottom' }}/> 
+              {stats.level}
+            </span>
+          </div>
+        </section>
 
-          <motion.div 
-            initial={{ opacity: 0, x: 20 }}
-            animate={{ opacity: 1, x: 0 }}
-            transition={{ duration: 0.5, delay: 0.2 }}
-          >
-            <div className="card history-card">
-              <h3 className="history-header">
-                <FileText size={20} />
-                Your Roadmaps
-              </h3>
-              
-              {history.length > 0 ? (
-                <div className="history-list">
+        {/* Data Grid for Roadmaps */}
+        <section className="workbench-data">
+          <div className="data-header">
+            <h2>Deployment History</h2>
+          </div>
+
+          {history.length > 0 ? (
+            <div className="data-table-container">
+              <table className="data-table">
+                <thead>
+                  <tr>
+                    <th>Career Path</th>
+                    <th>Created</th>
+                    <th>Progress</th>
+                    <th className="text-right">Actions</th>
+                  </tr>
+                </thead>
+                <tbody>
                   {history.map((item, index) => (
-                    <motion.div 
-                      key={item.id} 
-                      className="history-item" 
-                      onClick={() => navigate(`/results?id=${item.id}`)}
+                    <motion.tr 
+                      key={item.id}
                       initial={{ opacity: 0, y: 10 }}
                       animate={{ opacity: 1, y: 0 }}
-                      transition={{ delay: 0.3 + (index * 0.1) }}
-                      whileHover={{ scale: 1.02 }}
-                      whileTap={{ scale: 0.98 }}
+                      transition={{ delay: index * 0.05 }}
+                      onClick={() => navigate(`/results?id=${item.id}`)}
+                      className="data-row"
                     >
-                      <div className="history-item-info">
-                        <h4>{item.primary_career || 'Generated Roadmap'}</h4>
-                        <span className="history-item-date">
-                          {new Date(item.created_at).toLocaleDateString('en-US', {
-                            year: 'numeric',
-                            month: 'long',
-                            day: 'numeric'
-                          })}
-                        </span>
-                      </div>
-                      <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
-                        <div style={{ fontSize: '0.875rem', color: 'hsl(var(--primary))', fontWeight: 600 }}>
-                          {getProgress(item.roadmap)}% Complete
+                      <td className="font-medium text-primary">
+                        <div className="career-cell">
+                          <FileText size={16} className="text-muted" />
+                          {item.primary_career || 'Generated Roadmap'}
                         </div>
-                        <motion.button
-                          onClick={(e) => deleteRoadmap(e, item.id)}
-                          whileHover={{ scale: 1.1 }}
-                          whileTap={{ scale: 0.9 }}
-                          style={{
-                            background: 'none',
-                            border: 'none',
-                            cursor: 'pointer',
-                            color: 'hsl(var(--muted-foreground))',
-                            padding: '0.25rem',
-                            display: 'flex',
-                            alignItems: 'center',
-                            borderRadius: '6px',
-                          }}
-                          title="Delete roadmap"
-                        >
-                          <Trash2 size={15} />
-                        </motion.button>
-                        <ChevronRight size={20} className="text-muted" />
-                      </div>
-                    </motion.div>
+                      </td>
+                      <td className="text-muted text-sm">
+                        {new Date(item.created_at).toLocaleDateString('en-US', {
+                          year: 'numeric', month: 'short', day: 'numeric'
+                        })}
+                      </td>
+                      <td>
+                        <div className="progress-cell">
+                          <div className="progress-bar">
+                            <div className="progress-fill" style={{ width: `${getProgress(item.roadmap)}%` }} />
+                          </div>
+                          <span className="progress-text">{getProgress(item.roadmap)}%</span>
+                        </div>
+                      </td>
+                      <td className="text-right">
+                        <div className="action-cell">
+                          <button 
+                            className="btn-icon text-muted hover-destructive"
+                            onClick={(e) => deleteRoadmap(e, item.id)}
+                            title="Delete deployment"
+                          >
+                            <Trash2 size={16} />
+                          </button>
+                          <ChevronRight size={16} className="text-muted" />
+                        </div>
+                      </td>
+                    </motion.tr>
                   ))}
-                </div>
-              ) : (
-                <div className="empty-state">
-                  <Compass size={48} className="empty-state-icon" />
-                  <h3>No roadmaps yet</h3>
-                  <p>You haven't generated any career roadmaps. Take the assessment to get started!</p>
-                </div>
-              )}
+                </tbody>
+              </table>
             </div>
-          </motion.div>
-        </div>
+          ) : (
+            <div className="workbench-empty">
+              <Terminal size={32} className="text-muted" />
+              <h3>No active deployments</h3>
+              <p className="text-muted">You haven't generated any career roadmaps yet.</p>
+              <button className="btn btn-outline" onClick={() => navigate('/quiz')} style={{ marginTop: '1rem' }}>
+                Run Assessment
+              </button>
+            </div>
+          )}
+        </section>
       </main>
     </div>
   );

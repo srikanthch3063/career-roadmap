@@ -86,32 +86,18 @@ router.post('/generate-roadmap', requireAuth, generateLimiter, async (req: AuthR
     let finalRoadmapJSON = null;
 
     if (groq) {
-      // 2. Build System Prompt
-      const systemPrompt = `You are a brutally honest, highly opinionated, and incredibly specific Lead Career Counselor for top-tier engineering students.
-Your goal is to generate a deeply personalized, non-generic career roadmap based on the student's constraints. 
+      // 2. Read System Prompt from Config
+      let config: any = {};
+      try {
+        const rawConfig = fs.readFileSync(path.join(__dirname, '../data/config.json'), 'utf8');
+        config = JSON.parse(rawConfig);
+      } catch (err) {
+        console.error('Error reading config.json, using defaults.', err);
+      }
 
-DO NOT give generic advice like "Learn Python" or "Do internships". Give highly specific advice like "Master FastAPI and Pydantic", "Build a distributed cache system in Rust", or "Target Series B climate-tech startups".
-If they mention specific constraints (e.g. they hate frontend, they want to work in finance), YOU MUST aggressively tailor the roadmap to those constraints.
+      const defaultRoadmapPrompt = `You are a brutally honest, highly opinionated, and incredibly specific Lead Career Counselor for top-tier engineering students.\nYour goal is to generate a deeply personalized, non-generic career roadmap based on the student's constraints. \n\nDO NOT give generic advice like "Learn Python" or "Do internships". Give highly specific advice like "Master FastAPI and Pydantic", "Build a distributed cache system in Rust", or "Target Series B climate-tech startups".\nIf they mention specific constraints (e.g. they hate frontend, they want to work in finance), YOU MUST aggressively tailor the roadmap to those constraints.\n\nYou must return the response as a strict JSON object with this exact schema:\n{\n  "recommended_careers": ["string (e.g. 'HFT C++ Engineer', 'Kernel Developer')"],\n  "primary_career": "string",\n  "reasoning": "string (Explain EXACTLY why you chose this based on their constraints. Be opinionated.)",\n  "roadmap": {\n    "skills_to_learn": ["string (Highly specific skills)"],\n    "technologies": ["string (Specific frameworks, libraries, tools)"],\n    "project_ideas": ["string (Non-trivial, resume-worthy project ideas. No to-do lists.)"],\n    "certifications": ["string (Or specify 'None needed for this field' if applicable)"],\n    "internship_advice": "string (Actionable advice tailored to their niche)",\n    "job_titles": ["string (Specific titles to search for)"]\n  }\n}`;
 
-You must return the response as a strict JSON object with this exact schema:
-{
-  "recommended_careers": ["string (e.g. 'HFT C++ Engineer', 'Kernel Developer')"],
-  "primary_career": "string",
-  "reasoning": "string (Explain EXACTLY why you chose this based on their constraints. Be opinionated.)",
-  "roadmap": {
-    "skills_to_learn": ["string (Highly specific skills)"],
-    "technologies": ["string (Specific frameworks, libraries, tools)"],
-    "project_ideas": ["string (Non-trivial, resume-worthy project ideas. No to-do lists.)"],
-    "certifications": ["string (Or specify 'None needed for this field' if applicable)"],
-    "internship_advice": "string (Actionable advice tailored to their niche)",
-    "job_titles": ["string (Specific titles to search for)"]
-  }
-}
-
-Student Data:
-Branch: ${branch}
-Quiz Answers: ${JSON.stringify(answers)}
-Additional Constraints/Info: ${freeText}`;
+      const systemPrompt = `${config.systemPrompt_roadmap || defaultRoadmapPrompt}\n\nStudent Data:\nBranch: ${branch}\nQuiz Answers: ${JSON.stringify(answers)}\nAdditional Constraints/Info: ${freeText}`;
 
       try {
         // 3. Call Groq with timeout
@@ -188,16 +174,23 @@ router.post('/chat', requireAuth, async (req: any, res: any) => {
       return res.status(400).json({ error: 'Question and roadmap context are required' });
     }
 
-    const systemPrompt = `You are a helpful, expert career counselor and technical mentor. 
-You previously generated the following career roadmap for the user:
-${JSON.stringify(roadmapContext)}
+    let config: any = {};
+    try {
+      const rawConfig = fs.readFileSync(path.join(__dirname, '../data/config.json'), 'utf8');
+      config = JSON.parse(rawConfig);
+    } catch (err) {
+      console.error('Error reading config.json, using defaults.', err);
+    }
 
+    const defaultChatPrompt = `You are a helpful, expert career counselor and technical mentor. 
 IMPORTANT RULES:
 1. You MUST ONLY answer questions related to careers, skills, learning, job searching, technology, certifications, projects, internships, and professional development.
 2. If the user asks about anything unrelated (e.g. jokes, personal life, politics, entertainment, coding help unrelated to their roadmap, or any off-topic question), respond ONLY with: "I can only help with career and roadmap-related questions. Please ask something about your career path, skills, or learning plan."
 3. Keep your answers concise — maximum 150 words unless the user explicitly asks for a detailed explanation.
 4. Be actionable and encouraging in your tone.
 Format your response in plain text or markdown. Do NOT return JSON.`;
+
+    const systemPrompt = `${config.systemPrompt_chat || defaultChatPrompt}\n\nYou previously generated the following career roadmap for the user:\n${JSON.stringify(roadmapContext)}`;
 
     const chatCompletion = await groq.chat.completions.create({
       messages: [
@@ -293,6 +286,18 @@ router.put('/progress', requireAuth, async (req: any, res: any) => {
   } catch (error: any) {
     console.error('Error updating progress:', error);
     res.status(500).json({ error: 'Failed to update progress' });
+  }
+});
+
+// Get Config (Quiz Questions) Endpoint
+router.get('/config', requireAuth, (req: any, res: any) => {
+  try {
+    const configPath = path.join(__dirname, '../data/config.json');
+    const rawConfig = fs.readFileSync(configPath, 'utf8');
+    const config = JSON.parse(rawConfig);
+    res.json({ quizQuestions: config.quizQuestions || [] });
+  } catch (error) {
+    res.status(500).json({ error: 'Failed to load config' });
   }
 });
 

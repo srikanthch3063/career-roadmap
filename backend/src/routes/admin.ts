@@ -1,6 +1,8 @@
 import { Router } from 'express';
 import { requireAuth, requireAdmin, AuthRequest } from '../middleware/auth';
 import { createClient } from '@supabase/supabase-js';
+import fs from 'fs';
+import path from 'path';
 
 const router = Router();
 const supabase = createClient(
@@ -81,6 +83,26 @@ router.get('/stats', requireAuth, requireAdmin, async (req: AuthRequest, res: an
   } catch (error) {
     console.error('Error fetching admin stats:', error);
     res.status(500).json({ error: 'Internal server error' });
+  }
+});
+
+router.get('/config', requireAuth, requireAdmin, (req: any, res: any) => {
+  try {
+    const configPath = path.join(__dirname, '../data/config.json');
+    const rawData = fs.readFileSync(configPath, 'utf8');
+    res.json(JSON.parse(rawData));
+  } catch (error) {
+    res.status(500).json({ error: 'Failed to read config' });
+  }
+});
+
+router.post('/config', requireAuth, requireAdmin, (req: any, res: any) => {
+  try {
+    const configPath = path.join(__dirname, '../data/config.json');
+    fs.writeFileSync(configPath, JSON.stringify(req.body, null, 2), 'utf8');
+    res.json({ success: true });
+  } catch (error) {
+    res.status(500).json({ error: 'Failed to write config' });
   }
 });
 
