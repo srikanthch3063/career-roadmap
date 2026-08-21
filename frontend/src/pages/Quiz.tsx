@@ -165,7 +165,7 @@ const Quiz = () => {
           <h2>{q.text}</h2>
           
           <div className="options-stack">
-            {q.options.map((opt) => (
+            {q.options.map((opt: string) => (
               <button
                 key={opt}
                 type="button"
