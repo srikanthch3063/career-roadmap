@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { supabase } from '../supabase';
-import { branches } from '../quizConfig';
+import { branches, quizQuestions } from '../quizConfig';
 import { Map, ArrowRight, ArrowLeft } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import './Quiz.css';
@@ -15,27 +15,11 @@ const Quiz = () => {
   const [answers, setAnswers] = useState<Record<string, string>>({});
   const [freeText, setFreeText] = useState('');
   const [error, setError] = useState<string | null>(null);
-  const [quizQuestions, setQuizQuestions] = useState<any[]>([]);
+  
 
-  useEffect(() => {
-    fetchQuizConfig();
-  }, []);
+  
 
-  const fetchQuizConfig = async () => {
-    try {
-      const { data: { session } } = await supabase.auth.getSession();
-      if (!session) return;
-      const res = await fetch(`${import.meta.env.VITE_API_BASE_URL || 'http://localhost:3000/api'}/roadmap/config`, {
-        headers: { 'Authorization': `Bearer ${session.access_token}` }
-      });
-      const data = await res.json();
-      if (data.quizQuestions) {
-        setQuizQuestions(data.quizQuestions);
-      }
-    } catch (err) {
-      console.error('Failed to load quiz config', err);
-    }
-  };
+  
 
   const totalSteps = quizQuestions.length > 0 ? quizQuestions.length + 2 : 2;
 
