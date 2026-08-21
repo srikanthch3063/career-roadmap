@@ -1,8 +1,8 @@
-import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { supabase } from '../supabase';
-import { Map, LogOut, FileText, ChevronRight, Compass, Award } from 'lucide-react';
+import { Map, LogOut, FileText, ChevronRight, Compass, Award, Trash2 } from 'lucide-react';
 import { motion } from 'framer-motion';
+import toast from 'react-hot-toast';
 import ThemeToggle from '../components/ThemeToggle';
 import './Dashboard.css';
 
@@ -82,6 +82,18 @@ const Dashboard = () => {
     const checked = roadmapJson.checked_items?.length || 0;
     if (total === 0) return 0;
     return Math.round((checked / total) * 100);
+  };
+
+  const deleteRoadmap = async (e: React.MouseEvent, roadmapId: string) => {
+    e.stopPropagation();
+    if (!confirm('Delete this roadmap? This cannot be undone.')) return;
+    const { error } = await supabase.from('roadmaps').delete().eq('id', roadmapId);
+    if (error) {
+      toast.error('Failed to delete roadmap');
+    } else {
+      setHistory(prev => prev.filter(r => r.id !== roadmapId));
+      toast.success('Roadmap deleted');
+    }
   };
 
   const handleLogout = async () => {
@@ -182,6 +194,24 @@ const Dashboard = () => {
                         <div style={{ fontSize: '0.875rem', color: 'hsl(var(--primary))', fontWeight: 600 }}>
                           {getProgress(item.roadmap)}% Complete
                         </div>
+                        <motion.button
+                          onClick={(e) => deleteRoadmap(e, item.id)}
+                          whileHover={{ scale: 1.1 }}
+                          whileTap={{ scale: 0.9 }}
+                          style={{
+                            background: 'none',
+                            border: 'none',
+                            cursor: 'pointer',
+                            color: 'hsl(var(--muted-foreground))',
+                            padding: '0.25rem',
+                            display: 'flex',
+                            alignItems: 'center',
+                            borderRadius: '6px',
+                          }}
+                          title="Delete roadmap"
+                        >
+                          <Trash2 size={15} />
+                        </motion.button>
                         <ChevronRight size={20} className="text-muted" />
                       </div>
                     </motion.div>
