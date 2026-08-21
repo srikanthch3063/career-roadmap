@@ -74,7 +74,7 @@ const AuthPage = () => {
       >
         <div className="auth-header">
           <Map className="icon" />
-          <h2>{isLogin ? 'Welcome Back' : 'Create an Account'}</h2>
+          <h2>{isLogin ? 'Sign In' : 'Create an Account'}</h2>
           <p>{isLogin ? 'Log in to view your roadmap' : 'Sign up to map your future'}</p>
         </div>
 

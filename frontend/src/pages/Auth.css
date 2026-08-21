@@ -87,3 +87,25 @@
 .btn-full {
   width: 100%;
 }
+
+.auth-card .input {
+  color: hsl(var(--foreground));
+  background-color: hsl(var(--secondary));
+  border: 1px solid hsl(var(--border));
+}
+
+.auth-card .input::placeholder {
+  color: hsl(var(--muted-foreground));
+}
+
+.auth-card .label {
+  color: hsl(var(--foreground));
+}
+
+.auth-card h2 {
+  color: hsl(var(--foreground));
+}
+
+.auth-card p {
+  color: hsl(var(--muted-foreground));
+}

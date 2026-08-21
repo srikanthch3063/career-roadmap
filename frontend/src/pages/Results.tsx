@@ -223,14 +223,12 @@ const Results = () => {
     window.print();
   };
 
-  const handleShare = () => {
-    const params = new URLSearchParams(location.search);
-    const id = params.get('id');
-    if (id) {
-      navigator.clipboard.writeText(window.location.href);
-      toast.success('Shareable link copied to clipboard!');
-    } else {
-      toast.error('Save this roadmap first to share it.');
+  const handleShare = async () => {
+    try {
+      await navigator.clipboard.writeText(window.location.href);
+      toast.success('Link copied to clipboard!');
+    } catch {
+      toast.error('Could not copy link. Try copying the URL manually.');
     }
   };
 

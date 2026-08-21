@@ -192,7 +192,11 @@ router.post('/chat', requireAuth, async (req: any, res: any) => {
 You previously generated the following career roadmap for the user:
 ${JSON.stringify(roadmapContext)}
 
-The user has a follow-up question. Provide a concise, highly actionable, and encouraging answer. 
+IMPORTANT RULES:
+1. You MUST ONLY answer questions related to careers, skills, learning, job searching, technology, certifications, projects, internships, and professional development.
+2. If the user asks about anything unrelated (e.g. jokes, personal life, politics, entertainment, coding help unrelated to their roadmap, or any off-topic question), respond ONLY with: "I can only help with career and roadmap-related questions. Please ask something about your career path, skills, or learning plan."
+3. Keep your answers concise — maximum 150 words unless the user explicitly asks for a detailed explanation.
+4. Be actionable and encouraging in your tone.
 Format your response in plain text or markdown. Do NOT return JSON.`;
 
     const chatCompletion = await groq.chat.completions.create({
@@ -202,6 +206,7 @@ Format your response in plain text or markdown. Do NOT return JSON.`;
       ],
       model: 'openai/gpt-oss-120b',
       temperature: 0.7,
+      max_tokens: 500,
     });
 
     res.json({ answer: chatCompletion.choices[0]?.message?.content || 'Sorry, I could not generate an answer.' });
