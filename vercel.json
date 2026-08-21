@@ -1,23 +1,33 @@
 {
   "version": 2,
-  "functions": {
-    "backend/src/index.ts": {
-      "runtime": "@vercel/node@3",
-      "maxDuration": 30
+  "builds": [
+    {
+      "src": "frontend/package.json",
+      "use": "@vercel/static-build",
+      "config": {
+        "distDir": "dist"
+      }
+    },
+    {
+      "src": "backend/src/index.ts",
+      "use": "@vercel/node",
+      "config": {
+        "maxDuration": 30
+      }
     }
-  },
+  ],
   "rewrites": [
     {
       "source": "/api/(.*)",
-      "destination": "/backend/src/index.ts"
+      "destination": "backend/src/index.ts"
     },
     {
       "source": "/health",
-      "destination": "/backend/src/index.ts"
+      "destination": "backend/src/index.ts"
     },
     {
-      "source": "/((?!backend).*)",
-      "destination": "/index.html"
+      "source": "/(.*)",
+      "destination": "frontend/$1"
     }
   ]
 }
