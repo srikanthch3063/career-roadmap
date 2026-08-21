@@ -1,0 +1,15 @@
+{
+  "name": "selenium-tests",
+  "version": "1.0.0",
+  "description": "Selenium E2E tests for Career Roadmap Guide",
+  "main": "index.js",
+  "scripts": {
+    "test": "mocha tests/**/*.js --reporter ./reporter.js --timeout 30000"
+  },
+  "dependencies": {
+    "selenium-webdriver": "^4.18.1",
+    "mocha": "^10.3.0",
+    "chai": "^4.4.1",
+    "xlsx": "^0.18.5"
+  }
+}

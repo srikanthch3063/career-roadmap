@@ -1,0 +1,50 @@
+[
+  {
+    "branch": "Computer Science & Engineering (CSE)",
+    "roadmap": {
+      "primary_career": "Full Stack Developer",
+      "reasoning": "Based on a preference for hands-on coding and building things, full-stack development offers the perfect mix of creating user-facing features and designing robust backend architectures.",
+      "recommended_careers": ["Full Stack Developer", "Frontend Developer", "Software Engineer"],
+      "roadmap": {
+        "skills_to_learn": ["React", "Node.js", "TypeScript", "SQL/PostgreSQL", "Git & GitHub"],
+        "technologies": ["Vite", "Express", "Supabase", "Tailwind CSS"],
+        "project_ideas": ["Build a task management app with real-time updates", "Create a personal portfolio website with a blog", "Develop an e-commerce storefront mock"],
+        "certifications": ["AWS Certified Cloud Practitioner", "Meta Front-End Developer Professional Certificate"],
+        "internship_advice": "Look for early-stage startups where you can touch multiple parts of the codebase. Focus on demonstrating a working project rather than just theoretical knowledge.",
+        "job_titles": ["Frontend Developer", "Backend Engineer", "Full Stack Engineer"]
+      }
+    }
+  },
+  {
+    "branch": "Mechanical Engineering",
+    "roadmap": {
+      "primary_career": "Robotics Engineer",
+      "reasoning": "Combining mechanical knowledge with an interest in logic and systems leads naturally to robotics, bridging the physical and digital worlds.",
+      "recommended_careers": ["Robotics Engineer", "Automation Engineer", "Systems Engineer"],
+      "roadmap": {
+        "skills_to_learn": ["Python", "C++", "Kinematics", "Control Systems", "Machine Vision basics"],
+        "technologies": ["ROS (Robot Operating System)", "AutoCAD/SolidWorks", "MATLAB"],
+        "project_ideas": ["Build a line-following robot with Arduino", "Simulate a robotic arm in ROS", "Create a computer vision model to detect objects"],
+        "certifications": ["Coursera Robotics Specialization (UPenn)"],
+        "internship_advice": "Seek roles at manufacturing companies, automotive firms, or drone startups. Hardware experience is hard to fake, so build physical projects.",
+        "job_titles": ["Robotics Engineer", "Mechatronics Engineer", "Automation Engineer"]
+      }
+    }
+  },
+  {
+    "branch": "Electronics & Communication Engineering (ECE)",
+    "roadmap": {
+      "primary_career": "Embedded Systems Engineer",
+      "reasoning": "A strong foundation in hardware combined with an interest in programming points directly to embedded systems, where you write software that runs on custom hardware.",
+      "recommended_careers": ["Embedded Systems Engineer", "Firmware Engineer", "Hardware Engineer"],
+      "roadmap": {
+        "skills_to_learn": ["C/C++", "Microcontrollers (ARM, AVR)", "RTOS", "PCB Design basics", "I2C/SPI protocols"],
+        "technologies": ["Arduino", "Raspberry Pi", "KiCad", "FreeRTOS"],
+        "project_ideas": ["Build a smart home weather station", "Develop a custom mechanical keyboard controller", "Create a simple IoT device sending data to the cloud"],
+        "certifications": ["Embedded Systems Certificate (Coursera/CU Boulder)"],
+        "internship_advice": "Target semiconductor companies, consumer electronics makers, or IoT startups. Showcase a portfolio of microcontroller projects.",
+        "job_titles": ["Embedded Software Engineer", "Firmware Engineer", "IoT Developer"]
+      }
+    }
+  }
+]

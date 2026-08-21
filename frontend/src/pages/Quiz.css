@@ -1,0 +1,125 @@
+.quiz-container {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background-color: hsl(var(--background));
+  padding: 2rem 1rem;
+}
+
+.quiz-card {
+  width: 100%;
+  max-width: 600px;
+  background-color: hsl(var(--card));
+  border: 1px solid hsl(var(--border));
+  border-radius: var(--radius);
+  box-shadow: 0 4px 20px rgba(0,0,0,0.03);
+  position: relative;
+  overflow: hidden;
+}
+
+.progress-bar-bg {
+  height: 4px;
+  background-color: hsl(var(--muted));
+  width: 100%;
+}
+
+.progress-bar-fill {
+  height: 100%;
+  background: linear-gradient(90deg, hsl(var(--primary)), hsl(var(--accent)));
+  transition: width 0.4s ease-in-out;
+}
+
+.quiz-content {
+  padding: 3rem 2.5rem;
+}
+
+.quiz-step h2 {
+  font-size: 1.5rem;
+  margin-bottom: 0.5rem;
+  line-height: 1.2;
+}
+
+.subtitle {
+  color: hsl(var(--muted-foreground));
+  margin-bottom: 2rem;
+  font-size: 0.9375rem;
+}
+
+.options-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 1rem;
+  margin-top: 1.5rem;
+}
+
+.options-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  margin-top: 1.5rem;
+}
+
+.option-card {
+  display: flex;
+  align-items: center;
+  padding: 1rem 1.25rem;
+  border: 1px solid hsl(var(--border));
+  border-radius: var(--radius);
+  cursor: pointer;
+  transition: all 0.2s;
+  background-color: transparent;
+  font-weight: 500;
+}
+
+.option-card:hover {
+  background-color: hsl(var(--muted));
+}
+
+.option-card.selected {
+  border-color: hsl(var(--primary));
+  background-color: hsl(var(--primary) / 0.15);
+  box-shadow: 0 0 0 1px hsl(var(--primary));
+}
+
+.hidden-radio {
+  display: none;
+}
+
+.quiz-footer {
+  display: flex;
+  justify-content: space-between;
+  padding: 1.5rem 2.5rem;
+  border-top: 1px solid hsl(var(--border));
+  background-color: hsl(var(--muted) / 0.3);
+}
+
+textarea {
+  width: 100%;
+  border: 1px solid hsl(var(--input));
+  border-radius: var(--radius);
+  padding: 1rem;
+  font-family: inherit;
+  font-size: 0.875rem;
+  resize: vertical;
+  background-color: transparent;
+  transition: border-color 0.2s;
+}
+
+textarea:focus {
+  outline: none;
+  border-color: hsl(var(--ring));
+  box-shadow: 0 0 0 1px hsl(var(--ring));
+}
+
+@media (max-width: 600px) {
+  .options-grid {
+    grid-template-columns: 1fr;
+  }
+  .quiz-content {
+    padding: 2rem 1.5rem;
+  }
+  .quiz-footer {
+    padding: 1rem 1.5rem;
+  }
+}

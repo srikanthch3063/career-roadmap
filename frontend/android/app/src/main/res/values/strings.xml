@@ -1,0 +1,7 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources>
+    <string name="app_name">career-roadmap</string>
+    <string name="title_activity_main">career-roadmap</string>
+    <string name="package_name">com.career.roadmap</string>
+    <string name="custom_url_scheme">com.career.roadmap</string>
+</resources>
