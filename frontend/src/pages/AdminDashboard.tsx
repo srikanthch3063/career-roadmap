@@ -67,7 +67,7 @@ const AdminDashboard = () => {
       const { data: { session } } = await supabase.auth.getSession();
       if (!session) throw new Error('Not authenticated');
 
-      const apiUrl = import.meta.env.VITE_API_BASE_URL || 'http://localhost:3000/api';
+      const apiUrl = import.meta.env.VITE_API_BASE_URL || (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1' ? 'http://localhost:3000/api' : '/api');
       
       const [statsRes, configRes] = await Promise.all([
         fetch(`${apiUrl}/admin/stats`, { headers: { 'Authorization': `Bearer ${session.access_token}` } }),
@@ -97,7 +97,7 @@ const AdminDashboard = () => {
     try {
       const { data: { session } } = await supabase.auth.getSession();
       if (!session) return;
-      const apiUrl = import.meta.env.VITE_API_BASE_URL || 'http://localhost:3000/api';
+      const apiUrl = import.meta.env.VITE_API_BASE_URL || (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1' ? 'http://localhost:3000/api' : '/api');
       
       const res = await fetch(`${apiUrl}/admin/student/${studentId}`, {
         headers: { 'Authorization': `Bearer ${session.access_token}` }
@@ -119,7 +119,7 @@ const AdminDashboard = () => {
     try {
       const { data: { session } } = await supabase.auth.getSession();
       if (!session) return;
-      const apiUrl = import.meta.env.VITE_API_BASE_URL || 'http://localhost:3000/api';
+      const apiUrl = import.meta.env.VITE_API_BASE_URL || (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1' ? 'http://localhost:3000/api' : '/api');
       
       const res = await fetch(`${apiUrl}/admin/config`, {
         method: 'POST',

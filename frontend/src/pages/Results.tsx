@@ -123,7 +123,7 @@ const Results = () => {
       const { data: { session } } = await supabase.auth.getSession();
       if (!session) throw new Error('Not authenticated');
 
-      const apiUrl = import.meta.env.VITE_API_BASE_URL || 'http://localhost:3000/api';
+      const apiUrl = import.meta.env.VITE_API_BASE_URL || (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1' ? 'http://localhost:3000/api' : '/api');
       const response = await fetch(`${apiUrl}/generate-roadmap`, {
         method: 'POST',
         headers: {
@@ -154,7 +154,7 @@ const Results = () => {
       
       const checkedArray = Object.keys(newChecked).filter(k => newChecked[k]);
       
-      await fetch(`${import.meta.env.VITE_API_BASE_URL || 'http://localhost:3000/api'}/progress`, {
+      await fetch(`${import.meta.env.VITE_API_BASE_URL || (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1' ? 'http://localhost:3000/api' : '/api')}/progress`, {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
