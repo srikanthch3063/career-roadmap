@@ -1,19 +1,18 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { supabase } from '../supabase';
-import { Map, LogOut, FileText, ChevronRight, Compass, Award, Trash2, Plus, Terminal, Settings } from 'lucide-react';
+import { Map, LogOut, FileText, ChevronRight, Compass, Trash2, Plus, Terminal, Settings, Hexagon } from 'lucide-react';
 import { motion } from 'framer-motion';
 import toast from 'react-hot-toast';
-import ThemeToggle from '../components/ThemeToggle';
 import './Dashboard.css';
 
 const Dashboard = () => {
   const navigate = useNavigate();
   const [profile, setProfile] = useState<any>(null);
-  const [userName, setUserName] = useState('Student');
+  const [userName, setUserName] = useState('student');
   const [history, setHistory] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
-  const [stats, setStats] = useState({ totalChecked: 0, level: 'Beginner', totalRoadmaps: 0 });
+  const [stats, setStats] = useState({ totalChecked: 0, level: 'init', totalRoadmaps: 0 });
 
   useEffect(() => {
     fetchUserData();
@@ -28,12 +27,10 @@ const Dashboard = () => {
         return;
       }
 
-      // Extract a friendly name
       const meta = user.user_metadata;
-      const friendlyName = meta?.full_name || meta?.name || user.email?.split('@')[0] || 'Student';
-      setUserName(friendlyName);
+      const friendlyName = meta?.full_name || meta?.name || user.email?.split('@')[0] || 'student';
+      setUserName(friendlyName.toLowerCase());
 
-      // Fetch Profile
       const { data: profileData } = await supabase
         .from('profiles')
         .select('*')
@@ -42,7 +39,6 @@ const Dashboard = () => {
       
       setProfile(profileData);
 
-      // Fetch History
       const { data: historyData } = await supabase
         .from('roadmaps')
         .select('id, created_at, primary_career, roadmap')
@@ -51,18 +47,17 @@ const Dashboard = () => {
 
       if (historyData) {
         setHistory(historyData);
-        // Calculate global stats
         let totalChecked = 0;
         historyData.forEach(item => {
           if (item.roadmap?.checked_items) {
             totalChecked += item.roadmap.checked_items.length;
           }
         });
-        let level = 'Beginner';
-        if (totalChecked > 5) level = 'Explorer';
-        if (totalChecked > 15) level = 'Specialist';
-        if (totalChecked > 30) level = 'Expert';
-        if (totalChecked > 50) level = 'Master';
+        let level = 'init';
+        if (totalChecked > 5) level = 'explorer';
+        if (totalChecked > 15) level = 'specialist';
+        if (totalChecked > 30) level = 'expert';
+        if (totalChecked > 50) level = 'master';
         
         setStats({ totalChecked, level, totalRoadmaps: historyData.length });
       }
@@ -87,14 +82,14 @@ const Dashboard = () => {
 
   const deleteRoadmap = async (e: React.MouseEvent, roadmapId: string) => {
     e.stopPropagation();
-    if (!confirm('Delete this roadmap? This cannot be undone.')) return;
+    if (!confirm('confirm deletion?')) return;
     const { error } = await supabase.from('roadmaps').delete().eq('id', roadmapId);
     if (error) {
-      toast.error('Failed to delete roadmap');
+      toast.error('failed to delete');
     } else {
       setHistory(prev => prev.filter(r => r.id !== roadmapId));
       setStats(prev => ({ ...prev, totalRoadmaps: prev.totalRoadmaps - 1 }));
-      toast.success('Roadmap deleted');
+      toast.success('deleted successfully');
     }
   };
 
@@ -104,80 +99,81 @@ const Dashboard = () => {
   };
 
   if (loading) {
-    return <div className="workbench-loading"><Terminal className="spin" size={24} /> Loading Workspace...</div>;
+    return <div className="loading-state"><Terminal className="spin" size={24} /> booting environment...</div>;
   }
 
   return (
-    <div className="workbench">
-      {/* Side Rail Navigation */}
-      <aside className="workbench-sidebar">
-        <div className="sidebar-brand" onClick={() => navigate('/')}>
-          <Map className="brand-icon" size={24} />
-          <span className="brand-text">PathForge</span>
+    <div className="lumen-workbench">
+      <aside className="lumen-sidebar">
+        <div className="lumen-sidebar__brand" onClick={() => navigate('/')}>
+          <Map size={18} />
+          <span className="wordmark">pathforge</span>
         </div>
         
-        <nav className="sidebar-nav">
-          <button className="nav-item active"><Compass size={18} /> <span>Command Center</span></button>
-          <button className="nav-item text-muted" onClick={() => navigate('/quiz')}><Plus size={18} /> <span>New Roadmap</span></button>
+        <nav className="lumen-sidebar__nav">
+          <button className="nav-item active">
+            <Compass size={16} /> <span>console</span>
+          </button>
+          <button className="nav-item" onClick={() => navigate('/quiz')}>
+            <Plus size={16} /> <span>generate</span>
+          </button>
           {profile?.role === 'admin' && (
-            <button className="nav-item text-muted" onClick={() => navigate('/admin')}><Settings size={18} /> <span>Admin Console</span></button>
+            <button className="nav-item" onClick={() => navigate('/admin')}>
+              <Settings size={16} /> <span>system admin</span>
+            </button>
           )}
         </nav>
 
-        <div className="sidebar-footer">
-          <ThemeToggle />
-          <button className="nav-item text-muted logout-btn" onClick={handleLogout}>
-            <LogOut size={18} /> <span>Disconnect</span>
+        <div className="lumen-sidebar__footer">
+          <button className="nav-item destructive" onClick={handleLogout}>
+            <LogOut size={16} /> <span>disconnect</span>
           </button>
         </div>
       </aside>
 
-      {/* Main Command Center */}
-      <main className="workbench-main">
-        <header className="workbench-header">
+      <main className="lumen-main">
+        <header className="lumen-header">
           <div>
-            <h1 className="workbench-title">Welcome, {userName}</h1>
-            <p className="workbench-subtitle">Your active career deployments and tracking metrics.</p>
+            <span className="eyebrow">00 · WORKSPACE</span>
+            <h1 className="lumen-title">welcome, <em>{userName}</em>.</h1>
           </div>
-          <button className="btn btn-primary btn-generate" onClick={() => navigate('/quiz')}>
-            <Plus size={16} /> Deploy New Roadmap
+          <button className="btn btn--primary" onClick={() => navigate('/quiz')}>
+            <Plus size={16} style={{marginRight: 6}}/> new roadmap
           </button>
         </header>
 
-        {/* Dense Stats Row */}
-        <section className="workbench-stats">
-          <div className="stat-card">
-            <span className="stat-label">Active Roadmaps</span>
-            <span className="stat-value">{stats.totalRoadmaps}</span>
+        {/* Stats Row */}
+        <section className="lumen-stats">
+          <div className="stat-cell">
+            <span className="stat__value">{stats.totalRoadmaps}</span>
+            <span className="stat__label">ACTIVE · DEPLOYMENTS</span>
           </div>
-          <div className="stat-card">
-            <span className="stat-label">Tasks Completed</span>
-            <span className="stat-value">{stats.totalChecked}</span>
+          <div className="stat-cell">
+            <span className="stat__value">{stats.totalChecked}</span>
+            <span className="stat__label">TASKS · COMPLETED</span>
           </div>
-          <div className="stat-card">
-            <span className="stat-label">Current Rank</span>
-            <span className="stat-value text-accent">
-              <Award size={18} style={{ display: 'inline', marginRight: '4px', verticalAlign: 'text-bottom' }}/> 
+          <div className="stat-cell">
+            <span className="stat__value text-accent">
               {stats.level}
             </span>
+            <span className="stat__label">CURRENT · RANK</span>
           </div>
         </section>
 
-        {/* Data Grid for Roadmaps */}
-        <section className="workbench-data">
+        <section className="lumen-data">
           <div className="data-header">
-            <h2>Deployment History</h2>
+            <span className="eyebrow">01 · DEPLOYMENT HISTORY</span>
           </div>
 
           {history.length > 0 ? (
-            <div className="data-table-container">
-              <table className="data-table">
+            <div className="data-table-wrap">
+              <table className="lumen-table">
                 <thead>
                   <tr>
-                    <th>Career Path</th>
-                    <th>Created</th>
-                    <th>Progress</th>
-                    <th className="text-right">Actions</th>
+                    <th>CAREER PATH</th>
+                    <th>DEPLOYED</th>
+                    <th>PROGRESS</th>
+                    <th className="text-right">ACTIONS</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -188,18 +184,18 @@ const Dashboard = () => {
                       animate={{ opacity: 1, y: 0 }}
                       transition={{ delay: index * 0.05 }}
                       onClick={() => navigate(`/results?id=${item.id}`)}
-                      className="data-row"
+                      className="lumen-row"
                     >
-                      <td className="font-medium text-primary">
+                      <td>
                         <div className="career-cell">
-                          <FileText size={16} className="text-muted" />
-                          {item.primary_career || 'Generated Roadmap'}
+                          <Hexagon size={14} className="accent-icon" />
+                          <span>{item.primary_career?.toLowerCase() || 'generated roadmap'}</span>
                         </div>
                       </td>
-                      <td className="text-muted text-sm">
+                      <td className="text-muted">
                         {new Date(item.created_at).toLocaleDateString('en-US', {
                           year: 'numeric', month: 'short', day: 'numeric'
-                        })}
+                        }).toLowerCase()}
                       </td>
                       <td>
                         <div className="progress-cell">
@@ -212,9 +208,9 @@ const Dashboard = () => {
                       <td className="text-right">
                         <div className="action-cell">
                           <button 
-                            className="btn-icon text-muted hover-destructive"
+                            className="btn-icon hover-destructive"
                             onClick={(e) => deleteRoadmap(e, item.id)}
-                            title="Delete deployment"
+                            title="delete"
                           >
                             <Trash2 size={16} />
                           </button>
@@ -227,12 +223,12 @@ const Dashboard = () => {
               </table>
             </div>
           ) : (
-            <div className="workbench-empty">
+            <div className="lumen-empty">
               <Terminal size={32} className="text-muted" />
-              <h3>No active deployments</h3>
-              <p className="text-muted">You haven't generated any career roadmaps yet.</p>
-              <button className="btn btn-outline" onClick={() => navigate('/quiz')} style={{ marginTop: '1rem' }}>
-                Run Assessment
+              <h3>no deployments found.</h3>
+              <p>initialize your first career roadmap.</p>
+              <button className="btn btn--outline" onClick={() => navigate('/quiz')} style={{ marginTop: '1.5rem' }}>
+                generate
               </button>
             </div>
           )}

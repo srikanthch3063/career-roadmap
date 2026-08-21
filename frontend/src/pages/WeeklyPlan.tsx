@@ -1,8 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { supabase } from '../supabase';
-import { motion } from 'framer-motion';
-import { ArrowLeft, Loader2, Calendar } from 'lucide-react';
+import { motion, AnimatePresence } from 'framer-motion';
+import { ArrowLeft, Loader2, Calendar, Map, ChevronRight, Terminal } from 'lucide-react';
 
 const WeeklyPlan = () => {
   const location = useLocation();
@@ -49,60 +49,84 @@ const WeeklyPlan = () => {
 
   if (loading) {
     return (
-      <div className="results-layout" style={{ minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+      <div className="lumen-workbench" style={{ display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
         <div className="loading-state">
-          <Loader2 className="spinner" size={48} />
-          <p className="loading-text">Generating your 12-week learning plan...</p>
+          <Terminal className="spin" size={24} style={{ marginBottom: '1rem' }} />
+          <h2 style={{ fontFamily: 'var(--font-serif)', fontSize: '2rem', margin: 0 }}>structuring timeline.</h2>
+          <p className="text-muted" style={{ fontFamily: 'var(--font-mono)', fontSize: '0.875rem' }}>compiling 12-week schedule...</p>
         </div>
-      </div>
-    );
-  }
-
-  if (error) {
-    return (
-      <div className="container" style={{ padding: '4rem 1rem', textAlign: 'center' }}>
-        <div className="alert-error">{error}</div>
-        <button className="btn btn-primary" onClick={() => navigate(-1)} style={{ marginTop: '1rem' }}>Go Back</button>
       </div>
     );
   }
 
   return (
-    <div className="results-layout" style={{ minHeight: '100vh', padding: '2rem 1rem' }}>
-      <div className="container" style={{ maxWidth: '800px', margin: '0 auto' }}>
-        <button className="btn btn-ghost" onClick={() => navigate(-1)} style={{ marginBottom: '2rem', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-          <ArrowLeft size={16} /> Back to Roadmap
-        </button>
+    <div className="lumen-workbench">
+      <aside className="lumen-sidebar">
+        <div className="lumen-sidebar__brand" onClick={() => navigate('/dashboard')}>
+          <Map size={18} />
+          <span className="wordmark">pathforge</span>
+        </div>
         
-        <div style={{ marginBottom: '3rem', textAlign: 'center' }}>
-          <Calendar size={48} color="hsl(var(--primary))" style={{ margin: '0 auto 1rem' }} />
-          <h1 style={{ fontSize: '2.5rem', marginBottom: '0.5rem' }}>12-Week Learning Plan</h1>
-          <p className="text-muted">Structured weekly goals based on your customized career roadmap.</p>
-        </div>
+        <nav className="lumen-sidebar__nav">
+          <button className="nav-item active">
+            <Calendar size={16} /> <span>12-week schedule</span>
+          </button>
+        </nav>
 
-        <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
-          {plan?.weeks?.map((week: any, idx: number) => (
-            <motion.div
-              key={idx}
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: idx * 0.1 }}
-              className="card"
-              style={{ padding: '2rem', borderLeft: '4px solid hsl(var(--primary))' }}
-            >
-              <div style={{ display: 'flex', alignItems: 'baseline', gap: '1rem', marginBottom: '1rem' }}>
-                <h3 style={{ fontSize: '1.25rem', margin: 0, color: 'hsl(var(--primary))' }}>Week {week.week_number}</h3>
-                <h4 style={{ fontSize: '1.125rem', margin: 0, fontWeight: 500 }}>{week.focus}</h4>
-              </div>
-              <ul style={{ listStyleType: 'disc', paddingLeft: '1.5rem', margin: 0, color: 'hsl(var(--muted-foreground))' }}>
-                {week.tasks?.map((task: string, i: number) => (
-                  <li key={i} style={{ marginBottom: '0.5rem', lineHeight: '1.5' }}>{task}</li>
-                ))}
-              </ul>
-            </motion.div>
-          ))}
+        <div className="lumen-sidebar__footer">
+          <button className="nav-item text-muted" onClick={() => navigate(-1)}>
+            <ArrowLeft size={16} /> <span>back to document</span>
+          </button>
         </div>
-      </div>
+      </aside>
+
+      <main className="lumen-main document-main">
+        {error && (
+          <div className="alert alert--error" style={{ marginBottom: '2rem' }}>
+            {error} <button className="btn btn-link" onClick={() => navigate(-1)}>return_</button>
+          </div>
+        )}
+
+        {plan && (
+          <div className="lumen-document">
+            <header className="document-header">
+              <span className="eyebrow">TARGET SCHEDULE</span>
+              <h1 className="document-title">12-week timeline.</h1>
+              <p className="text-muted" style={{ fontFamily: 'var(--font-mono)' }}>structured execution blueprint derived from the target trajectory.</p>
+            </header>
+
+            <div className="timeline-container" style={{ display: 'flex', flexDirection: 'column', gap: '3rem' }}>
+              {plan?.weeks?.map((week: any, idx: number) => (
+                <motion.div
+                  key={idx}
+                  initial={{ opacity: 0, x: -20 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  transition={{ delay: idx * 0.1 }}
+                  style={{ display: 'flex', gap: '2rem' }}
+                >
+                  <div style={{ flexShrink: 0, width: '100px', borderRight: '1px solid var(--color-rule)', paddingRight: '2rem', textAlign: 'right' }}>
+                    <span className="eyebrow" style={{ color: 'var(--color-accent)' }}>WEEK {week.week_number < 10 ? `0${week.week_number}` : week.week_number}</span>
+                  </div>
+                  
+                  <div style={{ flex: 1, paddingBottom: '3rem' }}>
+                    <h3 style={{ fontFamily: 'var(--font-serif)', fontSize: '1.5rem', marginBottom: '1rem', color: 'var(--color-paper-contrast)' }}>
+                      {week.focus.toLowerCase()}
+                    </h3>
+                    <ul className="lumen-checklist" style={{ gap: '0.75rem' }}>
+                      {week.tasks?.map((task: string, i: number) => (
+                        <li key={i} style={{ display: 'flex', gap: '1rem', alignItems: 'flex-start' }}>
+                          <ChevronRight size={16} className="text-rule" style={{ marginTop: '2px', flexShrink: 0 }} />
+                          <span style={{ fontFamily: 'var(--font-mono)', fontSize: '0.875rem', lineHeight: '1.5', color: 'var(--color-paper-contrast)' }}>{task}</span>
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+                </motion.div>
+              ))}
+            </div>
+          </div>
+        )}
+      </main>
     </div>
   );
 };

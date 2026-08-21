@@ -57,8 +57,8 @@ const App = () => {
     <ThemeProvider>
       <BrowserRouter>
         <Routes>
-          <Route path="/" element={!session ? <Landing /> : <Navigate to={role === 'admin' ? '/admin' : '/dashboard'} />} />
-          <Route path="/auth" element={!session ? <AuthPage /> : <Navigate to={role === 'admin' ? '/admin' : '/dashboard'} />} />
+          <Route path="/" element={!session ? <Landing /> : <Navigate to="/dashboard" />} />
+          <Route path="/auth" element={!session ? <AuthPage /> : <Navigate to="/dashboard" />} />
           
           {/* Protected Student Routes (Admins can access too) */}
           <Route path="/dashboard" element={session && (role === 'student' || role === 'admin') ? <Dashboard /> : <Navigate to="/auth" />} />

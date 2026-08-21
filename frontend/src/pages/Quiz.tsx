@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { supabase } from '../supabase';
 import { branches, quizQuestions } from '../quizConfig';
@@ -15,23 +15,18 @@ const Quiz = () => {
   const [answers, setAnswers] = useState<Record<string, string>>({});
   const [freeText, setFreeText] = useState('');
   const [error, setError] = useState<string | null>(null);
-  
-
-  
-
-  
 
   const totalSteps = quizQuestions.length > 0 ? quizQuestions.length + 2 : 2;
 
   const handleNext = () => {
-    if (step === 0 && !branch) {
-      setError('Please select an option.');
+    if (step === 0 && !branch && !otherBranch) {
+      setError('please select an option.');
       return;
     }
     if (step > 0 && step <= quizQuestions.length) {
       const q = quizQuestions[step - 1];
       if (!answers[q.id]) {
-        setError('Please select an answer.');
+        setError('please select an answer.');
         return;
       }
     }
@@ -72,22 +67,21 @@ const Quiz = () => {
 
       navigate('/results?generate=true');
     } catch (err: any) {
-      setError(err.message || 'Failed to submit assessment');
+      setError(err.message || 'failed to submit assessment');
     } finally {
       setLoading(false);
     }
   };
 
-  // Automatically go next if clicking an option (except on free text step)
   const selectOption = (type: 'branch' | 'answer', value: string, qId?: string) => {
     if (type === 'branch') {
       setBranch(value);
       if (value !== 'Other') {
-        setTimeout(() => handleNext(), 200);
+        setTimeout(() => { setError(null); setStep(s => s + 1); }, 300);
       }
     } else if (type === 'answer' && qId) {
       setAnswers(prev => ({ ...prev, [qId]: value }));
-      setTimeout(() => handleNext(), 200);
+      setTimeout(() => { setError(null); setStep(s => s + 1); }, 300);
     }
   };
 
@@ -101,11 +95,11 @@ const Quiz = () => {
           exit={{ opacity: 0, x: -20 }}
           key="step-0"
         >
-          <span className="quiz-eyebrow">Step 1 of {totalSteps}</span>
-          <h2>What is your engineering branch?</h2>
-          <p className="quiz-subtitle">This helps us tailor your roadmap specifically to your field.</p>
+          <span className="quiz-eyebrow">STEP 01 // {totalSteps < 10 ? `0${totalSteps}` : totalSteps}</span>
+          <h2 className="quiz-question">what is your engineering branch?</h2>
+          <p className="quiz-subtitle">this helps calibrate the roadmap to your existing domain knowledge.</p>
           
-          <div className="options-stack">
+          <div className="options-grid">
             {branches.map((b) => (
               <button
                 key={b}
@@ -113,18 +107,18 @@ const Quiz = () => {
                 className={`option-btn ${branch === b ? 'selected' : ''}`}
                 onClick={() => selectOption('branch', b)}
               >
-                <div className="radio-circle"></div>
-                {b}
+                <div className="radio-indicator"></div>
+                <span>{b.toLowerCase()}</span>
               </button>
             ))}
           </div>
 
           {branch === 'Other' && (
-            <motion.div initial={{ opacity: 0, height: 0 }} animate={{ opacity: 1, height: 'auto' }} className="mt-4">
+            <motion.div initial={{ opacity: 0, height: 0 }} animate={{ opacity: 1, height: 'auto' }} style={{marginTop: '1rem'}}>
               <input 
                 className="input"
                 type="text" 
-                placeholder="Specify your branch..." 
+                placeholder="specify branch..." 
                 value={otherBranch}
                 onChange={(e) => setOtherBranch(e.target.value)}
                 autoFocus
@@ -137,6 +131,7 @@ const Quiz = () => {
 
     if (step > 0 && step <= quizQuestions.length) {
       const q = quizQuestions[step - 1];
+      const displayStep = step + 1;
       return (
         <motion.div 
           className="quiz-step"
@@ -145,8 +140,8 @@ const Quiz = () => {
           exit={{ opacity: 0, x: -20 }}
           key={`step-${step}`}
         >
-          <span className="quiz-eyebrow">Step {step + 1} of {totalSteps}</span>
-          <h2>{q.text}</h2>
+          <span className="quiz-eyebrow">STEP {displayStep < 10 ? `0${displayStep}` : displayStep} // {totalSteps < 10 ? `0${totalSteps}` : totalSteps}</span>
+          <h2 className="quiz-question">{q.text.toLowerCase()}</h2>
           
           <div className="options-stack">
             {q.options.map((opt: string) => (
@@ -156,8 +151,8 @@ const Quiz = () => {
                 className={`option-btn ${answers[q.id] === opt ? 'selected' : ''}`}
                 onClick={() => selectOption('answer', opt, q.id)}
               >
-                <div className="radio-circle"></div>
-                {opt}
+                <div className="radio-indicator"></div>
+                <span>{opt.toLowerCase()}</span>
               </button>
             ))}
           </div>
@@ -174,14 +169,14 @@ const Quiz = () => {
           exit={{ opacity: 0, x: -20 }}
           key="step-final"
         >
-          <span className="quiz-eyebrow">Final Step</span>
-          <h2>Anything else we should know?</h2>
-          <p className="quiz-subtitle">Tell us about specific technologies you like, dream companies, or constraints.</p>
+          <span className="quiz-eyebrow">FINAL STEP</span>
+          <h2 className="quiz-question">any specific constraints?</h2>
+          <p className="quiz-subtitle">mention dream companies, specific frameworks you like, or timelines.</p>
           
           <textarea 
-            className="quiz-textarea"
+            className="input quiz-textarea"
             rows={5}
-            placeholder="E.g., I want to work in climate tech, or I have a strong background in competitive programming..."
+            placeholder="e.g. targeting product-based startups, no leetcode, focus on frontend..."
             value={freeText}
             onChange={(e) => setFreeText(e.target.value)}
           />
@@ -191,43 +186,55 @@ const Quiz = () => {
   };
 
   return (
-    <div className="quiz-split">
+    <div className="lumen-quiz">
       {/* Left Pane - Atmospheric */}
-      <div className="quiz-context-pane">
+      <div className="quiz-visual">
         <div className="quiz-logo" onClick={() => navigate('/dashboard')}>
-          <Map className="icon" size={24} />
-          <span>PathForge</span>
+          <Map className="icon" size={20} />
+          <span className="wordmark">pathforge</span>
         </div>
 
-        <div className="quiz-context-content">
-          <div className="quiz-progress-text">
-            {Math.round(((step) / totalSteps) * 100)}% Complete
+        <div className="quiz-visual__inner">
+          <div className="quiz-visual__apparatus">
+            {/* Abstract UI representation of nodes connecting */}
+            <div className="node-grid">
+              {[...Array(9)].map((_, i) => (
+                <div key={i} className={`node ${i === step % 9 ? 'active' : ''}`} />
+              ))}
+            </div>
+            <div className="glow-sphere"></div>
           </div>
-          <h1 className="quiz-context-title">
-            Engineering<br />
-            your<br />
-            trajectory.
-          </h1>
-          <p className="quiz-context-desc">
-            We use these parameters to generate a highly opinionated, step-by-step roadmap tailored to your specific constraints.
-          </p>
+          
+          <div className="quiz-visual__text">
+            <h1 className="quiz-visual__title">
+              engineering<br/>
+              <em>trajectory.</em>
+            </h1>
+            <p>calibrating constraints to generate your optimized timeline.</p>
+            
+            <div className="quiz-progress-metrics">
+              <div className="metric">
+                <span className="metric-val">{Math.round(((step) / totalSteps) * 100)}%</span>
+                <span className="metric-label">calibrated</span>
+              </div>
+            </div>
+          </div>
         </div>
       </div>
 
       {/* Right Pane - Form */}
-      <div className="quiz-form-pane">
-        <div className="quiz-form-container">
-          
-          <div className="quiz-progress-line">
+      <div className="quiz-form-side">
+        <div className="quiz-form__inner">
+          <div className="quiz-progress-bar">
             <div 
               className="quiz-progress-fill" 
               style={{ width: `${((step + 1) / totalSteps) * 100}%` }}
             />
           </div>
 
-          <div className="quiz-inner">
+          <div className="quiz-content">
             {error && (
-              <motion.div initial={{ opacity: 0, y: -10 }} animate={{ opacity: 1, y: 0 }} className="alert-error quiz-error">
+              <motion.div initial={{ opacity: 0, y: -10 }} animate={{ opacity: 1, y: 0 }} className="alert alert--error mb-6">
                 {error}
               </motion.div>
             )}
@@ -238,20 +245,22 @@ const Quiz = () => {
 
             <div className="quiz-controls">
               {step > 0 ? (
-                <button className="btn btn-outline" onClick={handlePrev} disabled={loading}>
-                  <ArrowLeft size={16} style={{ marginRight: '6px' }} /> Back
+                <button className="btn btn--outline" onClick={handlePrev} disabled={loading}>
+                  <ArrowLeft size={16} /> back
                 </button>
               ) : (
-                <button className="btn btn-ghost" onClick={() => navigate('/dashboard')}>Cancel</button>
+                <button className="btn btn--outline" onClick={() => navigate('/dashboard')}>cancel</button>
               )}
               
               {step < totalSteps - 1 ? (
-                <button className="btn btn-primary" onClick={handleNext} style={{ gap: '6px' }}>
-                  Continue <ArrowRight size={16} />
+                /* The Continue button is visually less prominent since auto-advance handles the main flow, 
+                   but we keep it for "Other" branch text input or fallback. */
+                <button className="btn btn--primary" onClick={handleNext}>
+                  next <ArrowRight size={16} />
                 </button>
               ) : (
-                <button className="btn btn-primary" onClick={handleSubmit} disabled={loading} style={{ gap: '6px' }}>
-                  {loading ? 'Generating...' : 'Deploy Roadmap'}
+                <button className="btn btn--primary" onClick={handleSubmit} disabled={loading}>
+                  {loading ? 'generating...' : 'deploy roadmap'}
                   {!loading && <ArrowRight size={16} />}
                 </button>
               )}

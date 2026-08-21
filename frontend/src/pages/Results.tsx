@@ -1,13 +1,12 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { supabase } from '../supabase';
-import confetti from 'canvas-confetti';
 import { motion, AnimatePresence } from 'framer-motion';
 import toast from 'react-hot-toast';
 import { 
   Map, Printer, CheckCircle2, Circle, 
   Search, Code2, Briefcase, GraduationCap,
-  Loader2, X, ExternalLink, Lightbulb, Share2, MessageSquare, Calendar, ChevronRight, Download
+  Loader2, X, ExternalLink, Lightbulb, Share2, MessageSquare, Calendar, ChevronRight, Download, Hexagon
 } from 'lucide-react';
 import html2canvas from 'html2canvas';
 import { jsPDF } from 'jspdf';
@@ -29,9 +28,9 @@ const Results = () => {
   const contentRef = useRef<HTMLDivElement>(null);
 
   const loadingMessages = [
-    "Analyzing your constraints and goals...",
-    "Consulting AI models for tailored advice...",
-    "Crafting your personalized career blueprint..."
+    "calibrating constraints...",
+    "consulting knowledge graphs...",
+    "synthesizing trajectory..."
   ];
 
   useEffect(() => {
@@ -57,31 +56,6 @@ const Results = () => {
       fetchLatestRoadmap();
     }
   }, [location.search]);
-
-  const triggerConfetti = () => {
-    const duration = 3000;
-    const end = Date.now() + duration;
-
-    const frame = () => {
-      confetti({
-        particleCount: 5,
-        angle: 60,
-        spread: 55,
-        origin: { x: 0 },
-        colors: ['#8b5cf6', '#3b82f6', '#10b981']
-      });
-      confetti({
-        particleCount: 5,
-        angle: 120,
-        spread: 55,
-        origin: { x: 1 },
-        colors: ['#8b5cf6', '#3b82f6', '#10b981']
-      });
-
-      if (Date.now() < end) requestAnimationFrame(frame);
-    };
-    frame();
-  };
 
   const fetchLatestRoadmap = async () => {
     try {
@@ -159,10 +133,9 @@ const Results = () => {
       });
 
       const data = await response.json();
-      if (!response.ok) throw new Error(data.error || 'Generation failed');
+      if (!response.ok) throw new Error(data.error || 'generation failed');
 
       setRoadmap(data);
-      triggerConfetti();
       navigate('/results', { replace: true });
     } catch (err: any) {
       setError(err.message);
@@ -196,52 +169,59 @@ const Results = () => {
 
   const handleExportPDF = async () => {
     if (!contentRef.current) return;
-    toast.loading('Generating blueprint...', { id: 'pdf' });
+    toast.loading('exporting document...', { id: 'pdf', style: { borderRadius: 0, background: 'var(--color-paper-2)', color: 'var(--color-paper-contrast)', border: '1px solid var(--color-rule)' } });
     try {
       const canvas = await html2canvas(contentRef.current, { scale: 2, backgroundColor: '#000000' });
       const imgData = canvas.toDataURL('image/png');
       const pdf = new jsPDF({ orientation: 'portrait', unit: 'px', format: [canvas.width, canvas.height] });
       pdf.addImage(imgData, 'PNG', 0, 0, canvas.width, canvas.height);
-      pdf.save('PathForge_Blueprint.pdf');
-      toast.success('Downloaded successfully', { id: 'pdf' });
+      pdf.save('pathforge_trajectory.pdf');
+      toast.success('export complete.', { id: 'pdf' });
     } catch (e) {
-      toast.error('Failed to export', { id: 'pdf' });
+      toast.error('export failed.', { id: 'pdf' });
     }
   };
 
   const handleShare = async () => {
     try {
       await navigator.clipboard.writeText(window.location.href);
-      toast.success('Link copied to clipboard');
+      toast.success('link copied.');
     } catch {
-      toast.error('Could not copy link');
+      toast.error('clipboard error.');
     }
   };
 
   if (loading) {
     return (
-      <div className="results-loading">
-        <Loader2 className="spin icon-xl" />
-        <h2>{loadingMessages[loadingPhase]}</h2>
-        <p className="text-muted">High-quality roadmaps take about 10-20 seconds.</p>
+      <div className="lumen-generation">
+        <div className="generation-apparatus">
+          <div className="generation-core"></div>
+          <div className="generation-ring ring-1"></div>
+          <div className="generation-ring ring-2"></div>
+        </div>
+        <div className="generation-status">
+          <span className="eyebrow blink">SYSTEM_BUSY</span>
+          <h2>{loadingMessages[loadingPhase]}</h2>
+          <p className="text-muted">this process requires intensive computation. please wait.</p>
+        </div>
       </div>
     );
   }
 
   const renderChecklist = (items: string[], prefix: string) => (
-    <div className="blueprint-checklist">
+    <div className="lumen-checklist">
       {items.map((item: string, i: number) => {
         const id = `${prefix}-${i}`;
         const isChecked = checkedItems[id];
         return (
-          <div key={i} className={`blueprint-check-item ${isChecked ? 'checked' : ''}`} onClick={() => toggleCheck(id)}>
-            <div className="blueprint-check-icon">
-              {isChecked ? <CheckCircle2 size={18} /> : <Circle size={18} />}
+          <div key={i} className={`lumen-check-item ${isChecked ? 'is-checked' : ''}`} onClick={() => toggleCheck(id)}>
+            <div className="lumen-check-box">
+              {isChecked ? <div className="lumen-check-fill"></div> : null}
             </div>
-            <span className="blueprint-check-text">{item}</span>
+            <span className="lumen-check-text">{item}</span>
             {prefix === 'tech' && !isChecked && (
-              <button className="blueprint-resource-btn" onClick={(e) => { e.stopPropagation(); setSelectedResource(item); }}>
-                <Search size={14} /> Find Resources
+              <button className="btn-link" onClick={(e) => { e.stopPropagation(); setSelectedResource(item); }}>
+                query resources
               </button>
             )}
           </div>
@@ -251,103 +231,121 @@ const Results = () => {
   );
 
   return (
-    <div className="document-layout">
+    <div className="lumen-workbench">
       {/* Sidebar Navigation */}
-      <aside className="document-sidebar">
-        <div className="sidebar-brand" onClick={() => navigate('/dashboard')}>
-          <Map className="brand-icon" size={24} />
-          <span className="brand-text">PathForge</span>
+      <aside className="lumen-sidebar">
+        <div className="lumen-sidebar__brand" onClick={() => navigate('/dashboard')}>
+          <Map size={18} />
+          <span className="wordmark">pathforge</span>
         </div>
         
-        <div className="sidebar-actions">
-          <button className="btn btn-primary w-full" onClick={() => navigate('/weekly-plan', { state: { roadmap } })}>
-            <Calendar size={16} /> Generate 12-Week Plan
+        <nav className="lumen-sidebar__nav">
+          <button className="nav-item" onClick={() => navigate('/weekly-plan', { state: { roadmap } })}>
+            <Calendar size={16} /> <span>12-week schedule</span>
           </button>
           
-          <button className="btn btn-outline w-full" onClick={() => setIsChatOpen(true)}>
-            <MessageSquare size={16} /> Ask AI Mentor
+          <button className="nav-item" onClick={() => setIsChatOpen(true)}>
+            <MessageSquare size={16} /> <span>ai mentor</span>
           </button>
-          
-          <hr className="sidebar-divider" />
-          
-          <button className="btn-ghost w-full justify-start" onClick={handleShare}>
-            <Share2 size={16} /> Share Link
+        </nav>
+
+        <div className="lumen-sidebar__footer">
+          <button className="nav-item" onClick={handleShare}>
+            <Share2 size={16} /> <span>share link</span>
           </button>
-          <button className="btn-ghost w-full justify-start" onClick={handleExportPDF}>
-            <Download size={16} /> Export PDF
+          <button className="nav-item" onClick={handleExportPDF}>
+            <Download size={16} /> <span>export pdf</span>
           </button>
-          <button className="btn-ghost w-full justify-start" onClick={() => navigate('/dashboard')}>
-            <ChevronRight size={16} /> Back to Dashboard
+          <button className="nav-item text-muted" onClick={() => navigate('/dashboard')}>
+            <ChevronRight size={16} /> <span>return to console</span>
           </button>
         </div>
       </aside>
 
       {/* Main Document Content */}
-      <main className="document-main">
+      <main className="lumen-main document-main">
         {error && (
-          <div className="alert alert-error mb-8">
-            {error} <button className="btn btn-outline btn-sm ml-4" onClick={generateRoadmap}>Retry</button>
+          <div className="alert alert--error" style={{ marginBottom: '2rem' }}>
+            {error} <button className="btn btn-link" onClick={generateRoadmap}>retry_</button>
           </div>
         )}
 
         {roadmap && roadmap.primary_career && (
-          <div className="blueprint-document" ref={contentRef}>
+          <div className="lumen-document" ref={contentRef}>
             {/* Header / Title block */}
-            <header className="blueprint-header">
-              <span className="blueprint-eyebrow">Career Trajectory Analysis</span>
-              <h1 className="blueprint-title">{roadmap.primary_career}</h1>
+            <header className="document-header">
+              <span className="eyebrow">TARGET TRAJECTORY</span>
+              <h1 className="document-title">{roadmap.primary_career.toLowerCase()}</h1>
               
-              <div className="blueprint-meta">
+              <div className="document-meta">
                 {(salaryData as Record<string, any>)[roadmap.primary_career] && (
-                  <span className="blueprint-badge success">
-                    Compensation Est: {(salaryData as Record<string, any>)[roadmap.primary_career].india}
+                  <span className="badge badge--success">
+                    est_comp: {(salaryData as Record<string, any>)[roadmap.primary_career].india}
                   </span>
                 )}
-                {roadmap.recommended_careers.slice(0,2).map((c: string) => (
-                  <span key={c} className="blueprint-badge default">Alt: {c}</span>
+                {roadmap.recommended_careers?.slice(0,2).map((c: string) => (
+                  <span key={c} className="badge">alt: {c.toLowerCase()}</span>
                 ))}
               </div>
             </header>
 
             {/* Reasoning Block */}
-            <section className="blueprint-section rationale-section">
-              <h2 className="blueprint-h2">Architectural Rationale</h2>
-              <p className="blueprint-p">{roadmap.reasoning}</p>
+            <section className="document-section rationale-section">
+              <div className="section-header">
+                <Hexagon size={16} className="text-accent"/>
+                <h2 className="section-title">architectural rationale</h2>
+              </div>
+              <p className="document-body">{roadmap.reasoning}</p>
             </section>
 
             {/* Grid for Technical Details */}
-            <div className="blueprint-grid">
-              <section className="blueprint-section">
-                <h3 className="blueprint-h3"><Code2 size={18}/> Technology Stack</h3>
-                {renderChecklist(roadmap.roadmap.technologies, 'tech')}
+            <div className="document-grid">
+              <section className="document-section">
+                <div className="section-header">
+                  <Code2 size={16} className="text-rule"/>
+                  <h3 className="section-title">technology stack</h3>
+                </div>
+                {renderChecklist(roadmap.roadmap?.technologies || [], 'tech')}
               </section>
 
-              <section className="blueprint-section">
-                <h3 className="blueprint-h3"><CheckCircle2 size={18}/> Core Competencies</h3>
-                {renderChecklist(roadmap.roadmap.skills_to_learn, 'skill')}
+              <section className="document-section">
+                <div className="section-header">
+                  <CheckCircle2 size={16} className="text-rule"/>
+                  <h3 className="section-title">core competencies</h3>
+                </div>
+                {renderChecklist(roadmap.roadmap?.skills_to_learn || [], 'skill')}
               </section>
 
-              <section className="blueprint-section full-width">
-                <h3 className="blueprint-h3"><Lightbulb size={18}/> Portfolio Architecture (Projects)</h3>
-                {renderChecklist(roadmap.roadmap.project_ideas, 'proj')}
+              <section className="document-section full-width">
+                <div className="section-header">
+                  <Lightbulb size={16} className="text-accent"/>
+                  <h3 className="section-title">portfolio architecture</h3>
+                </div>
+                {renderChecklist(roadmap.roadmap?.project_ideas || [], 'proj')}
               </section>
 
-              <section className="blueprint-section">
-                <h3 className="blueprint-h3"><Briefcase size={18}/> Market Strategy</h3>
-                <p className="blueprint-p text-sm">{roadmap.roadmap.internship_advice}</p>
-                <div className="blueprint-tags mt-4">
-                  {roadmap.roadmap.job_titles.map((t: string) => <span key={t} className="blueprint-tag">{t}</span>)}
+              <section className="document-section">
+                <div className="section-header">
+                  <Briefcase size={16} className="text-rule"/>
+                  <h3 className="section-title">market strategy</h3>
+                </div>
+                <p className="document-body text-sm mb-4">{roadmap.roadmap?.internship_advice}</p>
+                <div className="document-tags">
+                  {roadmap.roadmap?.job_titles?.map((t: string) => <span key={t} className="badge">{t.toLowerCase()}</span>)}
                 </div>
               </section>
 
-              <section className="blueprint-section">
-                <h3 className="blueprint-h3"><GraduationCap size={18}/> Validation (Certifications)</h3>
-                {renderChecklist(roadmap.roadmap.certifications, 'cert')}
+              <section className="document-section">
+                <div className="section-header">
+                  <GraduationCap size={16} className="text-rule"/>
+                  <h3 className="section-title">validation / certs</h3>
+                </div>
+                {renderChecklist(roadmap.roadmap?.certifications || [], 'cert')}
               </section>
             </div>
             
-            <footer className="blueprint-footer">
-              Generated by PathForge Intelligence
+            <footer className="document-footer">
+              <span className="eyebrow">GENERATED BY PATHFORGE INTELLIGENCE</span>
             </footer>
           </div>
         )}
@@ -356,25 +354,25 @@ const Results = () => {
       {/* Resource Modal */}
       <AnimatePresence>
         {selectedResource && (
-          <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="resource-modal-overlay" onClick={() => setSelectedResource(null)}>
-            <motion.div initial={{ y: 20, opacity: 0 }} animate={{ y: 0, opacity: 1 }} exit={{ y: 20, opacity: 0 }} className="resource-modal" onClick={e => e.stopPropagation()}>
-              <button className="resource-modal-close" onClick={() => setSelectedResource(null)}><X size={20} /></button>
-              <h3>Resource Locator: {selectedResource}</h3>
-              <p className="text-muted mb-6">Select a destination to query knowledge paths.</p>
+          <div className="modal-overlay" onClick={() => setSelectedResource(null)}>
+            <motion.div initial={{ y: 20, opacity: 0 }} animate={{ y: 0, opacity: 1 }} exit={{ y: 20, opacity: 0 }} className="modal-content" onClick={e => e.stopPropagation()}>
+              <button className="btn-icon" style={{ position: 'absolute', top: '1rem', right: '1rem' }} onClick={() => setSelectedResource(null)}><X size={16} /></button>
+              <h3 style={{ fontFamily: 'var(--font-mono)', fontSize: '1.25rem', marginBottom: '0.5rem' }}>resource query: <span className="text-accent">{selectedResource.toLowerCase()}</span></h3>
+              <p className="text-muted mb-6">select a destination to query knowledge paths.</p>
               
-              <div className="resource-links">
-                <a href={`https://www.youtube.com/results?search_query=${encodeURIComponent(selectedResource + ' tutorial for beginners')}`} target="_blank" rel="noreferrer" className="resource-btn">
-                  YouTube <ExternalLink size={16} />
+              <div className="resource-links" style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
+                <a href={`https://www.youtube.com/results?search_query=${encodeURIComponent(selectedResource + ' tutorial for beginners')}`} target="_blank" rel="noreferrer" className="btn btn--outline" style={{ justifyContent: 'space-between' }}>
+                  query youtube <ExternalLink size={16} />
                 </a>
-                <a href={`https://www.freecodecamp.org/news/search/?query=${encodeURIComponent(selectedResource)}`} target="_blank" rel="noreferrer" className="resource-btn">
-                  freeCodeCamp <ExternalLink size={16} />
+                <a href={`https://www.freecodecamp.org/news/search/?query=${encodeURIComponent(selectedResource)}`} target="_blank" rel="noreferrer" className="btn btn--outline" style={{ justifyContent: 'space-between' }}>
+                  query freecodecamp <ExternalLink size={16} />
                 </a>
-                <a href={`https://roadmap.sh/search?q=${encodeURIComponent(selectedResource)}`} target="_blank" rel="noreferrer" className="resource-btn">
-                  Roadmap.sh <ExternalLink size={16} />
+                <a href={`https://roadmap.sh/search?q=${encodeURIComponent(selectedResource)}`} target="_blank" rel="noreferrer" className="btn btn--outline" style={{ justifyContent: 'space-between' }}>
+                  query roadmap.sh <ExternalLink size={16} />
                 </a>
               </div>
             </motion.div>
-          </motion.div>
+          </div>
         )}
       </AnimatePresence>
 
