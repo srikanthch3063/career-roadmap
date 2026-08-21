@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { supabase } from '../supabase';
-import { Users, BookOpen, Target, LogOut, Shield, Key, Trash2, Eye, EyeOff, Terminal, Compass, Settings, Save, AlertCircle, X, Search } from 'lucide-react';
+import { Users, BookOpen, Target, LogOut, Shield, Key, Trash2, Eye, EyeOff, Terminal, Compass, Settings, Save, AlertCircle, X, Search, Download, BarChart2, Filter } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import toast from 'react-hot-toast';
 import ThemeToggle from '../components/ThemeToggle';
@@ -9,8 +9,16 @@ import './Dashboard.css';
 
 interface Stats {
   total_students: number;
+  total_roadmaps: number;
   most_common_branch: string;
   most_common_career: string;
+  funnel: {
+    signed_up: number;
+    took_quiz: number;
+    generated_roadmap: number;
+  };
+  daily_signups: { date: string; count: number }[];
+  word_cloud: { text: string; value: number }[];
 }
 
 interface Student {
@@ -149,6 +157,34 @@ const AdminDashboard = () => {
     }
   };
 
+  const downloadCSV = () => {
+    if (students.length === 0) return toast.error('No students to export');
+    
+    const headers = ['Name', 'Email', 'Branch', 'Primary Career', 'Joined Date'];
+    const rows = students.map(s => [
+      s.name || 'Unknown', 
+      s.email, 
+      s.branch || 'Unknown', 
+      s.primary_career, 
+      new Date(s.created_at).toLocaleDateString()
+    ]);
+    
+    const csvContent = [
+      headers.join(','),
+      ...rows.map(row => row.map(cell => `"${cell}"`).join(','))
+    ].join('\n');
+    
+    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.href = url;
+    link.setAttribute('download', `pathforge_students_${new Date().toISOString().split('T')[0]}.csv`);
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    toast.success('Download started');
+  };
+
   const handleLogout = async () => {
     await supabase.auth.signOut();
     navigate('/');
@@ -170,7 +206,7 @@ const AdminDashboard = () => {
         </div>
         
         <nav className="sidebar-nav">
-          <button className={`nav-item ${activeTab === 'overview' ? 'active' : 'text-muted'}`} onClick={() => setActiveTab('overview')}><Target size={18} /> <span>Overview</span></button>
+          <button className={`nav-item ${activeTab === 'overview' ? 'active' : 'text-muted'}`} onClick={() => setActiveTab('overview')}><BarChart2 size={18} /> <span>Analytics</span></button>
           <button className={`nav-item ${activeTab === 'students' ? 'active' : 'text-muted'}`} onClick={() => setActiveTab('students')}><Users size={18} /> <span>Command Centre</span></button>
           <button className={`nav-item ${activeTab === 'config' ? 'active' : 'text-muted'}`} onClick={() => setActiveTab('config')}><Settings size={18} /> <span>AI & Config</span></button>
           <button className={`nav-item ${activeTab === 'credentials' ? 'active' : 'text-muted'}`} onClick={() => setActiveTab('credentials')}><Key size={18} /> <span>Credentials</span></button>
@@ -202,27 +238,118 @@ const AdminDashboard = () => {
         )}
 
         <AnimatePresence mode="wait">
+          {/* Analytics / Overview Tab */}
           {activeTab === 'overview' && stats && (
-            <motion.div key="overview" initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0 }} className="workbench-stats">
-              <div className="stat-card">
-                <span className="stat-label">Total Students</span>
-                <span className="stat-value text-accent"><Users size={24} style={{ display: 'inline', marginRight: '8px' }}/>{stats.total_students}</span>
+            <motion.div key="overview" initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0 }} style={{ display: 'flex', flexDirection: 'column', gap: '2rem' }}>
+              
+              {/* Top KPI Cards */}
+              <div className="workbench-stats">
+                <div className="stat-card">
+                  <span className="stat-label">Total Students</span>
+                  <span className="stat-value text-accent"><Users size={24} style={{ display: 'inline', marginRight: '8px', verticalAlign: 'text-bottom' }}/>{stats.total_students}</span>
+                </div>
+                <div className="stat-card">
+                  <span className="stat-label">Total AI Generations</span>
+                  <span className="stat-value text-primary"><Compass size={24} style={{ display: 'inline', marginRight: '8px', verticalAlign: 'text-bottom' }}/>{stats.total_roadmaps}</span>
+                </div>
+                <div className="stat-card">
+                  <span className="stat-label">Top Branch</span>
+                  <span className="stat-value" style={{ fontSize: '1.25rem' }}>{stats.most_common_branch || 'N/A'}</span>
+                </div>
+                <div className="stat-card">
+                  <span className="stat-label">Top Career</span>
+                  <span className="stat-value" style={{ fontSize: '1.25rem' }}>{stats.most_common_career || 'N/A'}</span>
+                </div>
               </div>
-              <div className="stat-card">
-                <span className="stat-label">Top Branch</span>
-                <span className="stat-value" style={{ fontSize: '1.25rem' }}>{stats.most_common_branch || 'N/A'}</span>
+
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: '2rem' }}>
+                {/* Funnel Visualization */}
+                <div className="card" style={{ padding: '2rem', backgroundColor: 'hsl(var(--card))', border: '1px solid hsl(var(--border))', borderRadius: 'var(--radius)' }}>
+                  <h3 style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '1.5rem', fontSize: '1.125rem' }}><Filter size={18} className="text-primary"/> Onboarding Funnel</h3>
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+                    
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', background: 'hsl(var(--secondary)/0.5)', padding: '1rem', borderRadius: '8px' }}>
+                      <span style={{ fontWeight: 500 }}>Signed Up</span>
+                      <span style={{ fontSize: '1.25rem', fontWeight: 700 }}>{stats.funnel.signed_up}</span>
+                    </div>
+                    <div style={{ width: '2px', height: '20px', background: 'hsl(var(--border))', margin: '0 auto' }}></div>
+                    
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', background: 'hsl(var(--secondary)/0.5)', padding: '1rem', borderRadius: '8px' }}>
+                      <span style={{ fontWeight: 500 }}>Started Quiz</span>
+                      <span style={{ fontSize: '1.25rem', fontWeight: 700 }}>{stats.funnel.took_quiz}</span>
+                    </div>
+                    <div style={{ width: '2px', height: '20px', background: 'hsl(var(--border))', margin: '0 auto' }}></div>
+                    
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', background: 'hsl(var(--primary)/0.2)', padding: '1rem', borderRadius: '8px', border: '1px solid hsl(var(--primary)/0.3)' }}>
+                      <span style={{ fontWeight: 500, color: 'hsl(var(--primary))' }}>Generated Roadmap</span>
+                      <span style={{ fontSize: '1.25rem', fontWeight: 700, color: 'hsl(var(--primary))' }}>{stats.funnel.generated_roadmap}</span>
+                    </div>
+                    
+                  </div>
+                </div>
+
+                {/* Word Cloud */}
+                <div className="card" style={{ padding: '2rem', backgroundColor: 'hsl(var(--card))', border: '1px solid hsl(var(--border))', borderRadius: 'var(--radius)', display: 'flex', flexDirection: 'column' }}>
+                  <h3 style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '1.5rem', fontSize: '1.125rem' }}><Target size={18} className="text-primary"/> Keyword Cloud</h3>
+                  <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.75rem', justifyContent: 'center', alignItems: 'center', flex: 1, alignContent: 'center' }}>
+                    {stats.word_cloud.length > 0 ? stats.word_cloud.map((w, idx) => {
+                      const minCount = Math.min(...stats.word_cloud.map(x => x.value));
+                      const maxCount = Math.max(...stats.word_cloud.map(x => x.value));
+                      // Scale between 0.8rem and 2.5rem
+                      const normalizedSize = maxCount === minCount ? 1 : (w.value - minCount) / (maxCount - minCount);
+                      const fontSize = 0.8 + (normalizedSize * 1.7) + 'rem';
+                      const opacity = 0.5 + (normalizedSize * 0.5);
+                      return (
+                        <span key={idx} style={{ fontSize, opacity, fontWeight: 600, color: `hsl(var(--primary))`, padding: '0 4px' }}>
+                          {w.text}
+                        </span>
+                      );
+                    }) : (
+                      <span className="text-muted">No text data available.</span>
+                    )}
+                  </div>
+                </div>
               </div>
-              <div className="stat-card">
-                <span className="stat-label">Top Career Output</span>
-                <span className="stat-value" style={{ fontSize: '1.25rem' }}>{stats.most_common_career || 'N/A'}</span>
+
+              {/* Bar Chart (Daily Signups) */}
+              <div className="card" style={{ padding: '2rem', backgroundColor: 'hsl(var(--card))', border: '1px solid hsl(var(--border))', borderRadius: 'var(--radius)' }}>
+                <h3 style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '2rem', fontSize: '1.125rem' }}><BarChart2 size={18} className="text-primary"/> 30-Day Growth (Signups)</h3>
+                
+                <div style={{ height: '200px', display: 'flex', alignItems: 'flex-end', gap: '4px', overflowX: 'auto', paddingBottom: '20px' }}>
+                  {stats.daily_signups.map((day, i) => {
+                    const maxCount = Math.max(...stats.daily_signups.map(d => d.count), 1);
+                    const heightPercent = (day.count / maxCount) * 100;
+                    return (
+                      <div key={i} style={{ flex: 1, minWidth: '20px', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'flex-end', height: '100%', position: 'relative' }}>
+                        <div style={{ 
+                          width: '100%', 
+                          height: `${heightPercent}%`, 
+                          minHeight: day.count > 0 ? '10px' : '0', 
+                          background: day.count > 0 ? 'hsl(var(--primary))' : 'transparent',
+                          borderRadius: '4px 4px 0 0',
+                          opacity: 0.8,
+                          transition: 'height 0.3s ease'
+                        }} title={`${day.date}: ${day.count} signups`}></div>
+                        <span style={{ position: 'absolute', bottom: '-20px', fontSize: '0.65rem', color: 'hsl(var(--muted-foreground))', transform: 'rotate(-45deg)', transformOrigin: 'top left', whiteSpace: 'nowrap' }}>
+                          {i % 3 === 0 ? day.date : ''}
+                        </span>
+                      </div>
+                    );
+                  })}
+                </div>
               </div>
+
             </motion.div>
           )}
 
+          {/* Students Tab */}
           {activeTab === 'students' && (
             <motion.div key="students" initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0 }} className="workbench-data">
-              <div className="data-header">
+              <div className="data-header" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                 <h2>Command Centre Registry ({students.length})</h2>
+                <button className="btn btn-primary" onClick={downloadCSV}>
+                  <Download size={16} style={{ marginRight: '0.5rem' }}/> Download CSV
+                </button>
               </div>
               <div className="data-table-container">
                 <table className="data-table">
@@ -270,6 +397,7 @@ const AdminDashboard = () => {
             </motion.div>
           )}
 
+          {/* Config / AI Tab */}
           {activeTab === 'config' && config && (
             <motion.div key="config" initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0 }} style={{ display: 'flex', flexDirection: 'column', gap: '2rem' }}>
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
@@ -312,6 +440,7 @@ const AdminDashboard = () => {
             </motion.div>
           )}
 
+          {/* Credentials Tab */}
           {activeTab === 'credentials' && (
             <motion.div key="credentials" initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0 }} style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
               <div className="card" style={{ padding: '2rem', backgroundColor: 'hsl(var(--card))', border: '1px solid hsl(var(--border))', borderRadius: 'var(--radius)' }}>
