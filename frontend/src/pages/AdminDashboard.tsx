@@ -1,11 +1,11 @@
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { supabase } from '../supabase';
-import { Users, BookOpen, Target, LogOut, Shield, Key, Trash2, Eye, EyeOff, Terminal, Compass, Settings, Save, AlertCircle } from 'lucide-react';
+import { Users, BookOpen, Target, LogOut, Shield, Key, Trash2, Eye, EyeOff, Terminal, Compass, Settings, Save, AlertCircle, X, Search } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import toast from 'react-hot-toast';
 import ThemeToggle from '../components/ThemeToggle';
-import './Dashboard.css'; // Reuse Workbench CSS
+import './Dashboard.css';
 
 interface Stats {
   total_students: number;
@@ -22,6 +22,12 @@ interface Student {
   created_at: string;
 }
 
+interface StudentDetails {
+  profile: any;
+  quizResponses: any[];
+  roadmaps: any[];
+}
+
 const AdminDashboard = () => {
   const navigate = useNavigate();
   const [stats, setStats] = useState<Stats | null>(null);
@@ -32,6 +38,11 @@ const AdminDashboard = () => {
   const [error, setError] = useState<string | null>(null);
   const [activeTab, setActiveTab] = useState<'overview' | 'students' | 'config' | 'credentials'>('overview');
   const [showKeys, setShowKeys] = useState<Record<string, boolean>>({});
+  
+  // Detail View State
+  const [selectedStudentId, setSelectedStudentId] = useState<string | null>(null);
+  const [studentDetails, setStudentDetails] = useState<StudentDetails | null>(null);
+  const [loadingDetails, setLoadingDetails] = useState(false);
 
   const credentials = [
     { label: 'Supabase URL', key: 'SUPABASE_URL', value: import.meta.env.VITE_SUPABASE_URL || 'Not set' },
@@ -71,6 +82,30 @@ const AdminDashboard = () => {
     }
   };
 
+  const handleViewStudent = async (studentId: string) => {
+    setSelectedStudentId(studentId);
+    setLoadingDetails(true);
+    setStudentDetails(null);
+    try {
+      const { data: { session } } = await supabase.auth.getSession();
+      if (!session) return;
+      const apiUrl = import.meta.env.VITE_API_BASE_URL || 'http://localhost:3000/api';
+      
+      const res = await fetch(`${apiUrl}/admin/student/${studentId}`, {
+        headers: { 'Authorization': `Bearer ${session.access_token}` }
+      });
+      if (!res.ok) throw new Error('Failed to fetch student details');
+      
+      const data = await res.json();
+      setStudentDetails(data);
+    } catch (err) {
+      toast.error('Failed to load details');
+      setSelectedStudentId(null);
+    } finally {
+      setLoadingDetails(false);
+    }
+  };
+
   const saveConfig = async () => {
     setSavingConfig(true);
     try {
@@ -95,7 +130,8 @@ const AdminDashboard = () => {
     }
   };
 
-  const handleDeleteStudent = async (studentId: string) => {
+  const handleDeleteStudent = async (studentId: string, e: React.MouseEvent) => {
+    e.stopPropagation();
     if (!confirm('Are you sure you want to delete this student and all their roadmaps?')) return;
     
     try {
@@ -106,6 +142,7 @@ const AdminDashboard = () => {
       await supabase.from('profiles').delete().eq('id', studentId);
       
       setStudents(prev => prev.filter(s => s.id !== studentId));
+      if (selectedStudentId === studentId) setSelectedStudentId(null);
       toast.success('Student deleted successfully');
     } catch {
       toast.error('Failed to delete student');
@@ -126,7 +163,6 @@ const AdminDashboard = () => {
 
   return (
     <div className="workbench">
-      {/* Side Rail Navigation */}
       <aside className="workbench-sidebar">
         <div className="sidebar-brand" onClick={() => navigate('/dashboard')}>
           <Shield className="brand-icon" size={24} />
@@ -135,7 +171,7 @@ const AdminDashboard = () => {
         
         <nav className="sidebar-nav">
           <button className={`nav-item ${activeTab === 'overview' ? 'active' : 'text-muted'}`} onClick={() => setActiveTab('overview')}><Target size={18} /> <span>Overview</span></button>
-          <button className={`nav-item ${activeTab === 'students' ? 'active' : 'text-muted'}`} onClick={() => setActiveTab('students')}><Users size={18} /> <span>Students</span></button>
+          <button className={`nav-item ${activeTab === 'students' ? 'active' : 'text-muted'}`} onClick={() => setActiveTab('students')}><Users size={18} /> <span>Command Centre</span></button>
           <button className={`nav-item ${activeTab === 'config' ? 'active' : 'text-muted'}`} onClick={() => setActiveTab('config')}><Settings size={18} /> <span>AI & Config</span></button>
           <button className={`nav-item ${activeTab === 'credentials' ? 'active' : 'text-muted'}`} onClick={() => setActiveTab('credentials')}><Key size={18} /> <span>Credentials</span></button>
         </nav>
@@ -151,7 +187,6 @@ const AdminDashboard = () => {
         </div>
       </aside>
 
-      {/* Main Content */}
       <main className="workbench-main">
         <header className="workbench-header" style={{ marginBottom: '2rem' }}>
           <div>
@@ -167,7 +202,6 @@ const AdminDashboard = () => {
         )}
 
         <AnimatePresence mode="wait">
-          {/* Overview Tab */}
           {activeTab === 'overview' && stats && (
             <motion.div key="overview" initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0 }} className="workbench-stats">
               <div className="stat-card">
@@ -185,11 +219,10 @@ const AdminDashboard = () => {
             </motion.div>
           )}
 
-          {/* Students Tab */}
           {activeTab === 'students' && (
             <motion.div key="students" initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0 }} className="workbench-data">
               <div className="data-header">
-                <h2>Student Registry ({students.length})</h2>
+                <h2>Command Centre Registry ({students.length})</h2>
               </div>
               <div className="data-table-container">
                 <table className="data-table">
@@ -205,7 +238,7 @@ const AdminDashboard = () => {
                   </thead>
                   <tbody>
                     {students.map(s => (
-                      <tr key={s.id} className="data-row">
+                      <tr key={s.id} className="data-row" style={{ cursor: 'pointer' }} onClick={() => handleViewStudent(s.id)}>
                         <td className="font-medium">{s.name || '—'}</td>
                         <td className="text-muted">{s.email}</td>
                         <td className="text-muted">{s.branch || '—'}</td>
@@ -217,7 +250,10 @@ const AdminDashboard = () => {
                         </td>
                         <td className="text-muted text-sm">{new Date(s.created_at).toLocaleDateString()}</td>
                         <td className="text-right">
-                          <button className="btn-icon text-muted hover-destructive" onClick={() => handleDeleteStudent(s.id)} title="Delete Student">
+                          <button className="btn-icon text-primary" onClick={(e) => { e.stopPropagation(); handleViewStudent(s.id); }} title="View Details">
+                            <Search size={16} />
+                          </button>
+                          <button className="btn-icon text-muted hover-destructive" onClick={(e) => handleDeleteStudent(s.id, e)} title="Delete Student" style={{ marginLeft: '0.5rem' }}>
                             <Trash2 size={16} />
                           </button>
                         </td>
@@ -234,7 +270,6 @@ const AdminDashboard = () => {
             </motion.div>
           )}
 
-          {/* Config / AI Tab */}
           {activeTab === 'config' && config && (
             <motion.div key="config" initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0 }} style={{ display: 'flex', flexDirection: 'column', gap: '2rem' }}>
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
@@ -274,40 +309,9 @@ const AdminDashboard = () => {
                   onChange={e => setConfig({ ...config, systemPrompt_chat: e.target.value })}
                 />
               </div>
-
-              <div className="card" style={{ padding: '2rem', backgroundColor: 'hsl(var(--card))', border: '1px solid hsl(var(--border))', borderRadius: 'var(--radius)' }}>
-                <h3 style={{ marginBottom: '1rem', fontSize: '1rem', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-                  <Compass size={16} className="text-primary" /> Quiz Configuration (JSON)
-                </h3>
-                <p className="text-muted" style={{ fontSize: '0.875rem', marginBottom: '1rem' }}>
-                  Edit the questions shown to users during onboarding. Must remain valid JSON.
-                </p>
-                <textarea 
-                  style={{ width: '100%', minHeight: '300px', padding: '1rem', background: 'hsl(var(--secondary)/0.3)', border: '1px solid hsl(var(--border))', borderRadius: 'var(--radius)', color: 'hsl(var(--foreground))', fontFamily: 'monospace', fontSize: '0.875rem', resize: 'vertical' }}
-                  value={JSON.stringify(config.quizQuestions, null, 2)}
-                  onChange={e => {
-                    try {
-                      const parsed = JSON.parse(e.target.value);
-                      setConfig({ ...config, quizQuestions: parsed });
-                    } catch (err) {
-                      // Allow invalid state while typing, but don't save to state.
-                      // A proper implementation would use a robust JSON editor.
-                    }
-                  }}
-                  onBlur={e => {
-                     try {
-                        const parsed = JSON.parse(e.target.value);
-                        setConfig({ ...config, quizQuestions: parsed });
-                     } catch(err) {
-                        toast.error("Invalid JSON format for Quiz Questions!");
-                     }
-                  }}
-                />
-              </div>
             </motion.div>
           )}
 
-          {/* Credentials Tab */}
           {activeTab === 'credentials' && (
             <motion.div key="credentials" initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0 }} style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
               <div className="card" style={{ padding: '2rem', backgroundColor: 'hsl(var(--card))', border: '1px solid hsl(var(--border))', borderRadius: 'var(--radius)' }}>
@@ -336,20 +340,123 @@ const AdminDashboard = () => {
                   ))}
                 </div>
               </div>
-
-              <div className="card" style={{ padding: '2rem', backgroundColor: 'hsl(var(--card))', border: '1px solid hsl(var(--border))', borderRadius: 'var(--radius)' }}>
-                <h3 style={{ marginBottom: '0.5rem', fontSize: '1.25rem' }}>Backend Secrets</h3>
-                <div style={{ padding: '1rem', borderRadius: 'var(--radius)', backgroundColor: 'hsl(var(--primary) / 0.1)', border: '1px solid hsl(var(--primary) / 0.2)', display: 'flex', alignItems: 'center', gap: '1rem' }}>
-                  <AlertCircle className="text-primary" size={24} />
-                  <p style={{ fontSize: '0.875rem', color: 'hsl(var(--primary))', margin: 0 }}>
-                    Backend credentials (Groq API Key, Service Role Key, JWT Secret) are securely stored in Vercel environment variables and are not exposed to the frontend. Go to your Vercel Dashboard to manage them.
-                  </p>
-                </div>
-              </div>
             </motion.div>
           )}
         </AnimatePresence>
       </main>
+
+      {/* Student Details Modal */}
+      <AnimatePresence>
+        {selectedStudentId && (
+          <div className="modal-overlay" onClick={() => setSelectedStudentId(null)}>
+            <motion.div 
+              className="modal-content"
+              initial={{ x: '100%' }}
+              animate={{ x: 0 }}
+              exit={{ x: '100%' }}
+              transition={{ type: 'spring', damping: 25, stiffness: 200 }}
+              onClick={e => e.stopPropagation()}
+              style={{ 
+                position: 'fixed', right: 0, top: 0, bottom: 0, width: '100%', maxWidth: '600px', 
+                backgroundColor: 'hsl(var(--background))', borderLeft: '1px solid hsl(var(--border))', 
+                padding: '2rem', overflowY: 'auto', zIndex: 100,
+                boxShadow: '-10px 0 30px rgba(0,0,0,0.5)'
+              }}
+            >
+              <button className="btn-icon" onClick={() => setSelectedStudentId(null)} style={{ position: 'absolute', top: '1.5rem', right: '1.5rem' }}>
+                <X size={24} />
+              </button>
+              
+              {loadingDetails ? (
+                <div style={{ display: 'flex', height: '100%', alignItems: 'center', justifyContent: 'center', color: 'hsl(var(--muted-foreground))' }}>
+                  <Terminal className="spin" size={24} style={{ marginRight: '8px' }}/> Loading Insights...
+                </div>
+              ) : studentDetails ? (
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '2rem', marginTop: '2rem' }}>
+                  {/* Profile Header */}
+                  <div>
+                    <h2 style={{ fontSize: '1.5rem', marginBottom: '0.5rem' }}>{studentDetails.profile.name || 'Anonymous User'}</h2>
+                    <p className="text-muted" style={{ marginBottom: '1rem' }}>{studentDetails.profile.email}</p>
+                    <div style={{ display: 'flex', gap: '1rem', flexWrap: 'wrap' }}>
+                      <span className="badge" style={{ background: 'hsl(var(--primary)/0.1)', color: 'hsl(var(--primary))', padding: '4px 12px', borderRadius: '16px' }}>Role: {studentDetails.profile.role}</span>
+                      <span className="badge" style={{ background: 'hsl(var(--secondary))', color: 'hsl(var(--foreground))', padding: '4px 12px', borderRadius: '16px' }}>Branch: {studentDetails.profile.branch || 'None'}</span>
+                      <span className="text-muted text-sm" style={{ alignSelf: 'center' }}>Joined: {new Date(studentDetails.profile.created_at).toLocaleDateString()}</span>
+                    </div>
+                  </div>
+
+                  <hr style={{ borderColor: 'hsl(var(--border))' }}/>
+
+                  {/* Quiz Responses */}
+                  <div>
+                    <h3 style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '1rem' }}><BookOpen size={18} className="text-primary"/> Quiz Responses</h3>
+                    {studentDetails.quizResponses.length > 0 ? (
+                      <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+                        {studentDetails.quizResponses.map((qr, idx) => (
+                          <div key={idx} className="card" style={{ padding: '1.5rem', background: 'hsl(var(--card))', borderRadius: 'var(--radius)', border: '1px solid hsl(var(--border))' }}>
+                            <div style={{ marginBottom: '1rem' }}>
+                              <h4 style={{ fontSize: '0.875rem', color: 'hsl(var(--muted-foreground))', marginBottom: '0.5rem' }}>Additional Context (Future Goal)</h4>
+                              <p style={{ background: 'hsl(var(--secondary)/0.5)', padding: '0.75rem', borderRadius: '4px', fontSize: '0.875rem' }}>
+                                {qr.free_text || 'No extra context provided.'}
+                              </p>
+                            </div>
+                            <h4 style={{ fontSize: '0.875rem', color: 'hsl(var(--muted-foreground))', marginBottom: '0.5rem' }}>Selected Answers</h4>
+                            <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
+                              {Object.entries(qr.answers || {}).map(([questionId, answer]) => (
+                                <div key={questionId} style={{ display: 'flex', flexDirection: 'column' }}>
+                                  <span style={{ fontSize: '0.75rem', textTransform: 'uppercase', color: 'hsl(var(--muted-foreground))' }}>{questionId}</span>
+                                  <span style={{ fontSize: '0.875rem' }}>{String(answer)}</span>
+                                </div>
+                              ))}
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    ) : (
+                      <p className="text-muted" style={{ fontSize: '0.875rem' }}>This student hasn't completed the quiz yet.</p>
+                    )}
+                  </div>
+
+                  <hr style={{ borderColor: 'hsl(var(--border))' }}/>
+
+                  {/* Generated Roadmaps */}
+                  <div>
+                    <h3 style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '1rem' }}><Compass size={18} className="text-primary"/> Generated Roadmaps</h3>
+                    {studentDetails.roadmaps.length > 0 ? (
+                      <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+                        {studentDetails.roadmaps.map((rm, idx) => (
+                          <div key={idx} className="card" style={{ padding: '1.5rem', background: 'hsl(var(--card))', borderRadius: 'var(--radius)', border: '1px solid hsl(var(--border))' }}>
+                            <h4 style={{ fontSize: '1.125rem', marginBottom: '0.5rem', color: 'hsl(var(--primary))' }}>{rm.primary_career}</h4>
+                            <span style={{ fontSize: '0.75rem', color: 'hsl(var(--muted-foreground))', display: 'block', marginBottom: '1rem' }}>
+                              Generated on {new Date(rm.created_at).toLocaleString()}
+                            </span>
+                            
+                            <h5 style={{ fontSize: '0.875rem', marginBottom: '0.25rem' }}>AI Reasoning</h5>
+                            <p style={{ fontSize: '0.875rem', color: 'hsl(var(--muted-foreground))', marginBottom: '1rem' }}>
+                              {rm.roadmap_data?.reasoning || 'N/A'}
+                            </p>
+
+                            <h5 style={{ fontSize: '0.875rem', marginBottom: '0.25rem' }}>Alternative Paths</h5>
+                            <ul style={{ fontSize: '0.875rem', color: 'hsl(var(--muted-foreground))', paddingLeft: '1.5rem', margin: 0 }}>
+                              {rm.roadmap_data?.alternative_paths?.map((alt: string, i: number) => (
+                                <li key={i}>{alt}</li>
+                              ))}
+                            </ul>
+                          </div>
+                        ))}
+                      </div>
+                    ) : (
+                      <p className="text-muted" style={{ fontSize: '0.875rem' }}>No roadmaps generated yet.</p>
+                    )}
+                  </div>
+
+                </div>
+              ) : (
+                <div className="alert-error">Failed to load student data.</div>
+              )}
+            </motion.div>
+          </div>
+        )}
+      </AnimatePresence>
     </div>
   );
 };

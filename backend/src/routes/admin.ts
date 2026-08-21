@@ -106,4 +106,45 @@ router.post('/config', requireAuth, requireAdmin, (req: any, res: any) => {
   }
 });
 
+router.get('/student/:id', requireAuth, requireAdmin, async (req: AuthRequest, res: any) => {
+  try {
+    const studentId = req.params.id;
+
+    // Fetch profile
+    const { data: profile } = await supabase
+      .from('profiles')
+      .select('*')
+      .eq('id', studentId)
+      .single();
+
+    if (!profile) {
+      return res.status(404).json({ error: 'Student not found' });
+    }
+
+    // Fetch quiz responses (most recent first)
+    const { data: quizResponses } = await supabase
+      .from('quiz_responses')
+      .select('*')
+      .eq('user_id', studentId)
+      .order('created_at', { ascending: false });
+
+    // Fetch generated roadmaps
+    const { data: roadmaps } = await supabase
+      .from('roadmaps')
+      .select('*')
+      .eq('user_id', studentId)
+      .order('created_at', { ascending: false });
+
+    res.json({
+      profile,
+      quizResponses: quizResponses || [],
+      roadmaps: roadmaps || []
+    });
+
+  } catch (error) {
+    console.error('Error fetching student details:', error);
+    res.status(500).json({ error: 'Internal server error' });
+  }
+});
+
 export default router;
