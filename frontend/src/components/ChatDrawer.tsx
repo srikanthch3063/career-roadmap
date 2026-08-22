@@ -87,21 +87,24 @@ const ChatDrawer: React.FC<ChatDrawerProps> = ({ isOpen, onClose, roadmapContext
           if (line.startsWith('data: ')) {
             const dataStr = line.slice(6);
             if (dataStr === '[DONE]') break;
+            let parsed;
             try {
-              const parsed = JSON.parse(dataStr);
-              if (parsed.error) throw new Error(parsed.error);
-              if (parsed.chunk) {
-                aiMessage += parsed.chunk;
-                // Force plain text by stripping markdown chars: *, _, #, `, ~, >, and [] links
-                const cleanMessage = aiMessage.replace(/[*_#`~>]/g, '').replace(/\[.*?\]\(.*?\)/g, '');
-                setMessages(prev => {
-                  const newMessages = [...prev];
-                  newMessages[newMessages.length - 1].content = cleanMessage;
-                  return newMessages;
-                });
-              }
+              parsed = JSON.parse(dataStr);
             } catch (e) {
-              // ignore parse errors for partial chunks
+              continue; // ignore parse errors for partial chunks
+            }
+            
+            if (parsed.error) throw new Error(parsed.error);
+            
+            if (parsed.chunk) {
+              aiMessage += parsed.chunk;
+              // Force plain text by stripping markdown chars: *, _, #, `, ~, >, and [] links
+              const cleanMessage = aiMessage.replace(/[*_#`~>]/g, '').replace(/\[.*?\]\(.*?\)/g, '');
+              setMessages(prev => {
+                const newMessages = [...prev];
+                newMessages[newMessages.length - 1].content = cleanMessage;
+                return newMessages;
+              });
             }
           }
         }

@@ -201,6 +201,14 @@ IMPORTANT RULES:
 
     const systemPrompt = `${config.systemPrompt_chat || defaultChatPrompt}\n\nYou previously generated the following career roadmap for the user:\n${JSON.stringify(roadmapContext)}`;
 
+    let maxTokens = 500;
+    if (config.chat_character_limit) {
+      const parsed = parseInt(String(config.chat_character_limit).trim(), 10);
+      if (!isNaN(parsed) && parsed > 0) {
+        maxTokens = parsed;
+      }
+    }
+
     const stream = await groq.chat.completions.create({
       messages: [
         { role: 'system', content: systemPrompt },
@@ -208,7 +216,7 @@ IMPORTANT RULES:
       ],
       model: 'openai/gpt-oss-120b',
       temperature: 0.7,
-      max_tokens: config.chat_character_limit ? parseInt(config.chat_character_limit) : 500,
+      max_tokens: maxTokens,
       stream: true,
     });
 
