@@ -92,9 +92,11 @@ const ChatDrawer: React.FC<ChatDrawerProps> = ({ isOpen, onClose, roadmapContext
               if (parsed.error) throw new Error(parsed.error);
               if (parsed.chunk) {
                 aiMessage += parsed.chunk;
+                // Force plain text by stripping markdown chars: *, _, #, `, ~, >, and [] links
+                const cleanMessage = aiMessage.replace(/[*_#`~>]/g, '').replace(/\[.*?\]\(.*?\)/g, '');
                 setMessages(prev => {
                   const newMessages = [...prev];
-                  newMessages[newMessages.length - 1].content = aiMessage;
+                  newMessages[newMessages.length - 1].content = cleanMessage;
                   return newMessages;
                 });
               }
