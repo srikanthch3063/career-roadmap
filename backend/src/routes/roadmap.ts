@@ -301,4 +301,43 @@ router.get('/config', requireAuth, (req: any, res: any) => {
   }
 });
 
+// Soft Delete Roadmap Endpoint
+router.delete('/roadmaps/:id', requireAuth, async (req: any, res: any) => {
+  try {
+    const userId = req.user.id;
+    const roadmapId = req.params.id;
+
+    // Fetch existing
+    const { data: roadmapData, error: fetchError } = await supabase
+      .from('roadmaps')
+      .select('roadmap')
+      .eq('id', roadmapId)
+      .eq('user_id', userId)
+      .single();
+
+    if (fetchError || !roadmapData) {
+      return res.status(404).json({ error: 'Roadmap not found' });
+    }
+
+    // Append is_deleted to JSONB
+    const updatedRoadmap = { ...roadmapData.roadmap, is_deleted: true };
+
+    const { error: updateError } = await supabase
+      .from('roadmaps')
+      .update({ roadmap: updatedRoadmap })
+      .eq('id', roadmapId)
+      .eq('user_id', userId);
+
+    if (updateError) {
+      console.error('Failed to soft delete roadmap:', updateError);
+      return res.status(500).json({ error: 'Failed to soft delete roadmap' });
+    }
+
+    res.json({ success: true });
+  } catch (error: any) {
+    console.error('Error soft deleting roadmap:', error);
+    res.status(500).json({ error: 'Internal server error' });
+  }
+});
+
 export default router;

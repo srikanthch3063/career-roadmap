@@ -173,8 +173,10 @@ const Results = () => {
     try {
       const canvas = await html2canvas(contentRef.current, { scale: 2, backgroundColor: '#000000' });
       const imgData = canvas.toDataURL('image/png');
-      const pdf = new jsPDF({ orientation: 'portrait', unit: 'px', format: [canvas.width, canvas.height] });
-      pdf.addImage(imgData, 'PNG', 0, 0, canvas.width, canvas.height);
+      const pdf = new jsPDF('p', 'mm', 'a4');
+      const pdfWidth = pdf.internal.pageSize.getWidth();
+      const pdfHeight = (canvas.height * pdfWidth) / canvas.width;
+      pdf.addImage(imgData, 'PNG', 0, 0, pdfWidth, pdfHeight);
       pdf.save('pathforge_trajectory.pdf');
       toast.success('export complete.', { id: 'pdf' });
     } catch (e) {

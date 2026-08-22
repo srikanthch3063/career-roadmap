@@ -46,20 +46,23 @@ const Dashboard = () => {
         .order('created_at', { ascending: false });
 
       if (historyData) {
-        setHistory(historyData);
+        const visibleHistory = historyData.filter(item => !item.roadmap?.is_deleted);
+        setHistory(visibleHistory);
+        
         let totalChecked = 0;
-        historyData.forEach(item => {
+        visibleHistory.forEach(item => {
           if (item.roadmap?.checked_items) {
             totalChecked += item.roadmap.checked_items.length;
           }
         });
+        
         let level = 'init';
         if (totalChecked > 5) level = 'explorer';
         if (totalChecked > 15) level = 'specialist';
         if (totalChecked > 30) level = 'expert';
         if (totalChecked > 50) level = 'master';
         
-        setStats({ totalChecked, level, totalRoadmaps: historyData.length });
+        setStats({ totalChecked, level, totalRoadmaps: visibleHistory.length });
       }
     } catch (error) {
       console.error('Error fetching user data:', error);
@@ -83,13 +86,26 @@ const Dashboard = () => {
   const deleteRoadmap = async (e: React.MouseEvent, roadmapId: string) => {
     e.stopPropagation();
     if (!confirm('confirm deletion?')) return;
-    const { error } = await supabase.from('roadmaps').delete().eq('id', roadmapId);
-    if (error) {
-      toast.error('failed to delete');
-    } else {
+    
+    try {
+      const { data: { session } } = await supabase.auth.getSession();
+      if (!session) throw new Error('Not authenticated');
+
+      const apiUrl = import.meta.env.VITE_API_BASE_URL || (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1' ? 'http://localhost:3000/api' : '/api');
+      const response = await fetch(`${apiUrl}/roadmaps/${roadmapId}`, {
+        method: 'DELETE',
+        headers: {
+          'Authorization': `Bearer ${session.access_token}`
+        }
+      });
+      
+      if (!response.ok) throw new Error('Delete failed');
+      
       setHistory(prev => prev.filter(r => r.id !== roadmapId));
       setStats(prev => ({ ...prev, totalRoadmaps: prev.totalRoadmaps - 1 }));
       toast.success('deleted successfully');
+    } catch (error) {
+      toast.error('failed to delete');
     }
   };
 

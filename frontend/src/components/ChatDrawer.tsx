@@ -60,8 +60,8 @@ const ChatDrawer: React.FC<ChatDrawerProps> = ({ isOpen, onClose, roadmapContext
             style={{
               position: 'fixed',
               top: 0, left: 0, right: 0, bottom: 0,
-              backgroundColor: 'hsl(var(--background) / 0.8)',
-              backdropFilter: 'blur(4px)',
+              backgroundColor: 'hsl(var(--background) / 0.5)',
+              backdropFilter: 'blur(8px)',
               zIndex: 100
             }}
           />
@@ -75,7 +75,8 @@ const ChatDrawer: React.FC<ChatDrawerProps> = ({ isOpen, onClose, roadmapContext
               top: 0, right: 0, bottom: 0,
               width: '400px',
               maxWidth: '100%',
-              backgroundColor: 'hsl(var(--card))',
+              backgroundColor: 'hsl(var(--card) / 0.95)',
+              backdropFilter: 'blur(16px)',
               borderLeft: '1px solid hsl(var(--border))',
               zIndex: 101,
               display: 'flex',
