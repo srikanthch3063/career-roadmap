@@ -301,15 +301,13 @@ button {
 /* AI Bubble */
 .lumen-chat-bubble-ai {
   align-self: flex-start;
-  background: #242834;
-  color: #F1F5F9;
-  padding: 10px 14px;
-  border-radius: 12px;
-  border-bottom-left-radius: 4px;
-  max-width: 85%;
+  background: transparent;
+  color: #E2E8F0;
+  padding: 10px 0;
+  max-width: 95%;
   font-size: 0.875rem;
-  line-height: 1.5;
-  border: 1px solid #2A2E39;
+  line-height: 1.6;
+  border: none;
 }
 
 .lumen-chat-input-container {

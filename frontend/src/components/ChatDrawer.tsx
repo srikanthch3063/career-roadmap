@@ -15,6 +15,11 @@ const ChatDrawer: React.FC<ChatDrawerProps> = ({ isOpen, onClose, roadmapContext
   const [loading, setLoading] = useState(false);
   const [thinkingMessage, setThinkingMessage] = useState('');
   const [userName, setUserName] = useState('');
+  const messagesEndRef = React.useRef<HTMLDivElement>(null);
+
+  React.useEffect(() => {
+    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+  }, [messages]);
 
   React.useEffect(() => {
     supabase.auth.getUser().then(({ data }) => {
@@ -54,7 +59,10 @@ const ChatDrawer: React.FC<ChatDrawerProps> = ({ isOpen, onClose, roadmapContext
           if (prev === 'analyzing roadmap context...') return 'synthesizing answer...';
           return 'looking into preferences...';
         });
-      }, 2000);
+      }, 800); // Faster cycle
+
+      // Artificial delay to guarantee the thinking state is visible to the user
+      await new Promise(resolve => setTimeout(resolve, 1500));
 
       const response = await fetch(`${apiUrl}/chat`, {
         method: 'POST',
@@ -97,6 +105,9 @@ const ChatDrawer: React.FC<ChatDrawerProps> = ({ isOpen, onClose, roadmapContext
             if (parsed.error) throw new Error(parsed.error);
             
             if (parsed.chunk) {
+              // Synthetic delay to create a typing effect if network is too fast
+              await new Promise(resolve => setTimeout(resolve, 30));
+              
               aiMessage += parsed.chunk;
               // Force plain text by stripping markdown chars: *, _, #, `, ~, >, and [] links
               const cleanMessage = aiMessage.replace(/[*_#`~>]/g, '').replace(/\[.*?\]\(.*?\)/g, '');
@@ -172,6 +183,8 @@ const ChatDrawer: React.FC<ChatDrawerProps> = ({ isOpen, onClose, roadmapContext
                   <Loader2 size={12} className="spin" /> {thinkingMessage}
                 </div>
               )}
+              
+              <div ref={messagesEndRef} />
             </div>
 
             <div className="lumen-chat-input-container">
