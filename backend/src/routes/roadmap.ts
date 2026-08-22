@@ -89,10 +89,10 @@ router.post('/generate-roadmap', requireAuth, generateLimiter, async (req: AuthR
       // 2. Read System Prompt from Config
       let config: any = {};
       try {
-        const rawConfig = fs.readFileSync(path.join(__dirname, '../data/config.json'), 'utf8');
-        config = JSON.parse(rawConfig);
+        const { data } = await supabase.from('system_config').select('config').eq('id', 1).single();
+        if (data) config = data.config || {};
       } catch (err) {
-        console.error('Error reading config.json, using defaults.', err);
+        console.error('Error reading config from supabase, using defaults.', err);
       }
 
       const defaultRoadmapPrompt = `You are a brutally honest, highly opinionated, and incredibly specific Lead Career Counselor for top-tier engineering students.\nYour goal is to generate a deeply personalized, non-generic career roadmap based on the student's constraints. \n\nDO NOT give generic advice like "Learn Python" or "Do internships". Give highly specific advice like "Master FastAPI and Pydantic", "Build a distributed cache system in Rust", or "Target Series B climate-tech startups".\nIf they mention specific constraints (e.g. they hate frontend, they want to work in finance), YOU MUST aggressively tailor the roadmap to those constraints.\n\nYou must return the response as a strict JSON object with this exact schema:\n{\n  "recommended_careers": ["string (e.g. 'HFT C++ Engineer', 'Kernel Developer')"],\n  "primary_career": "string",\n  "reasoning": "string (Explain EXACTLY why you chose this based on their constraints. Be opinionated.)",\n  "roadmap": {\n    "skills_to_learn": ["string (Highly specific skills)"],\n    "technologies": ["string (Specific frameworks, libraries, tools)"],\n    "project_ideas": ["string (Non-trivial, resume-worthy project ideas. No to-do lists.)"],\n    "certifications": ["string (Or specify 'None needed for this field' if applicable)"],\n    "internship_advice": "string (Actionable advice tailored to their niche)",\n    "job_titles": ["string (Specific titles to search for)"]\n  }\n}`;
@@ -183,10 +183,10 @@ router.post('/chat', requireAuth, async (req: any, res: any) => {
 
     let config: any = {};
     try {
-      const rawConfig = fs.readFileSync(path.join(__dirname, '../data/config.json'), 'utf8');
-      config = JSON.parse(rawConfig);
+      const { data } = await supabase.from('system_config').select('config').eq('id', 1).single();
+      if (data) config = data.config || {};
     } catch (err) {
-      console.error('Error reading config.json, using defaults.', err);
+      console.error('Error reading config from supabase, using defaults.', err);
     }
 
     const defaultChatPrompt = `You are a helpful, expert career counselor and technical mentor. 
@@ -309,14 +309,15 @@ router.put('/progress', requireAuth, async (req: any, res: any) => {
 });
 
 // Get Config (Quiz Questions) Endpoint
-router.get('/config', requireAuth, (req: any, res: any) => {
+router.get('/config', requireAuth, async (req: any, res: any) => {
   try {
-    const configPath = path.join(__dirname, '../data/config.json');
-    const rawConfig = fs.readFileSync(configPath, 'utf8');
-    const config = JSON.parse(rawConfig);
+    const { data, error } = await supabase.from('system_config').select('config').eq('id', 1).single();
+    if (error) throw error;
+    const config = data?.config || {};
     res.json({ quizQuestions: config.quizQuestions || [] });
   } catch (error) {
-    res.status(500).json({ error: 'Failed to load config' });
+    console.error('Error fetching config for quiz:', error);
+    res.status(500).json({ error: 'Failed to read config' });
   }
 });
 

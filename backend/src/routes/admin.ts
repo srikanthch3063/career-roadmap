@@ -185,22 +185,24 @@ router.get('/student/:id', requireAuth, requireAdmin, async (req: AuthRequest, r
   }
 });
 
-router.get('/config', requireAuth, requireAdmin, (req: any, res: any) => {
+router.get('/config', requireAuth, requireAdmin, async (req: any, res: any) => {
   try {
-    const configPath = path.join(__dirname, '../data/config.json');
-    const rawData = fs.readFileSync(configPath, 'utf8');
-    res.json(JSON.parse(rawData));
+    const { data, error } = await supabase.from('system_config').select('config').eq('id', 1).single();
+    if (error) throw error;
+    res.json(data?.config || {});
   } catch (error) {
+    console.error('Error fetching config:', error);
     res.status(500).json({ error: 'Failed to read config' });
   }
 });
 
-router.post('/config', requireAuth, requireAdmin, (req: any, res: any) => {
+router.post('/config', requireAuth, requireAdmin, async (req: any, res: any) => {
   try {
-    const configPath = path.join(__dirname, '../data/config.json');
-    fs.writeFileSync(configPath, JSON.stringify(req.body, null, 2), 'utf8');
+    const { error } = await supabase.from('system_config').update({ config: req.body }).eq('id', 1);
+    if (error) throw error;
     res.json({ success: true });
   } catch (error) {
+    console.error('Error writing config:', error);
     res.status(500).json({ error: 'Failed to write config' });
   }
 });
