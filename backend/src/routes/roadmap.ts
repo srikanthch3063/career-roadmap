@@ -29,7 +29,7 @@ const getFallbackRoadmap = (branch: string) => {
   try {
     const rawData = fs.readFileSync(path.join(__dirname, '../data/fallbackRoadmaps.json'), 'utf8');
     const roadmaps = JSON.parse(rawData);
-    
+
     // Simple matching logic
     const matched = roadmaps.find((r: any) => r.branch.toLowerCase().includes(branch.toLowerCase().split(' ')[0]));
     if (matched) return matched.roadmap;
@@ -46,7 +46,7 @@ const validateSchema = (data: any) => {
   if (typeof data.primary_career !== 'string') return false;
   if (typeof data.reasoning !== 'string') return false;
   if (!data.roadmap || typeof data.roadmap !== 'object') return false;
-  
+
   const rm = data.roadmap;
   if (!Array.isArray(rm.skills_to_learn)) return false;
   if (!Array.isArray(rm.technologies)) return false;
@@ -54,7 +54,7 @@ const validateSchema = (data: any) => {
   if (!Array.isArray(rm.certifications)) return false;
   if (typeof rm.internship_advice !== 'string') return false;
   if (!Array.isArray(rm.job_titles)) return false;
-  
+
   return true;
 };
 
@@ -110,13 +110,13 @@ router.post('/generate-roadmap', requireAuth, generateLimiter, async (req: AuthR
           response_format: { type: 'json_object' }
         });
 
-        const timeoutPromise = new Promise((_, reject) => 
+        const timeoutPromise = new Promise((_, reject) =>
           setTimeout(() => reject(new Error('Groq API timed out after 30 seconds. The AI model is taking too long. Please try again.')), 30000)
         );
 
         const chatCompletion = await Promise.race([groqPromise, timeoutPromise]) as any;
         const jsonResponse = JSON.parse(chatCompletion.choices[0]?.message?.content || '{}');
-        
+
         // 5. Validate Parsed JSON
         if (validateSchema(jsonResponse)) {
           finalRoadmapJSON = jsonResponse;
@@ -175,7 +175,7 @@ router.post('/chat', requireAuth, async (req: any, res: any) => {
 
   try {
     const { question, roadmapContext } = req.body;
-    
+
     if (!question || !roadmapContext) {
       res.write(`data: ${JSON.stringify({ error: 'Question and roadmap context are required' })}\n\n`);
       return res.end();
@@ -191,11 +191,13 @@ router.post('/chat', requireAuth, async (req: any, res: any) => {
 
     const defaultChatPrompt = `You are a helpful, expert career counselor and technical mentor. 
 IMPORTANT RULES:
+You are a helpful, expert career counselor and technical mentor. 
+IMPORTANT RULES:
 1. You MUST ONLY answer questions related to careers, skills, learning, job searching, technology, certifications, projects, internships, and professional development.
 2. If the user asks about anything unrelated (e.g. jokes, personal life, politics, entertainment, coding help unrelated to their roadmap, or any off-topic question), respond ONLY with: "I can only help with career and roadmap-related questions. Please ask something about your career path, skills, or learning plan."
 3. Keep your answers concise — maximum 150 words unless the user explicitly asks for a detailed explanation.
 4. Be actionable and encouraging in your tone.
-5. Format your response in plain text (conversational chat style). Do NOT return JSON, MD, tables, or anything that isnt plain text.`;
+5. Format your response in plain text (conversational chat style). Do NOT return JSON, MD, tables, or anything that isnt plain text..`;
 
     const systemPrompt = `${config.systemPrompt_chat || defaultChatPrompt}\n\nYou previously generated the following career roadmap for the user:\n${JSON.stringify(roadmapContext)}`;
 
@@ -216,7 +218,7 @@ IMPORTANT RULES:
         res.write(`data: ${JSON.stringify({ chunk: content })}\n\n`);
       }
     }
-    
+
     res.write(`data: [DONE]\n\n`);
     res.end();
   } catch (error: any) {
@@ -230,7 +232,7 @@ IMPORTANT RULES:
 router.post('/plan', requireAuth, async (req: any, res: any) => {
   try {
     const { roadmapContext } = req.body;
-    
+
     if (!roadmapContext) {
       return res.status(400).json({ error: 'Roadmap context is required' });
     }
@@ -273,7 +275,7 @@ router.put('/progress', requireAuth, async (req: any, res: any) => {
   try {
     const userId = req.user.id;
     const { checkedItems } = req.body; // array of strings (item names)
-    
+
     if (!Array.isArray(checkedItems)) {
       return res.status(400).json({ error: 'checkedItems must be an array' });
     }
@@ -290,12 +292,12 @@ router.put('/progress', requireAuth, async (req: any, res: any) => {
     if (latestRoadmaps && latestRoadmaps.length > 0) {
       const latest = latestRoadmaps[0];
       const updatedRoadmap = { ...latest.roadmap, checked_items: checkedItems };
-      
+
       await supabase
         .from('roadmaps')
         .update({ roadmap: updatedRoadmap })
         .eq('id', latest.id);
-        
+
       res.json({ success: true });
     } else {
       res.status(404).json({ error: 'No roadmap found' });
