@@ -170,39 +170,75 @@ const Results = () => {
   const handleExportPDF = async () => {
     if (!contentRef.current) return;
     toast.loading('exporting document...', { id: 'pdf', style: { borderRadius: 0, background: 'var(--color-paper-2)', color: 'var(--color-paper-contrast)', border: '1px solid var(--color-rule)' } });
+    
+    let printContainer: HTMLDivElement | null = null;
+    
     try {
-      const element = contentRef.current;
-      const canvas = await html2canvas(element, { 
+      const originalElement = contentRef.current;
+      
+      // Create a temporary hidden container with fixed A4-proportioned width
+      printContainer = document.createElement('div');
+      printContainer.style.position = 'absolute';
+      printContainer.style.top = '-9999px';
+      printContainer.style.left = '0';
+      printContainer.style.width = '794px'; // 96dpi A4 width
+      printContainer.style.background = '#0a0a0a';
+      printContainer.style.color = '#ffffff';
+      printContainer.style.zIndex = '-1';
+      
+      // Clone the document so we don't mess up the live UI
+      const clonedElement = originalElement.cloneNode(true) as HTMLElement;
+      
+      // Remove any scrollbars on the clone
+      clonedElement.style.overflow = 'visible';
+      clonedElement.style.height = 'auto';
+      clonedElement.style.maxHeight = 'none';
+      
+      printContainer.appendChild(clonedElement);
+      document.body.appendChild(printContainer);
+
+      const canvas = await html2canvas(clonedElement, { 
         scale: 2, 
-        backgroundColor: '#000000',
-        scrollY: -window.scrollY
+        backgroundColor: '#0a0a0a',
+        useCORS: true,
+        logging: false,
+        width: 794,
+        windowWidth: 794
       });
       
-      const imgData = canvas.toDataURL('image/png');
+      // Clean up the DOM immediately
+      if (printContainer.parentNode) {
+        printContainer.parentNode.removeChild(printContainer);
+      }
+      
+      const imgData = canvas.toDataURL('image/jpeg', 0.95);
       const pdf = new jsPDF('p', 'mm', 'a4');
       
       const pdfWidth = pdf.internal.pageSize.getWidth();
       const pdfHeight = (canvas.height * pdfWidth) / canvas.width;
       const pageHeight = pdf.internal.pageSize.getHeight();
       
-      let heightLeft = pdfHeight;
+      let heightLeft = pdfHeight - pageHeight;
       let position = 0;
       
-      pdf.addImage(imgData, 'PNG', 0, position, pdfWidth, pdfHeight);
-      heightLeft -= pageHeight;
+      pdf.addImage(imgData, 'JPEG', 0, position, pdfWidth, pdfHeight);
       
       while (heightLeft > 0) {
-        position = heightLeft - pdfHeight;
+        position -= pageHeight;
         pdf.addPage();
-        pdf.addImage(imgData, 'PNG', 0, position, pdfWidth, pdfHeight);
+        pdf.addImage(imgData, 'JPEG', 0, position, pdfWidth, pdfHeight);
         heightLeft -= pageHeight;
       }
       
-      pdf.save('pathforge_trajectory.pdf');
+      pdf.save('career_roadmap.pdf');
       toast.success('export complete.', { id: 'pdf' });
     } catch (e) {
-      console.error(e);
+      console.error('PDF Export Error:', e);
       toast.error('export failed.', { id: 'pdf' });
+      // Ensure cleanup on error
+      if (printContainer && printContainer.parentNode) {
+        printContainer.parentNode.removeChild(printContainer);
+      }
     }
   };
 
