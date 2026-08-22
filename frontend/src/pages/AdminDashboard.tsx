@@ -191,7 +191,10 @@ const AdminDashboard = () => {
   };
 
   const toggleShowKey = (key: string) => setShowKeys(prev => ({ ...prev, [key]: !prev[key] }));
-  const maskValue = (val: string) => val.slice(0, 8) + '•'.repeat(Math.min(val.length - 8, 20));
+  const maskValue = (val: string) => {
+    if (!val || val.length <= 4) return '••••••••';
+    return val.slice(0, 4) + '•'.repeat(Math.min(Math.max(val.length - 4, 0), 20));
+  };
 
   if (loading) {
     return <div className="loading-state"><Terminal className="spin" size={24} /> booting admin environment...</div>;
