@@ -13,6 +13,25 @@ const ChatDrawer: React.FC<ChatDrawerProps> = ({ isOpen, onClose, roadmapContext
   const [messages, setMessages] = useState<{ role: 'user' | 'ai', content: string }[]>([]);
   const [input, setInput] = useState('');
   const [loading, setLoading] = useState(false);
+  const [thinkingMessage, setThinkingMessage] = useState('');
+  const [userName, setUserName] = useState('');
+
+  React.useEffect(() => {
+    supabase.auth.getUser().then(({ data }) => {
+      if (data?.user) {
+        const meta = data.user.user_metadata;
+        const name = meta?.full_name || meta?.name || data.user.email?.split('@')[0] || 'there';
+        setUserName(name.toLowerCase());
+      }
+    });
+  }, []);
+
+  const getGreeting = () => {
+    const hour = new Date().getHours();
+    if (hour < 12) return 'good morning';
+    if (hour < 18) return 'good afternoon';
+    return 'good evening';
+  };
 
   const handleSend = async () => {
     if (!input.trim()) return;
@@ -21,12 +40,22 @@ const ChatDrawer: React.FC<ChatDrawerProps> = ({ isOpen, onClose, roadmapContext
     setMessages(prev => [...prev, { role: 'user', content: userMessage }]);
     setInput('');
     setLoading(true);
+    setThinkingMessage('looking into preferences...');
 
     try {
       const { data: { session } } = await supabase.auth.getSession();
       if (!session) throw new Error('Not authenticated');
 
       const apiUrl = import.meta.env.VITE_API_BASE_URL || 'http://localhost:3000/api';
+      
+      const thinkingInterval = setInterval(() => {
+        setThinkingMessage(prev => {
+          if (prev === 'looking into preferences...') return 'analyzing roadmap context...';
+          if (prev === 'analyzing roadmap context...') return 'synthesizing answer...';
+          return 'looking into preferences...';
+        });
+      }, 2000);
+
       const response = await fetch(`${apiUrl}/chat`, {
         method: 'POST',
         headers: {
@@ -36,14 +65,48 @@ const ChatDrawer: React.FC<ChatDrawerProps> = ({ isOpen, onClose, roadmapContext
         body: JSON.stringify({ question: userMessage, roadmapContext })
       });
 
-      const data = await response.json();
-      if (!response.ok) throw new Error(data.error || 'Failed to fetch answer');
+      if (!response.ok) throw new Error('Failed to fetch answer');
+      if (!response.body) throw new Error('ReadableStream not yet supported in this browser.');
 
-      setMessages(prev => [...prev, { role: 'ai', content: data.answer }]);
+      const reader = response.body.getReader();
+      const decoder = new TextDecoder('utf-8');
+      let done = false;
+      let aiMessage = '';
+
+      setMessages(prev => [...prev, { role: 'ai', content: '' }]);
+      clearInterval(thinkingInterval);
+      setLoading(false); // Switch from thinking to streaming
+
+      while (!done) {
+        const { value, done: doneReading } = await reader.read();
+        done = doneReading;
+        const chunkValue = decoder.decode(value, { stream: true });
+        
+        const lines = chunkValue.split('\n');
+        for (const line of lines) {
+          if (line.startsWith('data: ')) {
+            const dataStr = line.slice(6);
+            if (dataStr === '[DONE]') break;
+            try {
+              const parsed = JSON.parse(dataStr);
+              if (parsed.error) throw new Error(parsed.error);
+              if (parsed.chunk) {
+                aiMessage += parsed.chunk;
+                setMessages(prev => {
+                  const newMessages = [...prev];
+                  newMessages[newMessages.length - 1].content = aiMessage;
+                  return newMessages;
+                });
+              }
+            } catch (e) {
+              // ignore parse errors for partial chunks
+            }
+          }
+        }
+      }
     } catch (error: any) {
       console.error(error);
       setMessages(prev => [...prev, { role: 'ai', content: 'Sorry, I encountered an error. Please try again.' }]);
-    } finally {
       setLoading(false);
     }
   };
@@ -75,8 +138,7 @@ const ChatDrawer: React.FC<ChatDrawerProps> = ({ isOpen, onClose, roadmapContext
               top: 0, right: 0, bottom: 0,
               width: '400px',
               maxWidth: '100%',
-              backgroundColor: 'hsl(var(--card) / 0.95)',
-              backdropFilter: 'blur(16px)',
+              backgroundColor: 'hsl(var(--card))',
               borderLeft: '1px solid hsl(var(--border))',
               zIndex: 101,
               display: 'flex',
@@ -98,7 +160,7 @@ const ChatDrawer: React.FC<ChatDrawerProps> = ({ isOpen, onClose, roadmapContext
               {messages.length === 0 && (
                 <div style={{ textAlign: 'center', color: 'hsl(var(--muted-foreground))', marginTop: '2rem' }}>
                   <MessageSquare size={48} style={{ opacity: 0.2, margin: '0 auto 1rem' }} />
-                  <p>Ask anything about your career roadmap. I'm here to help you understand the skills and plan your next steps.</p>
+                  <p>hi {userName}, {getGreeting()}. ask me anything about your career path or roadmap.</p>
                 </div>
               )}
               {messages.map((msg, idx) => (
@@ -118,8 +180,8 @@ const ChatDrawer: React.FC<ChatDrawerProps> = ({ isOpen, onClose, roadmapContext
                 </div>
               ))}
               {loading && (
-                <div style={{ alignSelf: 'flex-start', padding: '0.75rem 1rem', borderRadius: '12px', backgroundColor: 'hsl(var(--secondary))' }}>
-                  <Loader2 size={16} className="spinner" />
+                <div style={{ alignSelf: 'flex-start', padding: '0.75rem 1rem', borderRadius: '12px', backgroundColor: 'transparent', color: 'var(--color-rule-2)', fontFamily: 'var(--font-label)', fontSize: '11px', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                  <Loader2 size={12} className="spin" /> {thinkingMessage}
                 </div>
               )}
             </div>

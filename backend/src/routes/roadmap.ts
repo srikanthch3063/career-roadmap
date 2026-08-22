@@ -165,13 +165,20 @@ router.post('/generate-roadmap', requireAuth, generateLimiter, async (req: AuthR
   }
 });
 
-// Follow-up Chat Endpoint
+// Follow-up Chat Endpoint (Streaming)
 router.post('/chat', requireAuth, async (req: any, res: any) => {
+  // Set headers for SSE
+  res.setHeader('Content-Type', 'text/event-stream');
+  res.setHeader('Cache-Control', 'no-cache');
+  res.setHeader('Connection', 'keep-alive');
+  res.flushHeaders();
+
   try {
     const { question, roadmapContext } = req.body;
     
     if (!question || !roadmapContext) {
-      return res.status(400).json({ error: 'Question and roadmap context are required' });
+      res.write(`data: ${JSON.stringify({ error: 'Question and roadmap context are required' })}\n\n`);
+      return res.end();
     }
 
     let config: any = {};
@@ -188,24 +195,34 @@ IMPORTANT RULES:
 2. If the user asks about anything unrelated (e.g. jokes, personal life, politics, entertainment, coding help unrelated to their roadmap, or any off-topic question), respond ONLY with: "I can only help with career and roadmap-related questions. Please ask something about your career path, skills, or learning plan."
 3. Keep your answers concise — maximum 150 words unless the user explicitly asks for a detailed explanation.
 4. Be actionable and encouraging in your tone.
-Format your response in plain text or markdown. Do NOT return JSON.`;
+5. Format your response in plain text (conversational chat style). Do NOT return JSON and MD.`;
 
     const systemPrompt = `${config.systemPrompt_chat || defaultChatPrompt}\n\nYou previously generated the following career roadmap for the user:\n${JSON.stringify(roadmapContext)}`;
 
-    const chatCompletion = await groq.chat.completions.create({
+    const stream = await groq.chat.completions.create({
       messages: [
         { role: 'system', content: systemPrompt },
         { role: 'user', content: question }
       ],
       model: 'openai/gpt-oss-120b',
       temperature: 0.7,
-      max_tokens: 500,
+      max_tokens: config.chat_character_limit ? parseInt(config.chat_character_limit) : 500,
+      stream: true,
     });
 
-    res.json({ answer: chatCompletion.choices[0]?.message?.content || 'Sorry, I could not generate an answer.' });
+    for await (const chunk of stream) {
+      const content = chunk.choices[0]?.delta?.content || '';
+      if (content) {
+        res.write(`data: ${JSON.stringify({ chunk: content })}\n\n`);
+      }
+    }
+    
+    res.write(`data: [DONE]\n\n`);
+    res.end();
   } catch (error: any) {
     console.error('Error in chat:', error);
-    res.status(500).json({ error: 'Failed to generate answer' });
+    res.write(`data: ${JSON.stringify({ error: 'Failed to generate answer' })}\n\n`);
+    res.end();
   }
 });
 

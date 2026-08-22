@@ -171,15 +171,37 @@ const Results = () => {
     if (!contentRef.current) return;
     toast.loading('exporting document...', { id: 'pdf', style: { borderRadius: 0, background: 'var(--color-paper-2)', color: 'var(--color-paper-contrast)', border: '1px solid var(--color-rule)' } });
     try {
-      const canvas = await html2canvas(contentRef.current, { scale: 2, backgroundColor: '#000000' });
+      const element = contentRef.current;
+      const canvas = await html2canvas(element, { 
+        scale: 2, 
+        backgroundColor: '#000000',
+        scrollY: -window.scrollY
+      });
+      
       const imgData = canvas.toDataURL('image/png');
       const pdf = new jsPDF('p', 'mm', 'a4');
+      
       const pdfWidth = pdf.internal.pageSize.getWidth();
       const pdfHeight = (canvas.height * pdfWidth) / canvas.width;
-      pdf.addImage(imgData, 'PNG', 0, 0, pdfWidth, pdfHeight);
+      const pageHeight = pdf.internal.pageSize.getHeight();
+      
+      let heightLeft = pdfHeight;
+      let position = 0;
+      
+      pdf.addImage(imgData, 'PNG', 0, position, pdfWidth, pdfHeight);
+      heightLeft -= pageHeight;
+      
+      while (heightLeft > 0) {
+        position = heightLeft - pdfHeight;
+        pdf.addPage();
+        pdf.addImage(imgData, 'PNG', 0, position, pdfWidth, pdfHeight);
+        heightLeft -= pageHeight;
+      }
+      
       pdf.save('pathforge_trajectory.pdf');
       toast.success('export complete.', { id: 'pdf' });
     } catch (e) {
+      console.error(e);
       toast.error('export failed.', { id: 'pdf' });
     }
   };

@@ -197,7 +197,11 @@ const AdminDashboard = () => {
   };
 
   if (loading) {
-    return <div className="loading-state"><Terminal className="spin" size={24} /> booting admin environment...</div>;
+    return (
+      <div className="loading-state" style={{ fontFamily: 'var(--font-label)', letterSpacing: '0.1em' }}>
+        <motion.span animate={{ opacity: [1, 0, 1] }} transition={{ repeat: Infinity, duration: 1 }}>{`>`}_</motion.span> BOOTING ADMIN ENVIRONMENT...
+      </div>
+    );
   }
 
   return (
@@ -375,11 +379,32 @@ const AdminDashboard = () => {
           {activeTab === 'config' && config && (
             <motion.div key="config" initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0 }}>
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '2rem' }}>
-                <span className="eyebrow">01 · PROMPT TUNING</span>
+                <span className="eyebrow">01 · PROMPT TUNING & SYSTEM LIMITS</span>
                 <button className="btn btn--primary" onClick={saveConfig} disabled={savingConfig}>
                   {savingConfig ? 'saving...' : 'save config'}
                 </button>
               </div>
+
+              <section className="lumen-data" style={{ marginBottom: '2rem' }}>
+                <div className="data-header">
+                  <span className="eyebrow">GLOBAL SETTINGS</span>
+                </div>
+                <div className="data-table-wrap" style={{ padding: '1.5rem', display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
+                    <label className="eyebrow">CHAT CHARACTER / TOKEN LIMIT</label>
+                    <input 
+                      type="number"
+                      className="lumen-input"
+                      style={{ width: '200px', background: 'transparent', border: '1px solid var(--color-rule)', color: 'var(--color-paper-contrast)', padding: '0.5rem', fontFamily: 'var(--font-mono)' }}
+                      value={config.chat_character_limit || 500}
+                      onChange={e => setConfig({ ...config, chat_character_limit: e.target.value })}
+                      min="50"
+                      max="4000"
+                    />
+                    <p style={{ fontSize: '0.75rem', color: 'var(--color-rule-2)', fontFamily: 'var(--font-label)' }}>MAXIMUM LENGTH FOR AI MENTOR RESPONSES (DEFAULT: 500)</p>
+                  </div>
+                </div>
+              </section>
 
               <section className="lumen-data" style={{ marginBottom: '2rem' }}>
                 <div className="data-header">

@@ -140,3 +140,42 @@ button {
   background: var(--color-rule);
   margin: 0;
 }
+
+/* Scrollbar Customization for Dark Theme */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: var(--color-paper);
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--color-rule);
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--color-rule-2);
+}
+
+/* Button Link */
+.btn-link {
+  background: transparent;
+  border: none;
+  color: var(--color-accent);
+  font-family: var(--font-label);
+  font-size: 11px;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  cursor: pointer;
+  text-decoration: none;
+  padding: 0;
+  transition: opacity 0.2s ease;
+}
+
+.btn-link:hover {
+  opacity: 0.7;
+  text-decoration: underline;
+}
