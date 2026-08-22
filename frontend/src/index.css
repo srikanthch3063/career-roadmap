@@ -3,18 +3,18 @@
 /* Hallmark · genre: atmospheric · macrostructure: 03-marquee-hero · theme: lumen · enrichment: none · nav: N5 · footer: Ft5 */
 
 :root {
-  /* Lumen Night Foundry Drop */
-  --color-paper: oklch(13% 0.014 265);
-  --color-paper-2: oklch(17% 0.016 265);
-  --color-ink: oklch(96% 0.006 262);
-  --color-ink-2: oklch(76% 0.006 262);
-  --color-accent: oklch(76% 0.17 50); /* Molten brass */
-  --color-accent-2: oklch(68% 0.16 18); /* Coral chord */
-  --color-glow: oklch(80% 0.16 50 / 0.42);
-  --color-paper-emit: oklch(76% 0.17 50 / 0.04);
-  --color-rule: oklch(30% 0.008 265);
-  --color-rule-2: oklch(45% 0.008 265);
-  --rule-blueprint: oklch(96% 0.006 262 / 0.04);
+  /* Lumen Night Foundry Drop (Hex equivalents to support html2canvas) */
+  --color-paper: #1a1a24;
+  --color-paper-2: #23242e;
+  --color-ink: #f2f2f7;
+  --color-ink-2: #bcbcc1;
+  --color-accent: #ed8936; /* Molten brass */
+  --color-accent-2: #db5a55; /* Coral chord */
+  --color-glow: rgba(237, 137, 54, 0.42);
+  --color-paper-emit: rgba(237, 137, 54, 0.04);
+  --color-rule: #3e3f4a;
+  --color-rule-2: #61626d;
+  --rule-blueprint: rgba(242, 242, 247, 0.04);
   
   --font-display: "Instrument Serif", ui-serif, Georgia, serif;
   --font-body: "Geist", ui-sans-serif, system-ui, sans-serif;
