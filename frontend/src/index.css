@@ -179,3 +179,237 @@ button {
   opacity: 0.7;
   text-decoration: underline;
 }
+
+/* --- AI Chat Mentor UI Redesign --- */
+.lumen-chat-overlay {
+  position: fixed;
+  top: 0; left: 0; right: 0; bottom: 0;
+  background: rgba(0, 0, 0, 0.4);
+  z-index: 1040;
+}
+
+.lumen-chat-drawer {
+  position: fixed;
+  top: 0; right: 0;
+  width: 400px;
+  height: 100vh;
+  background: #0D0F12;
+  border-left: 1px solid #2A2E39;
+  z-index: 1050;
+  display: flex;
+  flex-direction: column;
+  box-shadow: -10px 0 30px rgba(0,0,0,0.5);
+}
+
+.lumen-chat-header {
+  padding: 16px 20px;
+  border-bottom: 1px solid #2A2E39;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background: #1A1D24;
+}
+
+.lumen-chat-title {
+  margin: 0;
+  font-family: var(--font-body);
+  font-size: 1rem;
+  font-weight: 500;
+  color: #E2E8F0;
+}
+
+.lumen-chat-subtitle {
+  margin: 0;
+  font-size: 0.75rem;
+  color: #94A3B8;
+  font-family: var(--font-mono);
+}
+
+.lumen-chat-close {
+  background: transparent;
+  border: none;
+  color: #94A3B8;
+  cursor: pointer;
+  padding: 4px;
+}
+.lumen-chat-close:hover {
+  color: #E2E8F0;
+}
+
+.lumen-chat-messages {
+  flex: 1;
+  overflow-y: auto;
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+/* System Welcome Bubble */
+.lumen-chat-system-bubble {
+  background: #1A1D24;
+  border: 1px solid #2A2E39;
+  border-radius: 8px;
+  padding: 16px;
+  margin-bottom: 8px;
+}
+
+.lumen-chat-system-bubble p {
+  color: #E2E8F0;
+  font-size: 0.875rem;
+  margin: 0 0 12px 0;
+  line-height: 1.5;
+}
+
+.lumen-chat-quick-replies {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.lumen-chat-chip {
+  background: #242834;
+  border: 1px solid #2A2E39;
+  color: #94A3B8;
+  padding: 6px 12px;
+  border-radius: 16px;
+  font-size: 0.75rem;
+  font-family: var(--font-label);
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.lumen-chat-chip:hover {
+  background: #2A2E39;
+  color: #E2E8F0;
+  border-color: #4B5563;
+}
+
+/* User Bubble */
+.lumen-chat-bubble-user {
+  align-self: flex-end;
+  background: #3B82F6;
+  color: #FFFFFF;
+  padding: 10px 14px;
+  border-radius: 12px;
+  border-bottom-right-radius: 4px;
+  max-width: 85%;
+  font-size: 0.875rem;
+  line-height: 1.5;
+}
+
+/* AI Bubble */
+.lumen-chat-bubble-ai {
+  align-self: flex-start;
+  background: #242834;
+  color: #F1F5F9;
+  padding: 10px 14px;
+  border-radius: 12px;
+  border-bottom-left-radius: 4px;
+  max-width: 85%;
+  font-size: 0.875rem;
+  line-height: 1.5;
+  border: 1px solid #2A2E39;
+}
+
+.lumen-chat-input-container {
+  padding: 20px;
+  background: #0D0F12;
+  border-top: 1px solid #2A2E39;
+  position: sticky;
+  bottom: 0;
+}
+
+.lumen-chat-input-pill {
+  display: flex;
+  background: #1A1D24;
+  border: 1px solid #2A2E39;
+  border-radius: 24px;
+  padding: 4px 4px 4px 16px;
+  align-items: center;
+}
+
+.lumen-chat-input-pill:focus-within {
+  border-color: var(--color-accent);
+  box-shadow: 0 0 0 1px var(--color-accent);
+}
+
+.lumen-chat-input-pill input {
+  flex: 1;
+  background: transparent;
+  border: none;
+  color: #E2E8F0;
+  font-size: 0.875rem;
+  outline: none;
+}
+.lumen-chat-input-pill input::placeholder {
+  color: #64748B;
+}
+
+.lumen-chat-send {
+  background: var(--color-accent);
+  color: #000;
+  border: none;
+  border-radius: 50%;
+  width: 32px;
+  height: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: opacity 0.2s;
+}
+
+.lumen-chat-send:hover:not(:disabled) {
+  opacity: 0.9;
+}
+
+.lumen-chat-send:disabled {
+  background: #2A2E39;
+  color: #64748B;
+  cursor: not-allowed;
+}
+
+/* --- Print Styles Global --- */
+@media print {
+  body {
+    background: #ffffff !important;
+    color: #000000 !important;
+  }
+  
+  .lumen-sidebar,
+  .lumen-chat-overlay,
+  .lumen-chat-drawer,
+  .lumen-header {
+    display: none !important;
+  }
+  
+  .lumen-results-layout, .lumen-workbench {
+    display: block !important;
+  }
+  
+  .lumen-main.document-main {
+    padding: 0 !important;
+    margin: 0 !important;
+    overflow: visible !important;
+    height: auto !important;
+  }
+  
+  .lumen-document {
+    box-shadow: none !important;
+    border: none !important;
+    max-width: 100% !important;
+    padding: 0 !important;
+    background: none !important;
+  }
+  
+  * {
+    color: #000 !important;
+    -webkit-print-color-adjust: exact !important;
+    print-color-adjust: exact !important;
+  }
+  
+  .document-section, .timeline-container > div {
+    page-break-inside: avoid;
+  }
+}

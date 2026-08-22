@@ -116,6 +116,10 @@ const ChatDrawer: React.FC<ChatDrawerProps> = ({ isOpen, onClose, roadmapContext
     }
   };
 
+  const handleQuickReply = (text: string) => {
+    setInput(text);
+  };
+
   return (
     <AnimatePresence>
       {isOpen && (
@@ -125,101 +129,72 @@ const ChatDrawer: React.FC<ChatDrawerProps> = ({ isOpen, onClose, roadmapContext
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
             onClick={onClose}
-            style={{
-              position: 'fixed',
-              top: 0, left: 0, right: 0, bottom: 0,
-              backgroundColor: 'hsl(var(--background) / 0.5)',
-              backdropFilter: 'blur(8px)',
-              zIndex: 100
-            }}
+            className="lumen-chat-overlay"
           />
-          <motion.div
+          <motion.aside
             initial={{ x: '100%' }}
             animate={{ x: 0 }}
             exit={{ x: '100%' }}
             transition={{ type: 'spring', damping: 25, stiffness: 200 }}
-            style={{
-              position: 'fixed',
-              top: 0, right: 0, bottom: 0,
-              width: '400px',
-              maxWidth: '100%',
-              backgroundColor: 'hsl(var(--card))',
-              borderLeft: '1px solid hsl(var(--border))',
-              zIndex: 101,
-              display: 'flex',
-              flexDirection: 'column',
-              boxShadow: '-10px 0 30px rgba(0,0,0,0.1)'
-            }}
+            className="lumen-chat-drawer"
+            aria-label="AI Career Mentor Chat"
           >
-            <div style={{ padding: '1.5rem', borderBottom: '1px solid hsl(var(--border))', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-              <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-                <MessageSquare size={20} color="hsl(var(--primary))" />
-                <h3 style={{ margin: 0, fontSize: '1.125rem' }}>Ask AI Mentor</h3>
+            <header className="lumen-chat-header">
+              <div>
+                <h3 className="lumen-chat-title">AI Career Mentor</h3>
+                <p className="lumen-chat-subtitle">Ask anything about your roadmap</p>
               </div>
-              <button onClick={onClose} className="btn btn-ghost" style={{ padding: '0.5rem' }}>
+              <button onClick={onClose} className="lumen-chat-close" aria-label="Close chat">
                 <X size={20} />
               </button>
-            </div>
+            </header>
 
-            <div style={{ flex: 1, overflowY: 'auto', padding: '1.5rem', display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+            <div className="lumen-chat-messages">
               {messages.length === 0 && (
-                <div style={{ textAlign: 'center', color: 'hsl(var(--muted-foreground))', marginTop: '2rem' }}>
-                  <MessageSquare size={48} style={{ opacity: 0.2, margin: '0 auto 1rem' }} />
-                  <p>hi {userName}, {getGreeting()}. ask me anything about your career path or roadmap.</p>
-                </div>
-              )}
-              {messages.map((msg, idx) => (
-                <div key={idx} style={{ alignSelf: msg.role === 'user' ? 'flex-end' : 'flex-start', maxWidth: '85%' }}>
-                  <div style={{
-                    padding: '0.75rem 1rem',
-                    borderRadius: '12px',
-                    backgroundColor: msg.role === 'user' ? 'hsl(var(--primary))' : 'hsl(var(--secondary))',
-                    color: msg.role === 'user' ? 'hsl(var(--primary-foreground))' : 'hsl(var(--secondary-foreground))',
-                    fontSize: '0.9375rem',
-                    lineHeight: '1.5',
-                    borderBottomRightRadius: msg.role === 'user' ? '4px' : '12px',
-                    borderBottomLeftRadius: msg.role === 'ai' ? '4px' : '12px',
-                  }}>
-                    {msg.content}
+                <div className="lumen-chat-system-bubble">
+                  <p>Hi {userName}, {getGreeting()}. I'm your AI career mentor. How can I help you execute this roadmap today?</p>
+                  <div className="lumen-chat-quick-replies">
+                    <button className="lumen-chat-chip" onClick={() => handleQuickReply('Review my roadmap')}>Review my roadmap</button>
+                    <button className="lumen-chat-chip" onClick={() => handleQuickReply('Suggest next skill')}>Suggest next skill</button>
+                    <button className="lumen-chat-chip" onClick={() => handleQuickReply('Salary insights')}>Salary insights</button>
                   </div>
                 </div>
+              )}
+              
+              {messages.map((msg, idx) => (
+                <div key={idx} className={msg.role === 'user' ? 'lumen-chat-bubble-user' : 'lumen-chat-bubble-ai'}>
+                  {msg.content}
+                </div>
               ))}
+              
               {loading && (
-                <div style={{ alignSelf: 'flex-start', padding: '0.75rem 1rem', borderRadius: '12px', backgroundColor: 'transparent', color: 'var(--color-rule-2)', fontFamily: 'var(--font-label)', fontSize: '11px', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                <div style={{ alignSelf: 'flex-start', padding: '10px 14px', borderRadius: '12px', backgroundColor: 'transparent', color: '#94A3B8', fontFamily: 'var(--font-mono)', fontSize: '11px', display: 'flex', alignItems: 'center', gap: '8px' }}>
                   <Loader2 size={12} className="spin" /> {thinkingMessage}
                 </div>
               )}
             </div>
 
-            <div style={{ padding: '1rem', borderTop: '1px solid hsl(var(--border))' }}>
-              <div style={{ display: 'flex', gap: '0.5rem' }}>
+            <div className="lumen-chat-input-container">
+              <label className="lumen-chat-input-pill">
                 <input
                   type="text"
                   value={input}
                   onChange={e => setInput(e.target.value)}
                   onKeyDown={e => e.key === 'Enter' && handleSend()}
                   placeholder="Ask a question..."
-                  style={{
-                    flex: 1,
-                    padding: '0.75rem 1rem',
-                    borderRadius: 'var(--radius)',
-                    border: '1px solid hsl(var(--border))',
-                    backgroundColor: 'transparent',
-                    color: 'inherit',
-                    outline: 'none'
-                  }}
+                  aria-label="Ask a question"
                 />
                 <button 
                   onClick={handleSend} 
                   disabled={loading || !input.trim()}
-                  className="btn btn-primary"
-                  style={{ padding: '0 1rem' }}
+                  className="lumen-chat-send"
+                  aria-label="Send message"
                 >
-                  <Send size={18} />
+                  <Send size={14} />
                 </button>
-              </div>
+              </label>
             </div>
-          </motion.div>
+          </motion.aside>
         </>
       )}
     </AnimatePresence>

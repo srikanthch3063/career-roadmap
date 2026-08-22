@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { supabase } from '../supabase';
 import { motion, AnimatePresence } from 'framer-motion';
-import { ArrowLeft, Loader2, Calendar, Map, ChevronRight, Terminal } from 'lucide-react';
+import { ArrowLeft, Loader2, Calendar, Map, ChevronRight, Terminal, Download } from 'lucide-react';
 
 const WeeklyPlan = () => {
   const location = useLocation();
@@ -47,6 +47,10 @@ const WeeklyPlan = () => {
     }
   };
 
+  const handleExportPDF = () => {
+    window.print();
+  };
+
   if (loading) {
     return (
       <div className="lumen-workbench" style={{ display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
@@ -74,6 +78,9 @@ const WeeklyPlan = () => {
         </nav>
 
         <div className="lumen-sidebar__footer">
+          <button className="nav-item" onClick={handleExportPDF}>
+            <Download size={16} /> <span>export pdf</span>
+          </button>
           <button className="nav-item text-muted" onClick={() => navigate(-1)}>
             <ArrowLeft size={16} /> <span>back to document</span>
           </button>
