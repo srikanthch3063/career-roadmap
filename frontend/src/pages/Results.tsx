@@ -171,45 +171,39 @@ const Results = () => {
     if (!contentRef.current) return;
     toast.loading('exporting document...', { id: 'pdf', style: { borderRadius: 0, background: 'var(--color-paper-2)', color: 'var(--color-paper-contrast)', border: '1px solid var(--color-rule)' } });
     
-    let printContainer: HTMLDivElement | null = null;
+    const originalElement = contentRef.current;
+    
+    // Save original styles
+    const originalStyle = {
+      width: originalElement.style.width,
+      margin: originalElement.style.margin,
+      overflow: originalElement.style.overflow,
+      maxHeight: originalElement.style.maxHeight,
+      maxWidth: originalElement.style.maxWidth
+    };
     
     try {
-      const originalElement = contentRef.current;
+      // Temporarily modify original element for perfect capture
+      originalElement.style.width = '794px'; // A4 width
+      originalElement.style.maxWidth = 'none';
+      originalElement.style.margin = '0';
+      originalElement.style.overflow = 'visible';
+      originalElement.style.maxHeight = 'none';
       
-      // Create a temporary hidden container with fixed A4-proportioned width
-      printContainer = document.createElement('div');
-      printContainer.style.position = 'absolute';
-      printContainer.style.top = '-9999px';
-      printContainer.style.left = '0';
-      printContainer.style.width = '794px'; // 96dpi A4 width
-      printContainer.style.background = '#0a0a0a';
-      printContainer.style.color = '#ffffff';
-      printContainer.style.zIndex = '-1';
-      
-      // Clone the document so we don't mess up the live UI
-      const clonedElement = originalElement.cloneNode(true) as HTMLElement;
-      
-      // Remove any scrollbars on the clone
-      clonedElement.style.overflow = 'visible';
-      clonedElement.style.height = 'auto';
-      clonedElement.style.maxHeight = 'none';
-      
-      printContainer.appendChild(clonedElement);
-      document.body.appendChild(printContainer);
+      // Wait for layout recalculation
+      await new Promise(resolve => setTimeout(resolve, 50));
 
-      const canvas = await html2canvas(clonedElement, { 
+      const canvas = await html2canvas(originalElement, { 
         scale: 2, 
         backgroundColor: '#0a0a0a',
         useCORS: true,
         logging: false,
-        width: 794,
-        windowWidth: 794
+        windowWidth: 794,
+        scrollY: 0
       });
       
-      // Clean up the DOM immediately
-      if (printContainer.parentNode) {
-        printContainer.parentNode.removeChild(printContainer);
-      }
+      // Immediately restore styles
+      Object.assign(originalElement.style, originalStyle);
       
       const imgData = canvas.toDataURL('image/jpeg', 0.95);
       const pdf = new jsPDF('p', 'mm', 'a4');
@@ -232,13 +226,11 @@ const Results = () => {
       
       pdf.save('career_roadmap.pdf');
       toast.success('export complete.', { id: 'pdf' });
-    } catch (e) {
+    } catch (e: any) {
       console.error('PDF Export Error:', e);
-      toast.error('export failed.', { id: 'pdf' });
-      // Ensure cleanup on error
-      if (printContainer && printContainer.parentNode) {
-        printContainer.parentNode.removeChild(printContainer);
-      }
+      // Immediately restore styles on error
+      Object.assign(originalElement.style, originalStyle);
+      toast.error(`export failed: ${e.message || String(e)}`, { id: 'pdf' });
     }
   };
 
