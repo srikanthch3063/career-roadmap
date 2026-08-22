@@ -302,6 +302,7 @@ const Results = () => {
         </nav>
 
         <div className="lumen-sidebar__footer">
+          <ThemeToggle />
           <button className="nav-item" onClick={handleShare}>
             <Share2 size={16} /> <span>share link</span>
           </button>

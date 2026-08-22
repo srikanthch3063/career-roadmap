@@ -9,9 +9,8 @@ const AuthPage = () => {
   const [password, setPassword] = useState('');
   const [name, setName] = useState('');
   
-  // OTP State
-  const [requiresOtp, setRequiresOtp] = useState(false);
-  const [otp, setOtp] = useState('');
+  // Magic Link State
+  const [linkSent, setLinkSent] = useState(false);
 
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -56,42 +55,13 @@ const AuthPage = () => {
         if (data.session) {
           navigate('/dashboard');
         } else {
-          // Switch to OTP mode
-          setRequiresOtp(true);
-          setMessage('a 6-digit code has been sent to your email.');
+          // Switch to magic link success mode
+          setLinkSent(true);
+          setMessage('a verification link has been sent to your email.');
         }
       }
     } catch (err: any) {
       setError(err.message || 'an error occurred');
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const handleVerifyOtp = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setLoading(true);
-    setError(null);
-    setMessage(null);
-
-    try {
-      const { data, error } = await supabase.auth.verifyOtp({
-        email,
-        token: otp,
-        type: 'signup'
-      });
-      if (error) throw error;
-      
-      if (data.session) {
-        navigate('/dashboard');
-      } else {
-        // Fallback if session isn't immediately available but OTP is correct
-        setMessage('verified successfully. please log in.');
-        setRequiresOtp(false);
-        setIsLogin(true);
-      }
-    } catch (err: any) {
-      setError(err.message || 'verification failed');
     } finally {
       setLoading(false);
     }
@@ -142,11 +112,11 @@ const AuthPage = () => {
       <div className="auth-form-side">
         <div className="auth-form__inner">
           <div className="auth-header">
-            <h1>{requiresOtp ? 'verification' : (isLogin ? 'authenticate' : 'initialize account')}</h1>
-            <p>{requiresOtp ? 'enter the 6-digit code.' : (isLogin ? 'enter credentials.' : 'create your identity.')}</p>
+            <h1>{linkSent ? 'verification' : (isLogin ? 'authenticate' : 'initialize account')}</h1>
+            <p>{linkSent ? 'check your inbox for the link.' : (isLogin ? 'enter credentials.' : 'create your identity.')}</p>
           </div>
 
-          {!requiresOtp && (
+          {!linkSent && (
             <>
               <button 
                 className="btn btn--outline btn-social" 
@@ -166,7 +136,7 @@ const AuthPage = () => {
           {error && <div className="alert alert--error">{error}</div>}
           {message && <div className="alert alert--success">{message}</div>}
 
-          {!requiresOtp ? (
+          {!linkSent ? (
             <form onSubmit={handleAuth} className="auth-form">
               {!isLogin && (
                 <div className="form-group">
@@ -213,27 +183,14 @@ const AuthPage = () => {
               </button>
             </form>
           ) : (
-            <form onSubmit={handleVerifyOtp} className="auth-form">
-              <div className="form-group">
-                <label className="eyebrow">one-time password</label>
-                <input 
-                  className="input"
-                  type="text" 
-                  value={otp}
-                  onChange={(e) => setOtp(e.target.value)}
-                  required
-                  placeholder="123456"
-                  maxLength={6}
-                  style={{ letterSpacing: '0.5em', textAlign: 'center', fontSize: '1.25rem' }}
-                />
-              </div>
-              <button type="submit" className="btn btn--primary auth-submit" disabled={loading}>
-                {loading ? 'verifying...' : 'verify'}
+            <div className="auth-form" style={{ textAlign: 'center', marginTop: '2rem' }}>
+              <button type="button" className="btn btn--outline" onClick={() => { setLinkSent(false); setIsLogin(true); setMessage(null); }}>
+                return to login
               </button>
-            </form>
+            </div>
           )}
 
-          {!requiresOtp && (
+          {!linkSent && (
             <div className="auth-toggle">
               <span>
                 {isLogin ? "don't have an account? " : "already have an account? "}

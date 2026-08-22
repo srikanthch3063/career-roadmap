@@ -4,6 +4,7 @@ import { supabase } from '../supabase';
 import { Map, LogOut, FileText, ChevronRight, Compass, Trash2, Plus, Terminal, Settings, Hexagon } from 'lucide-react';
 import { motion } from 'framer-motion';
 import toast from 'react-hot-toast';
+import ThemeToggle from '../components/ThemeToggle';
 import './Dashboard.css';
 
 const Dashboard = () => {
@@ -141,6 +142,7 @@ const Dashboard = () => {
         </nav>
 
         <div className="lumen-sidebar__footer">
+          <ThemeToggle />
           <button className="nav-item destructive" onClick={handleLogout}>
             <LogOut size={16} /> <span>disconnect</span>
           </button>
