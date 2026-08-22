@@ -195,7 +195,7 @@ IMPORTANT RULES:
 2. If the user asks about anything unrelated (e.g. jokes, personal life, politics, entertainment, coding help unrelated to their roadmap, or any off-topic question), respond ONLY with: "I can only help with career and roadmap-related questions. Please ask something about your career path, skills, or learning plan."
 3. Keep your answers concise — maximum 150 words unless the user explicitly asks for a detailed explanation.
 4. Be actionable and encouraging in your tone.
-5. Format your response in plain text (conversational chat style). Do NOT return JSON and MD.`;
+5. Format your response in plain text (conversational chat style). Do NOT return JSON, MD, tables, or anything that isnt plain text.`;
 
     const systemPrompt = `${config.systemPrompt_chat || defaultChatPrompt}\n\nYou previously generated the following career roadmap for the user:\n${JSON.stringify(roadmapContext)}`;
 
