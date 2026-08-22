@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { supabase } from '../supabase';
-import { Map, LogOut, FileText, ChevronRight, Compass, Trash2, Plus, Terminal, Settings, Hexagon } from 'lucide-react';
+import { Map, LogOut, FileText, ChevronRight, Compass, Trash2, Plus, Terminal, Settings, Hexagon, Menu } from 'lucide-react';
 import { motion } from 'framer-motion';
 import toast from 'react-hot-toast';
 import ThemeToggle from '../components/ThemeToggle';
@@ -14,6 +14,7 @@ const Dashboard = () => {
   const [history, setHistory] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [stats, setStats] = useState({ totalChecked: 0, level: 'init', totalRoadmaps: 0 });
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
   useEffect(() => {
     fetchUserData();
@@ -116,26 +117,30 @@ const Dashboard = () => {
   };
 
   if (loading) {
-    return <div className="loading-state"><Terminal className="spin" size={24} /> booting environment...</div>;
+    return <div className="loading-state"><div className="lumen-loader" /> initializing nexus...</div>;
   }
 
   return (
     <div className="lumen-workbench">
-      <aside className="lumen-sidebar">
+      <button className="mobile-menu-toggle" onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}>
+        <Menu size={24} />
+      </button>
+
+      <aside className={`lumen-sidebar ${isMobileMenuOpen ? 'mobile-open' : ''}`}>
         <div className="lumen-sidebar__brand" onClick={() => navigate('/')}>
           <Map size={18} />
           <span className="wordmark">pathforge</span>
         </div>
         
         <nav className="lumen-sidebar__nav">
-          <button className="nav-item active">
+          <button className="nav-item active" onClick={() => setIsMobileMenuOpen(false)}>
             <Compass size={16} /> <span>console</span>
           </button>
-          <button className="nav-item" onClick={() => navigate('/quiz')}>
+          <button className="nav-item" onClick={() => { setIsMobileMenuOpen(false); navigate('/quiz'); }}>
             <Plus size={16} /> <span>generate</span>
           </button>
           {profile?.role === 'admin' && (
-            <button className="nav-item" onClick={() => navigate('/admin')}>
+            <button className="nav-item" onClick={() => { setIsMobileMenuOpen(false); navigate('/admin'); }}>
               <Settings size={16} /> <span>system admin</span>
             </button>
           )}

@@ -6,7 +6,7 @@ import toast from 'react-hot-toast';
 import { 
   Map, Printer, CheckCircle2, Circle, 
   Search, Code2, Briefcase, GraduationCap,
-  Loader2, X, ExternalLink, Lightbulb, Share2, MessageSquare, Calendar, ChevronRight, Download, Hexagon
+  Loader2, X, ExternalLink, Lightbulb, Share2, MessageSquare, Calendar, ChevronRight, Download, Hexagon, Menu
 } from 'lucide-react';
 import html2canvas from 'html2canvas';
 import { jsPDF } from 'jspdf';
@@ -25,6 +25,7 @@ const Results = () => {
   const [checkedItems, setCheckedItems] = useState<Record<string, boolean>>({});
   const [selectedResource, setSelectedResource] = useState<string | null>(null);
   const [isChatOpen, setIsChatOpen] = useState(false);
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const contentRef = useRef<HTMLDivElement>(null);
 
   const loadingMessages = [
@@ -245,16 +246,11 @@ const Results = () => {
 
   if (loading) {
     return (
-      <div className="lumen-generation">
-        <div className="generation-apparatus">
-          <div className="generation-core"></div>
-          <div className="generation-ring ring-1"></div>
-          <div className="generation-ring ring-2"></div>
-        </div>
-        <div className="generation-status">
-          <span className="eyebrow blink">SYSTEM_BUSY</span>
-          <h2>{loadingMessages[loadingPhase]}</h2>
-          <p className="text-muted">this process requires intensive computation. please wait.</p>
+      <div className="lumen-workbench" style={{ display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+        <div className="loading-state">
+          <div className="lumen-loader" style={{ marginBottom: '1rem' }} />
+          <h2 style={{ fontFamily: 'var(--font-serif)', fontSize: '2rem', margin: 0 }}>{loadingMessages[loadingPhase]}</h2>
+          <p className="text-muted" style={{ fontFamily: 'var(--font-mono)', fontSize: '0.875rem' }}>this process requires intensive computation. please wait.</p>
         </div>
       </div>
     );
@@ -284,19 +280,24 @@ const Results = () => {
 
   return (
     <div className="lumen-workbench">
+      {/* Mobile Sidebar Overlay/Toggle */}
+      <button className="mobile-menu-toggle" onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}>
+        <Menu size={24} />
+      </button>
+
       {/* Sidebar Navigation */}
-      <aside className="lumen-sidebar">
+      <aside className={`lumen-sidebar ${isMobileMenuOpen ? 'mobile-open' : ''}`}>
         <div className="lumen-sidebar__brand" onClick={() => navigate('/dashboard')}>
           <Map size={18} />
           <span className="wordmark">pathforge</span>
         </div>
         
         <nav className="lumen-sidebar__nav">
-          <button className="nav-item" onClick={() => navigate('/weekly-plan', { state: { roadmap } })}>
+          <button className="nav-item" onClick={() => { setIsMobileMenuOpen(false); navigate('/weekly-plan', { state: { roadmap } }); }}>
             <Calendar size={16} /> <span>12-week schedule</span>
           </button>
           
-          <button className="nav-item" onClick={() => setIsChatOpen(true)}>
+          <button className="nav-item" onClick={() => { setIsMobileMenuOpen(false); setIsChatOpen(true); }}>
             <MessageSquare size={16} /> <span>ai mentor</span>
           </button>
         </nav>

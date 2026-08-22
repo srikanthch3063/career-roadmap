@@ -411,3 +411,107 @@ button {
     page-break-inside: avoid;
   }
 }
+
+/* --- Light Mode Overrides --- */
+[data-theme='light'] {
+  --color-paper: #ffffff;
+  --color-paper-2: #f2f2f7;
+  --color-ink: #1a1a24;
+  --color-ink-2: #3e3f4a;
+  --color-accent: #d35400;
+  --color-accent-2: #c0392b;
+  --color-glow: rgba(211, 84, 0, 0.2);
+  --color-paper-emit: rgba(0, 0, 0, 0.04);
+  --color-rule: #bcbcc1;
+  --color-rule-2: #8e8e93;
+  --rule-blueprint: rgba(0, 0, 0, 0.04);
+}
+
+/* --- Minimalist Geometric Loader --- */
+.lumen-loader {
+  width: 16px;
+  height: 16px;
+  border: 1px solid var(--color-rule-2);
+  border-radius: 2px;
+  animation: lumen-pulse 1.5s infinite ease-in-out;
+  display: inline-block;
+  background: var(--color-paper-emit);
+}
+
+@keyframes lumen-pulse {
+  0% { transform: scale(0.8) rotate(0deg); border-color: var(--color-rule-2); background: transparent; }
+  50% { transform: scale(1.1) rotate(90deg); border-color: var(--color-accent); background: var(--color-glow); }
+  100% { transform: scale(0.8) rotate(180deg); border-color: var(--color-rule-2); background: transparent; }
+}
+
+/* --- Mobile Responsiveness --- */
+@media (max-width: 768px) {
+  /* Sidebars act as off-canvas menus on mobile */
+  .lumen-sidebar {
+    position: fixed;
+    top: 0;
+    left: -100%;
+    height: 100vh;
+    z-index: 9999;
+    transition: left 0.3s ease;
+    box-shadow: 10px 0 30px rgba(0,0,0,0.5);
+  }
+
+  .lumen-sidebar.mobile-open {
+    left: 0;
+  }
+
+  /* Prevent split layout from shrinking content */
+  .lumen-results-layout, .lumen-workbench {
+    display: flex;
+    flex-direction: column;
+    height: 100vh;
+    overflow: hidden;
+  }
+  
+  /* Reset document constraints */
+  .lumen-document {
+    min-width: 0 !important;
+    width: 100% !important;
+    padding: 1rem !important;
+  }
+
+  .lumen-main {
+    padding: 1rem !important;
+  }
+
+  .document-main {
+    padding-top: 4rem !important; /* space for floating hamburger */
+  }
+
+  .document-section {
+    padding: 1.5rem !important;
+  }
+  
+  .quiz-layout {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* Floating Hamburger for Mobile */
+.mobile-menu-toggle {
+  display: none;
+  position: fixed;
+  top: 1rem;
+  left: 1rem;
+  z-index: 9998;
+  background: var(--color-paper-2);
+  border: 1px solid var(--color-rule);
+  color: var(--color-ink);
+  padding: 0.5rem;
+  border-radius: 4px;
+  cursor: pointer;
+}
+
+@media (max-width: 768px) {
+  .mobile-menu-toggle {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+}

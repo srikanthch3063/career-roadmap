@@ -180,7 +180,7 @@ const ChatDrawer: React.FC<ChatDrawerProps> = ({ isOpen, onClose, roadmapContext
               
               {loading && (
                 <div style={{ alignSelf: 'flex-start', padding: '10px 14px', borderRadius: '12px', backgroundColor: 'transparent', color: '#94A3B8', fontFamily: 'var(--font-mono)', fontSize: '11px', display: 'flex', alignItems: 'center', gap: '8px' }}>
-                  <Loader2 size={12} className="spin" /> {thinkingMessage}
+                  <div className="lumen-loader" style={{ width: '12px', height: '12px', borderWidth: '1px' }} /> {thinkingMessage}
                 </div>
               )}
               

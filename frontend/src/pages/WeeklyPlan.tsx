@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { supabase } from '../supabase';
 import { motion, AnimatePresence } from 'framer-motion';
-import { ArrowLeft, Loader2, Calendar, Map, ChevronRight, Terminal, Download } from 'lucide-react';
+import { ArrowLeft, Loader2, Calendar, Map, ChevronRight, Terminal, Download, Menu } from 'lucide-react';
 import toast from 'react-hot-toast';
 import html2canvas from 'html2canvas';
 import { jsPDF } from 'jspdf';
@@ -14,6 +14,7 @@ const WeeklyPlan = () => {
   const [plan, setPlan] = useState<any>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const contentRef = React.useRef<HTMLDivElement>(null);
 
   const roadmap = location.state?.roadmap;
@@ -123,7 +124,7 @@ const WeeklyPlan = () => {
     return (
       <div className="lumen-workbench" style={{ display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
         <div className="loading-state">
-          <Terminal className="spin" size={24} style={{ marginBottom: '1rem' }} />
+          <div className="lumen-loader" style={{ marginBottom: '1rem' }} />
           <h2 style={{ fontFamily: 'var(--font-serif)', fontSize: '2rem', margin: 0 }}>structuring timeline.</h2>
           <p className="text-muted" style={{ fontFamily: 'var(--font-mono)', fontSize: '0.875rem' }}>compiling 12-week schedule...</p>
         </div>
@@ -133,14 +134,18 @@ const WeeklyPlan = () => {
 
   return (
     <div className="lumen-workbench">
-      <aside className="lumen-sidebar">
+      <button className="mobile-menu-toggle" onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}>
+        <Menu size={24} />
+      </button>
+
+      <aside className={`lumen-sidebar ${isMobileMenuOpen ? 'mobile-open' : ''}`}>
         <div className="lumen-sidebar__brand" onClick={() => navigate('/dashboard')}>
           <Map size={18} />
           <span className="wordmark">pathforge</span>
         </div>
         
         <nav className="lumen-sidebar__nav">
-          <button className="nav-item active">
+          <button className="nav-item active" onClick={() => setIsMobileMenuOpen(false)}>
             <Calendar size={16} /> <span>12-week schedule</span>
           </button>
         </nav>
