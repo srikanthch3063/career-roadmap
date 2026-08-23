@@ -74,7 +74,7 @@ const LegalModal: React.FC<LegalModalProps> = ({ isOpen, onClose, type }) => {
   const { title, body } = content[type];
 
   return (
-    <div className="mobile-backdrop" style={{ display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+    <div style={{ position: 'fixed', inset: 0, zIndex: 10000, backgroundColor: 'rgba(0,0,0,0.7)', backdropFilter: 'blur(5px)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
       <div className="lumen-document" style={{ width: '100%', maxWidth: '600px', maxHeight: '80vh', overflowY: 'auto', position: 'relative', margin: '1rem', background: 'var(--color-paper-2)' }}>
         <button 
           onClick={onClose}

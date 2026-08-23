@@ -52,7 +52,7 @@ const HelpModal: React.FC<HelpModalProps> = ({ isOpen, onClose, userEmail = '', 
   };
 
   return (
-    <div className="mobile-backdrop" style={{ display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+    <div style={{ position: 'fixed', inset: 0, zIndex: 10000, backgroundColor: 'rgba(0,0,0,0.7)', backdropFilter: 'blur(5px)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
       <div className="lumen-document" style={{ width: '100%', maxWidth: '500px', position: 'relative', margin: '1rem', background: 'var(--color-paper-2)' }}>
         <button 
           onClick={onClose}

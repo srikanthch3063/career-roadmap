@@ -222,4 +222,22 @@ router.get('/tickets', requireAuth, requireAdmin, async (req: any, res: any) => 
   }
 });
 
+router.patch('/tickets/:id', requireAuth, requireAdmin, async (req: any, res: any) => {
+  try {
+    const { id } = req.params;
+    const { status } = req.body;
+    
+    const { error } = await supabase
+      .from('support_tickets')
+      .update({ status })
+      .eq('id', id);
+      
+    if (error) throw error;
+    res.json({ success: true });
+  } catch (error) {
+    console.error('Error updating ticket:', error);
+    res.status(500).json({ error: 'Failed to update ticket status' });
+  }
+});
+
 export default router;

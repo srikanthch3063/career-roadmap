@@ -163,6 +163,29 @@ const AdminDashboard = () => {
     }
   };
 
+  const updateTicketStatus = async (ticketId: string, newStatus: string) => {
+    try {
+      const { data: { session } } = await supabase.auth.getSession();
+      if (!session) return;
+      const apiUrl = import.meta.env.VITE_API_BASE_URL || (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1' ? 'http://localhost:3000/api' : '/api');
+      
+      const res = await fetch(`${apiUrl}/admin/tickets/${ticketId}`, {
+        method: 'PATCH',
+        headers: {
+          'Authorization': `Bearer ${session.access_token}`,
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ status: newStatus })
+      });
+      if (!res.ok) throw new Error('Failed to update ticket status');
+      
+      setTickets(prev => prev.map(t => t.id === ticketId ? { ...t, status: newStatus } : t));
+      toast.success('Ticket status updated');
+    } catch (err) {
+      toast.error('Failed to update status');
+    }
+  };
+
   const downloadCSV = () => {
     if (students.length === 0) return toast.error('No students to export');
     
@@ -508,7 +531,17 @@ const AdminDashboard = () => {
                           </div>
                         </td>
                         <td style={{ fontFamily: 'var(--font-mono)' }}>{ticket.topic}</td>
-                        <td style={{ fontFamily: 'var(--font-mono)' }}>{ticket.status}</td>
+                        <td style={{ fontFamily: 'var(--font-mono)' }} onClick={(e) => e.stopPropagation()}>
+                          <select 
+                            value={ticket.status} 
+                            onChange={(e) => updateTicketStatus(ticket.id, e.target.value)}
+                            style={{ background: 'transparent', color: 'var(--color-ink)', border: '1px solid var(--color-rule)', padding: '0.25rem', fontFamily: 'var(--font-mono)' }}
+                          >
+                            <option value="open">open</option>
+                            <option value="in_progress">in_progress</option>
+                            <option value="resolved">resolved</option>
+                          </select>
+                        </td>
                         <td style={{ fontFamily: 'var(--font-mono)', color: 'var(--color-rule)' }}>
                           {new Date(ticket.created_at).toLocaleDateString()}
                         </td>
