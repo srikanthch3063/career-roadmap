@@ -1,12 +1,15 @@
 import React, { useState } from 'react';
 import { supabase } from '../supabase';
 import { useNavigate } from 'react-router-dom';
+import { Eye, EyeOff } from 'lucide-react';
 import './Auth.css';
 
 const AuthPage = () => {
   const [isLogin, setIsLogin] = useState(true);
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [confirmPassword, setConfirmPassword] = useState('');
+  const [showPassword, setShowPassword] = useState(false);
   const [name, setName] = useState('');
   const [otp, setOtp] = useState('');
   
@@ -39,6 +42,9 @@ const AuthPage = () => {
         if (error) throw error;
         navigate('/dashboard');
       } else {
+        if (password !== confirmPassword) {
+          throw new Error('passwords do not match.');
+        }
         const passRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/;
         if (!passRegex.test(password)) {
           throw new Error('password must be at least 8 chars, include uppercase, lowercase, number, and special character.');
@@ -181,37 +187,72 @@ const AuthPage = () => {
                     onChange={(e) => setName(e.target.value)}
                     required={!isLogin}
                     placeholder="name"
+                    autoComplete="name"
                   />
                 </div>
               )}
               
               <div className="form-group">
                 <label className="eyebrow">email address</label>
-                <input 
-                  className="input"
-                  type="email" 
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                  required
-                  placeholder="email"
-                  autoCapitalize="none"
-                  autoCorrect="off"
-                />
+                  <input 
+                    className="input"
+                    type="email" 
+                    value={email}
+                    onChange={(e) => setEmail(e.target.value)}
+                    required
+                    placeholder="email"
+                    autoCapitalize="none"
+                    autoCorrect="off"
+                    autoComplete="username"
+                  />
               </div>
               
               <div className="form-group">
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                   <label className="eyebrow">password</label>
                 </div>
-                <input 
-                  className="input"
-                  type="password" 
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
-                  required
-                  placeholder="••••••••"
-                />
+                <div style={{ position: 'relative' }}>
+                  <input 
+                    className="input"
+                    type={showPassword ? "text" : "password"} 
+                    value={password}
+                    onChange={(e) => setPassword(e.target.value)}
+                    required
+                    placeholder="••••••••"
+                    autoComplete={isLogin ? "current-password" : "new-password"}
+                    style={{ paddingRight: '2.5rem' }}
+                  />
+                  <button 
+                    type="button"
+                    className="password-toggle-btn"
+                    onClick={() => setShowPassword(!showPassword)}
+                    tabIndex={-1}
+                    aria-label={showPassword ? "Hide password" : "Show password"}
+                  >
+                    {showPassword ? <EyeOff size={16} /> : <Eye size={16} />}
+                  </button>
+                </div>
               </div>
+
+              {!isLogin && (
+                <div className="form-group">
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                    <label className="eyebrow">confirm password</label>
+                  </div>
+                  <div style={{ position: 'relative' }}>
+                    <input 
+                      className="input"
+                      type={showPassword ? "text" : "password"} 
+                      value={confirmPassword}
+                      onChange={(e) => setConfirmPassword(e.target.value)}
+                      required
+                      placeholder="••••••••"
+                      autoComplete="new-password"
+                      style={{ paddingRight: '2.5rem' }}
+                    />
+                  </div>
+                </div>
+              )}
 
               <button type="submit" className="btn btn--primary auth-submit" disabled={loading}>
                 {loading ? 'processing...' : (isLogin ? 'authorize' : 'register')}

@@ -137,6 +137,27 @@
   border-color: var(--color-accent);
 }
 
+.password-toggle-btn {
+  position: absolute;
+  right: 0.5rem;
+  top: 50%;
+  transform: translateY(-50%);
+  background: transparent;
+  border: none;
+  color: var(--color-ink-2);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  cursor: pointer;
+  transition: color 0.2s;
+  padding: 0;
+}
+.password-toggle-btn:hover {
+  color: var(--color-accent);
+}
+
 .auth-submit {
   width: 100%;
   margin-top: 1rem;
