@@ -444,12 +444,37 @@ button {
   100% { transform: scale(0.8) rotate(180deg); border-color: var(--color-rule-2); background: transparent; }
 }
 
+/* --- Global Ergonomics & Accessibility --- */
+button, a, input, select, textarea {
+  touch-action: manipulation;
+}
+
+:focus-visible {
+  outline: 2px solid var(--color-accent);
+  outline-offset: 2px;
+}
+
+img, video, iframe {
+  max-width: 100%;
+  height: auto;
+}
+
 /* --- Mobile Responsiveness --- */
 @media (max-width: 768px) {
   html, body {
     overflow-x: hidden !important;
+    overflow-wrap: break-word;
     width: 100%;
     position: relative;
+  }
+  
+  .input, input, textarea {
+    font-size: 16px !important; /* Prevent iOS zoom */
+  }
+  
+  .btn, .btn-icon, .mobile-menu-toggle {
+    min-height: 44px;
+    min-width: 44px;
   }
   
   :root {

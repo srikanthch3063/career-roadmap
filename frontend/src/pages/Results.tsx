@@ -281,7 +281,11 @@ const Results = () => {
   return (
     <div className="lumen-workbench">
       {/* Mobile Sidebar Overlay/Toggle */}
-      <button className="mobile-menu-toggle" onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}>
+      <button 
+        className="mobile-menu-toggle" 
+        onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
+        aria-label="Toggle Menu"
+      >
         <Menu size={24} />
       </button>
 
@@ -297,6 +301,7 @@ const Results = () => {
           className="mobile-close-btn"
           onClick={() => setIsMobileMenuOpen(false)}
           style={{display:'none'}}
+          aria-label="Close Menu"
         >
           ✕
         </button>

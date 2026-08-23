@@ -194,3 +194,22 @@
     min-height: 40vh;
   }
 }
+
+@media (max-width: 768px) {
+  .lumen-auth {
+    flex-direction: column;
+  }
+  .auth-visual {
+    display: none;
+  }
+  .auth-form-side {
+    padding: 1rem;
+    width: 100%;
+  }
+  .auth-form__inner {
+    max-width: 100%;
+  }
+  .btn, .btn-social {
+    width: 100%;
+  }
+}

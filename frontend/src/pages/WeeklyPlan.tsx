@@ -134,7 +134,11 @@ const WeeklyPlan = () => {
 
   return (
     <div className="lumen-workbench">
-      <button className="mobile-menu-toggle" onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}>
+      <button 
+        className="mobile-menu-toggle" 
+        onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
+        aria-label="Toggle Menu"
+      >
         <Menu size={24} />
       </button>
 
@@ -149,6 +153,7 @@ const WeeklyPlan = () => {
           className="mobile-close-btn"
           onClick={() => setIsMobileMenuOpen(false)}
           style={{display:'none'}}
+          aria-label="Close Menu"
         >
           ✕
         </button>

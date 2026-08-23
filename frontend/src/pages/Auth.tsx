@@ -161,6 +161,8 @@ const AuthPage = () => {
                   onChange={(e) => setEmail(e.target.value)}
                   required
                   placeholder="email"
+                  autoCapitalize="none"
+                  autoCorrect="off"
                 />
               </div>
               
