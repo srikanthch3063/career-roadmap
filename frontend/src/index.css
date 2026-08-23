@@ -439,18 +439,39 @@ button {
 }
 
 .round-loader {
-  width: 40px;
-  height: 40px;
-  border: 3px solid var(--rule-blueprint);
-  border-top: 3px solid var(--color-accent);
+  width: 48px;
+  height: 48px;
+  border: 2px solid var(--rule-blueprint);
+  border-top: 2px solid var(--color-accent);
   border-radius: 50%;
-  animation: spin 1s linear infinite;
+  animation: spin 1s linear infinite, loader-glow 2s ease-in-out infinite alternate;
   display: inline-block;
+  position: relative;
+}
+
+.round-loader::before {
+  content: "";
+  position: absolute;
+  inset: 4px;
+  border: 2px solid var(--rule-blueprint);
+  border-bottom: 2px solid var(--color-accent-2);
+  border-radius: 50%;
+  animation: spin-reverse 1.5s linear infinite;
 }
 
 @keyframes spin {
   0% { transform: rotate(0deg); }
   100% { transform: rotate(360deg); }
+}
+
+@keyframes spin-reverse {
+  0% { transform: rotate(360deg); }
+  100% { transform: rotate(0deg); }
+}
+
+@keyframes loader-glow {
+  0% { box-shadow: 0 0 5px var(--color-glow); }
+  100% { box-shadow: 0 0 15px var(--color-glow), inset 0 0 10px var(--color-glow); }
 }
 
 @keyframes lumen-pulse {
