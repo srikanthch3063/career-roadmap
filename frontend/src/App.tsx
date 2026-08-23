@@ -69,7 +69,7 @@ const App = () => {
           {/* Protected Admin Routes */}
           <Route path="/admin" element={session && role === 'admin' ? <AdminDashboard /> : <Navigate to="/auth" />} />
         </Routes>
-        <Toaster position="bottom-right" toastOptions={{ 
+        <Toaster position="bottom-right" containerStyle={{ zIndex: 99999 }} toastOptions={{ 
           style: { 
             background: 'hsl(var(--card))', 
             color: 'hsl(var(--card-foreground))', 

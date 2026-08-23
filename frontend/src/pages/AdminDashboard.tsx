@@ -535,7 +535,7 @@ const AdminDashboard = () => {
                           <select 
                             value={ticket.status} 
                             onChange={(e) => updateTicketStatus(ticket.id, e.target.value)}
-                            style={{ background: 'transparent', color: 'var(--color-ink)', border: '1px solid var(--color-rule)', padding: '0.25rem', fontFamily: 'var(--font-mono)' }}
+                            style={{ backgroundColor: 'var(--color-paper)', color: 'var(--color-ink)', border: '1px solid var(--color-rule)', padding: '0.25rem', fontFamily: 'var(--font-mono)' }}
                           >
                             <option value="open">open</option>
                             <option value="in_progress">in_progress</option>
