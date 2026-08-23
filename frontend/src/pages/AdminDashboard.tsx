@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { supabase } from '../supabase';
-import { Users, BookOpen, Target, LogOut, Shield, Key, Trash2, Eye, EyeOff, Terminal, Compass, Settings, Save, Search, Download, BarChart2, Filter, Hexagon } from 'lucide-react';
+import { Users, BookOpen, Target, LogOut, Shield, Key, Trash2, Eye, EyeOff, Terminal, Compass, Settings, Save, Search, Download, BarChart2, Filter, Hexagon, Menu, X } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import toast from 'react-hot-toast';
 import ThemeToggle from '../components/ThemeToggle';
@@ -47,6 +47,7 @@ const AdminDashboard = () => {
   const [error, setError] = useState<string | null>(null);
   const [activeTab, setActiveTab] = useState<'overview' | 'students' | 'config' | 'credentials' | 'tickets' | 'landing'>('overview');
   const [showKeys, setShowKeys] = useState<Record<string, boolean>>({});
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   
   // Detail View State
   const [selectedStudentId, setSelectedStudentId] = useState<string | null>(null);
@@ -235,7 +236,16 @@ const AdminDashboard = () => {
 
   return (
     <div className="lumen-workbench">
-      <aside className="lumen-sidebar">
+      <button className="mobile-menu-toggle" onClick={() => setIsMobileMenuOpen(true)}>
+        <Menu size={20} />
+      </button>
+      <aside className={`lumen-sidebar ${isMobileMenuOpen ? 'mobile-open' : ''}`}>
+        <button 
+          className="mobile-close-btn"
+          onClick={() => setIsMobileMenuOpen(false)}
+        >
+          <X size={20} />
+        </button>
         <div className="lumen-sidebar__brand" onClick={() => navigate('/dashboard')}>
           <Shield size={18} />
           <span className="wordmark">system admin</span>
