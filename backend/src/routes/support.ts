@@ -43,26 +43,37 @@ router.post('/', async (req, res) => {
     }
 
     // 2. Send email to admin
-    const mailOptions = {
-      from: `"${name}" <${process.env.EMAIL_USER}>`, // From our own email to prevent spoofing bounce
-      replyTo: email,
-      to: process.env.EMAIL_USER, // Send to ourselves
-      subject: `[Support Ticket] ${topic.toUpperCase()} - from ${name}`,
-      html: `
-        <div style="font-family: sans-serif; padding: 20px;">
-          <h2>New Support Ticket</h2>
-          <p><strong>Name:</strong> ${name}</p>
-          <p><strong>Email:</strong> ${email}</p>
-          <p><strong>Topic:</strong> ${topic}</p>
-          <hr/>
-          <h3>Message:</h3>
-          <p style="white-space: pre-wrap;">${problem}</p>
-        </div>
-      `
-    };
+    try {
+      const mailOptions = {
+        from: `"${name}" <${process.env.EMAIL_USER}>`, // From our own email to prevent spoofing bounce
+        replyTo: email,
+        to: process.env.EMAIL_USER, // Send to ourselves
+        subject: `[Support Ticket] ${topic.toUpperCase()} - from ${name}`,
+        html: `
+          <div style="font-family: sans-serif; padding: 20px;">
+            <h2>New Support Ticket</h2>
+            <p><strong>Name:</strong> ${name}</p>
+            <p><strong>Email:</strong> ${email}</p>
+            <p><strong>Topic:</strong> ${topic}</p>
+            <hr/>
+            <h3>Message:</h3>
+            <p style="white-space: pre-wrap;">${problem}</p>
+          </div>
+        `
+      };
 
-    await transporter.sendMail(mailOptions);
+      await transporter.sendMail(mailOptions);
+    } catch (emailError) {
+      console.error('Email failed to send, but ticket was saved:', emailError);
+      // We don't fail the request since the ticket was safely stored in the database
+    }
     
+    // If we reach here, we consider it a success because at least one storage mechanism worked (DB or Email, or both)
+    // Actually, if DB failed and Email failed, we should probably fail. But for now, returning success is safer for UX.
+    if (dbError) {
+      return res.status(500).json({ error: 'Failed to save ticket to database.' });
+    }
+
     res.json({ success: true, message: 'Ticket submitted' });
   } catch (error: any) {
     console.error('Support endpoint error:', error);
