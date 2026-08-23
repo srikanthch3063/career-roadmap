@@ -268,8 +268,8 @@ const Results = () => {
             </div>
             <span className="lumen-check-text">{item}</span>
             {prefix === 'tech' && !isChecked && (
-              <button className="btn-link" onClick={(e) => { e.stopPropagation(); setSelectedResource(item); }}>
-                query resources
+              <button className="btn-resource-action" onClick={(e) => { e.stopPropagation(); setSelectedResource(item); }}>
+                Resources &rarr;
               </button>
             )}
           </div>
@@ -277,6 +277,18 @@ const Results = () => {
       })}
     </div>
   );
+
+  const formatQuery = (tech: string, destination: 'youtube' | 'github' | 'google') => {
+    let cleanTech = tech.replace(/\(or newer\)/gi, 'modern');
+    cleanTech = cleanTech.replace(/[^\w\s\+#.-]/g, ' ').replace(/\s+/g, ' ').trim();
+    
+    switch (destination) {
+      case 'youtube': return `${cleanTech} tutorial`;
+      case 'github': return `${cleanTech} examples`;
+      case 'google': return `${cleanTech} tutorial documentation`;
+      default: return cleanTech;
+    }
+  };
 
   return (
     <div className="lumen-workbench">
@@ -432,15 +444,27 @@ const Results = () => {
               <h3 style={{ fontFamily: 'var(--font-mono)', fontSize: '1.25rem', marginBottom: '0.5rem' }}>resource query: <span className="text-accent">{selectedResource.toLowerCase()}</span></h3>
               <p className="text-muted mb-6">select a destination to query knowledge paths.</p>
               
-              <div className="resource-links" style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
-                <a href={`https://www.youtube.com/results?search_query=${encodeURIComponent(selectedResource + ' tutorial for beginners')}`} target="_blank" rel="noreferrer" className="btn btn--outline" style={{ justifyContent: 'space-between' }}>
-                  query youtube <ExternalLink size={16} />
+              <div className="resource-links" style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
+                <a href={`https://www.youtube.com/results?search_query=${encodeURIComponent(formatQuery(selectedResource, 'youtube'))}`} target="_blank" rel="noreferrer" className="btn btn--outline" style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', textAlign: 'left', padding: '0.75rem 1rem' }}>
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: '0.25rem' }}>
+                    <span style={{ fontWeight: 'bold' }}>Videos</span>
+                    <span className="text-muted" style={{ fontSize: '0.75rem', textTransform: 'none', letterSpacing: 'normal' }}>tutorials/videos</span>
+                  </div>
+                  <ExternalLink size={16} />
                 </a>
-                <a href={`https://www.freecodecamp.org/news/search/?query=${encodeURIComponent(selectedResource)}`} target="_blank" rel="noreferrer" className="btn btn--outline" style={{ justifyContent: 'space-between' }}>
-                  query freecodecamp <ExternalLink size={16} />
+                <a href={`https://github.com/search?q=${encodeURIComponent(formatQuery(selectedResource, 'github'))}&type=repositories`} target="_blank" rel="noreferrer" className="btn btn--outline" style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', textAlign: 'left', padding: '0.75rem 1rem' }}>
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: '0.25rem' }}>
+                    <span style={{ fontWeight: 'bold' }}>Projects</span>
+                    <span className="text-muted" style={{ fontSize: '0.75rem', textTransform: 'none', letterSpacing: 'normal' }}>real code/repositories</span>
+                  </div>
+                  <ExternalLink size={16} />
                 </a>
-                <a href={`https://roadmap.sh/search?q=${encodeURIComponent(selectedResource)}`} target="_blank" rel="noreferrer" className="btn btn--outline" style={{ justifyContent: 'space-between' }}>
-                  query roadmap.sh <ExternalLink size={16} />
+                <a href={`https://www.google.com/search?q=${encodeURIComponent(formatQuery(selectedResource, 'google'))}`} target="_blank" rel="noreferrer" className="btn btn--outline" style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', textAlign: 'left', padding: '0.75rem 1rem' }}>
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: '0.25rem' }}>
+                    <span style={{ fontWeight: 'bold' }}>Web</span>
+                    <span className="text-muted" style={{ fontSize: '0.75rem', textTransform: 'none', letterSpacing: 'normal' }}>general tutorials, documentation, articles</span>
+                  </div>
+                  <ExternalLink size={16} />
                 </a>
               </div>
             </motion.div>
