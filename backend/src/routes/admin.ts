@@ -207,4 +207,19 @@ router.post('/config', requireAuth, requireAdmin, async (req: any, res: any) => 
   }
 });
 
+router.get('/tickets', requireAuth, requireAdmin, async (req: any, res: any) => {
+  try {
+    const { data, error } = await supabase
+      .from('support_tickets')
+      .select('*')
+      .order('created_at', { ascending: false });
+    
+    if (error) throw error;
+    res.json(data);
+  } catch (error) {
+    console.error('Error fetching tickets:', error);
+    res.status(500).json({ error: 'Failed to fetch tickets' });
+  }
+});
+
 export default router;

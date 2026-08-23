@@ -6,6 +6,7 @@ import { rateLimit } from 'express-rate-limit';
 import roadmapRoutes from './routes/roadmap';
 import adminRoutes from './routes/admin';
 import authRoutes from './routes/auth';
+import supportRoutes from './routes/support';
 
 dotenv.config();
 
@@ -39,10 +40,28 @@ app.use(globalLimiter);
 app.use('/api', roadmapRoutes);
 app.use('/api/admin', adminRoutes);
 app.use('/api/auth', authRoutes);
+app.use('/api/support', supportRoutes);
 
 // Health check
 app.get('/health', (req, res) => {
-  res.json({ status: 'ok' });
+  res.json({ status: 'ok', timestamp: new Date().toISOString() });
+});
+
+// Public Config (for Landing Page CMS)
+app.get('/api/config/landing', async (req, res) => {
+  try {
+    const { createClient } = require('@supabase/supabase-js');
+    const supabaseUrl = process.env.SUPABASE_URL || '';
+    const supabaseKey = process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.SUPABASE_KEY || '';
+    const supabase = createClient(supabaseUrl, supabaseKey);
+    
+    const { data, error } = await supabase.from('system_config').select('config').eq('id', 1).single();
+    if (error) throw error;
+    res.json(data?.config?.landing_page || {});
+  } catch (error) {
+    console.error('Error fetching landing config:', error);
+    res.status(500).json({ error: 'Failed to read config' });
+  }
 });
 
 // Only listen on a port during local development

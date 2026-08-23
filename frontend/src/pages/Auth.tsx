@@ -15,11 +15,24 @@ const AuthPage = () => {
   
   // Verification State
   const [linkSent, setLinkSent] = useState(false);
+  const [isForgotPassword, setIsForgotPassword] = useState(false);
+  
+  // Security State
+  const [failedAttempts, setFailedAttempts] = useState(0);
+  const [lockoutTime, setLockoutTime] = useState(0);
 
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [message, setMessage] = useState<string | null>(null);
   const navigate = useNavigate();
+
+  useEffect(() => {
+    let timer: any;
+    if (lockoutTime > 0) {
+      timer = setInterval(() => setLockoutTime((prev) => prev - 1), 1000);
+    }
+    return () => clearInterval(timer);
+  }, [lockoutTime]);
 
   const getURL = () => {
     let url = window.location.origin;
@@ -34,13 +47,30 @@ const AuthPage = () => {
     setMessage(null);
 
     try {
-      if (isLogin) {
+      if (isLogin && !isForgotPassword) {
+        if (lockoutTime > 0) throw new Error(`too many attempts. try again in ${lockoutTime}s.`);
         const { error } = await supabase.auth.signInWithPassword({
           email,
           password,
         });
-        if (error) throw error;
+        if (error) {
+          setFailedAttempts(prev => {
+            const newAttempts = prev + 1;
+            if (newAttempts >= 5) setLockoutTime(60);
+            return newAttempts;
+          });
+          throw error;
+        }
+        setFailedAttempts(0);
         navigate('/dashboard');
+      } else if (isForgotPassword) {
+        const { error } = await supabase.auth.resetPasswordForEmail(email, {
+          redirectTo: getURL(),
+        });
+        if (error) throw error;
+        setMessage('password reset link sent to your email.');
+        setIsForgotPassword(false);
+        return;
       } else {
         if (password !== confirmPassword) {
           throw new Error('passwords do not match.');
@@ -151,11 +181,11 @@ const AuthPage = () => {
       <div className="auth-form-side">
         <div className="auth-form__inner">
           <div className="auth-header">
-            <h1>{linkSent ? 'verification' : (isLogin ? 'authenticate' : 'initialize account')}</h1>
-            <p>{linkSent ? 'enter the 6-digit code sent to your inbox.' : (isLogin ? 'enter credentials.' : 'create your identity.')}</p>
+            <h1>{isForgotPassword ? 'reset password' : (linkSent ? 'verification' : (isLogin ? 'authenticate' : 'initialize account'))}</h1>
+            <p>{isForgotPassword ? 'enter your email to receive a reset link.' : (linkSent ? 'enter the 6-digit code sent to your inbox.' : (isLogin ? 'enter credentials.' : 'create your identity.'))}</p>
           </div>
 
-          {!linkSent && (
+          {!linkSent && !isForgotPassword && (
             <>
               <button 
                 className="btn btn--outline btn-social" 
@@ -175,7 +205,31 @@ const AuthPage = () => {
           {error && <div className="alert alert--error">{error}</div>}
           {message && <div className="alert alert--success">{message}</div>}
 
-          {!linkSent ? (
+          {isForgotPassword ? (
+            <form onSubmit={handleAuth} className="auth-form">
+              <div className="form-group">
+                <label className="eyebrow">email address</label>
+                <input 
+                  className="input"
+                  type="email" 
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  required
+                  placeholder="email"
+                  autoCapitalize="none"
+                  autoCorrect="off"
+                />
+              </div>
+              <button type="submit" className="btn btn--primary auth-submit" disabled={loading}>
+                {loading ? 'processing...' : 'send reset link'}
+              </button>
+              <div style={{ textAlign: 'center', marginTop: '1.5rem' }}>
+                <button type="button" className="btn-link" onClick={() => setIsForgotPassword(false)}>
+                  ← return to login
+                </button>
+              </div>
+            </form>
+          ) : !linkSent ? (
             <form onSubmit={handleAuth} className="auth-form">
               {!isLogin && (
                 <div className="form-group">
@@ -254,8 +308,16 @@ const AuthPage = () => {
                 </div>
               )}
 
-              <button type="submit" className="btn btn--primary auth-submit" disabled={loading}>
-                {loading ? 'processing...' : (isLogin ? 'authorize' : 'register')}
+              {isLogin && (
+                <div style={{ textAlign: 'right', marginTop: '-0.5rem', marginBottom: '1rem' }}>
+                  <button type="button" className="btn-link" onClick={() => setIsForgotPassword(true)}>
+                    forgot password?
+                  </button>
+                </div>
+              )}
+
+              <button type="submit" className="btn btn--primary auth-submit" disabled={loading || lockoutTime > 0}>
+                {loading ? 'processing...' : (lockoutTime > 0 ? `locked (${lockoutTime}s)` : (isLogin ? 'authorize' : 'register'))}
               </button>
             </form>
           ) : (
@@ -284,7 +346,7 @@ const AuthPage = () => {
             </form>
           )}
 
-          {!linkSent && (
+          {!linkSent && !isForgotPassword && (
             <div className="auth-toggle">
               <span>
                 {isLogin ? "don't have an account? " : "already have an account? "}

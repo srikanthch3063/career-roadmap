@@ -1,15 +1,26 @@
+import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { ArrowRight } from 'lucide-react';
+import { ArrowRight, Terminal } from 'lucide-react';
+import LegalModal from '../components/LegalModal';
 import './Landing.css';
 
 const STATS = [
-  { label: 'ROADMAPS · GENERATED', value: '12,400' },
-  { label: 'CAREER PATHS · COVERED', value: '85' },
-  { label: 'AVG SATISFACTION', value: '4.9' },
+  { value: '4.2', label: 'M APP REQUESTS' },
+  { value: '1.2', label: 'T DATA POINTS' },
+  { value: '99.9', label: '% UPTIME' },
 ];
 
 const Landing = () => {
   const navigate = useNavigate();
+  const [legalModalOpen, setLegalModalOpen] = useState(false);
+  const [legalModalType, setLegalModalType] = useState<'privacy' | 'terms' | 'status' | null>(null);
+  const [landingConfig, setLandingConfig] = useState<any>(null);
+
+  const openLegalModal = (e: React.MouseEvent, type: 'privacy' | 'terms' | 'status') => {
+    e.preventDefault();
+    setLegalModalType(type);
+    setLegalModalOpen(true);
+  };
 
   return (
     <div className="lumen-page">
@@ -29,10 +40,10 @@ const Landing = () => {
       <section className="hero">
         <div className="hero__content">
           <div className="hero__left">
-            <span className="eyebrow">00 · ROADMAP INFERENCE</span>
+            <span className="eyebrow">{landingConfig?.hero_eyebrow || '00 · ROADMAP INFERENCE'}</span>
             <h1 className="hero__title">
-              career paths,<br />
-              <em>engineered</em> by ai.
+              {landingConfig?.hero_title_1 || 'career paths,'}<br />
+              <em>{landingConfig?.hero_title_2 || 'engineered by ai.'}</em>
             </h1>
             <p className="hero__lede">
               answer six questions. get a precise, opinionated career roadmap in under 30 seconds. no vague advice.
@@ -127,12 +138,18 @@ const Landing = () => {
             <span className="wordmark">pathforge © 2026</span>
           </div>
           <div className="footer-ft5__links">
-            <a href="#">privacy</a>
-            <a href="#">terms</a>
-            <a href="#">system status</a>
+            <a href="#" onClick={(e) => openLegalModal(e, 'privacy')}>privacy</a>
+            <a href="#" onClick={(e) => openLegalModal(e, 'terms')}>terms</a>
+            <a href="#" onClick={(e) => openLegalModal(e, 'status')}>system status</a>
           </div>
         </div>
       </footer>
+
+      <LegalModal 
+        isOpen={legalModalOpen} 
+        onClose={() => setLegalModalOpen(false)} 
+        type={legalModalType} 
+      />
     </div>
   );
 };

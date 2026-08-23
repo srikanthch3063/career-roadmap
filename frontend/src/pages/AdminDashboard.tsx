@@ -41,10 +41,11 @@ const AdminDashboard = () => {
   const [stats, setStats] = useState<Stats | null>(null);
   const [students, setStudents] = useState<Student[]>([]);
   const [config, setConfig] = useState<any>(null);
+  const [tickets, setTickets] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [savingConfig, setSavingConfig] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [activeTab, setActiveTab] = useState<'overview' | 'students' | 'config' | 'credentials'>('overview');
+  const [activeTab, setActiveTab] = useState<'overview' | 'students' | 'config' | 'credentials' | 'tickets' | 'landing'>('overview');
   const [showKeys, setShowKeys] = useState<Record<string, boolean>>({});
   
   // Detail View State
@@ -69,20 +70,25 @@ const AdminDashboard = () => {
 
       const apiUrl = import.meta.env.VITE_API_BASE_URL || (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1' ? 'http://localhost:3000/api' : '/api');
       
-      const [statsRes, configRes] = await Promise.all([
+      const [statsRes, configRes, ticketsRes] = await Promise.all([
         fetch(`${apiUrl}/admin/stats`, { headers: { 'Authorization': `Bearer ${session.access_token}` } }),
-        fetch(`${apiUrl}/admin/config`, { headers: { 'Authorization': `Bearer ${session.access_token}` } })
+        fetch(`${apiUrl}/admin/config`, { headers: { 'Authorization': `Bearer ${session.access_token}` } }),
+        fetch(`${apiUrl}/admin/tickets`, { headers: { 'Authorization': `Bearer ${session.access_token}` } })
       ]);
 
       if (!statsRes.ok) throw new Error('Failed to fetch admin stats');
       if (!configRes.ok) throw new Error('Failed to fetch config');
+      if (!ticketsRes.ok) console.error('Failed to fetch tickets'); // Don't crash if tickets fail
 
       const data = await statsRes.json();
       const configData = await configRes.json();
+      let ticketsData = [];
+      try { ticketsData = await ticketsRes.json(); } catch(e) {}
       
       setStats(data.stats);
       setStudents(data.students);
       setConfig(configData);
+      setTickets(ticketsData || []);
     } catch (err: any) {
       setError(err.message);
     } finally {
@@ -215,6 +221,8 @@ const AdminDashboard = () => {
         <nav className="lumen-sidebar__nav">
           <button className={`nav-item ${activeTab === 'overview' ? 'active' : ''}`} onClick={() => setActiveTab('overview')}><BarChart2 size={16} /> <span>analytics</span></button>
           <button className={`nav-item ${activeTab === 'students' ? 'active' : ''}`} onClick={() => setActiveTab('students')}><Users size={16} /> <span>users</span></button>
+          <button className={`nav-item ${activeTab === 'tickets' ? 'active' : ''}`} onClick={() => setActiveTab('tickets')}><Hexagon size={16} /> <span>support tickets</span></button>
+          <button className={`nav-item ${activeTab === 'landing' ? 'active' : ''}`} onClick={() => setActiveTab('landing')}><Target size={16} /> <span>landing page cms</span></button>
           <button className={`nav-item ${activeTab === 'config' ? 'active' : ''}`} onClick={() => setActiveTab('config')}><Settings size={16} /> <span>ai config</span></button>
           <button className={`nav-item ${activeTab === 'credentials' ? 'active' : ''}`} onClick={() => setActiveTab('credentials')}><Key size={16} /> <span>credentials</span></button>
         </nav>

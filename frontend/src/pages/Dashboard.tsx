@@ -1,10 +1,11 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { supabase } from '../supabase';
-import { Map, LogOut, FileText, ChevronRight, Compass, Trash2, Plus, Terminal, Settings, Hexagon, Menu } from 'lucide-react';
+import { Map, LogOut, FileText, ChevronRight, Compass, Trash2, Plus, Terminal, Settings, Hexagon, Menu, HelpCircle } from 'lucide-react';
 import { motion } from 'framer-motion';
 import toast from 'react-hot-toast';
 import ThemeToggle from '../components/ThemeToggle';
+import HelpModal from '../components/HelpModal';
 import './Dashboard.css';
 
 const Dashboard = () => {
@@ -15,6 +16,8 @@ const Dashboard = () => {
   const [loading, setLoading] = useState(true);
   const [stats, setStats] = useState({ totalChecked: 0, level: 'init', totalRoadmaps: 0 });
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const [isHelpOpen, setIsHelpOpen] = useState(false);
+  const hasGreeted = useRef(false);
 
   useEffect(() => {
     fetchUserData();
@@ -64,7 +67,18 @@ const Dashboard = () => {
         if (totalChecked > 30) level = 'expert';
         if (totalChecked > 50) level = 'master';
         
-        setStats({ totalChecked, level, totalRoadmaps: visibleHistory.length });
+        const newStats = {
+          totalChecked: totalChecked,
+          level: level,
+          totalRoadmaps: visibleHistory.length
+        };
+        
+        setStats(newStats);
+
+        if (!hasGreeted.current) {
+          toast.success(`welcome back, ${friendlyName.toLowerCase()}`);
+          hasGreeted.current = true;
+        }
       }
     } catch (error) {
       console.error('Error fetching user data:', error);
@@ -117,7 +131,13 @@ const Dashboard = () => {
   };
 
   if (loading) {
-    return <div className="loading-state"><div className="lumen-loader" /> initializing nexus...</div>;
+    return (
+      <div className="lumen-workbench">
+        <div className="loading-state" style={{ height: '100dvh' }}>
+          <div className="lumen-loader" /> initializing nexus...
+        </div>
+      </div>
+    );
   }
 
   return (
@@ -166,8 +186,14 @@ const Dashboard = () => {
 
         <div className="lumen-sidebar__footer">
           <ThemeToggle />
-          <button className="nav-item destructive" onClick={handleLogout}>
-            <LogOut size={16} /> <span>disconnect</span>
+          <button className="nav-item" onClick={handleLogout} aria-label="Sign Out">
+            <LogOut size={16} /> <span>sign out</span>
+          </button>
+          
+          <div className="rule-thick" style={{ margin: '1rem 0' }}></div>
+          
+          <button className="nav-item" onClick={() => setIsHelpOpen(true)} aria-label="Help and Support">
+            <HelpCircle size={16} /> <span>support</span>
           </button>
         </div>
       </aside>
@@ -275,6 +301,13 @@ const Dashboard = () => {
           )}
         </section>
       </main>
+
+      <HelpModal 
+        isOpen={isHelpOpen} 
+        onClose={() => setIsHelpOpen(false)} 
+        userEmail={profile?.email} 
+        userName={userName} 
+      />
     </div>
   );
 };
