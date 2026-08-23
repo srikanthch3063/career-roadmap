@@ -126,7 +126,20 @@ const Dashboard = () => {
         <Menu size={24} />
       </button>
 
+      {isMobileMenuOpen && (
+        <div 
+          className="mobile-backdrop" 
+          onClick={() => setIsMobileMenuOpen(false)} 
+        />
+      )}
       <aside className={`lumen-sidebar ${isMobileMenuOpen ? 'mobile-open' : ''}`}>
+        <button 
+          className="mobile-close-btn"
+          onClick={() => setIsMobileMenuOpen(false)}
+          style={{display:'none'}}
+        >
+          ✕
+        </button>
         <div className="lumen-sidebar__brand" onClick={() => navigate('/')}>
           <Map size={18} />
           <span className="wordmark">pathforge</span>
