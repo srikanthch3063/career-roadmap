@@ -481,6 +481,90 @@ const AdminDashboard = () => {
               </div>
             </motion.div>
           )}
+
+          {/* Support Tickets Tab */}
+          {activeTab === 'tickets' && (
+            <motion.div key="tickets" initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0 }} className="lumen-data">
+              <div className="data-header">
+                <span className="eyebrow">01 · SUPPORT TICKETS</span>
+              </div>
+              <div className="data-table-wrap">
+                <table className="lumen-table">
+                  <thead>
+                    <tr>
+                      <th>USER</th>
+                      <th>TOPIC</th>
+                      <th>STATUS</th>
+                      <th>DATE</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {tickets.length > 0 ? tickets.map(ticket => (
+                      <tr key={ticket.id} className="lumen-row" onClick={() => alert(`Problem:\n${ticket.problem}`)} style={{ cursor: 'pointer' }}>
+                        <td>
+                          <div style={{ display: 'flex', flexDirection: 'column' }}>
+                            <span>{ticket.name}</span>
+                            <span style={{ fontSize: '0.75rem', color: 'var(--color-rule)', fontFamily: 'var(--font-mono)' }}>{ticket.email}</span>
+                          </div>
+                        </td>
+                        <td style={{ fontFamily: 'var(--font-mono)' }}>{ticket.topic}</td>
+                        <td style={{ fontFamily: 'var(--font-mono)' }}>{ticket.status}</td>
+                        <td style={{ fontFamily: 'var(--font-mono)', color: 'var(--color-rule)' }}>
+                          {new Date(ticket.created_at).toLocaleDateString()}
+                        </td>
+                      </tr>
+                    )) : (
+                      <tr><td colSpan={4} style={{ textAlign: 'center', padding: '2rem', fontFamily: 'var(--font-mono)', color: 'var(--color-rule)' }}>no support tickets found.</td></tr>
+                    )}
+                  </tbody>
+                </table>
+              </div>
+            </motion.div>
+          )}
+
+          {/* Landing CMS Tab */}
+          {activeTab === 'landing' && (
+            <motion.div key="landing" initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0 }} className="lumen-data">
+              <div className="data-header">
+                <span className="eyebrow">01 · LANDING PAGE CONTENT</span>
+                <button className="btn btn--primary" onClick={saveConfig} disabled={savingConfig}>
+                  <Save size={16} style={{ marginRight: '0.5rem' }} /> {savingConfig ? 'COMMITTING...' : 'COMMIT CHANGES'}
+                </button>
+              </div>
+              <div style={{ padding: '2rem' }}>
+                <div className="form-group" style={{ marginBottom: '1.5rem' }}>
+                  <label className="eyebrow">Hero Subtitle (Eyebrow)</label>
+                  <input 
+                    className="lumen-input"
+                    style={{ width: '100%', background: 'transparent', border: '1px solid var(--color-rule)', color: 'var(--color-paper-contrast)', padding: '0.5rem', fontFamily: 'var(--font-mono)' }}
+                    value={config?.landing_page?.hero_eyebrow || ''}
+                    onChange={(e) => setConfig({ ...config, landing_page: { ...config?.landing_page, hero_eyebrow: e.target.value }})}
+                    placeholder="e.g. 01 · SYSTEM CALIBRATION"
+                  />
+                </div>
+                <div className="form-group" style={{ marginBottom: '1.5rem' }}>
+                  <label className="eyebrow">Hero Title Line 1</label>
+                  <input 
+                    className="lumen-input"
+                    style={{ width: '100%', background: 'transparent', border: '1px solid var(--color-rule)', color: 'var(--color-paper-contrast)', padding: '0.5rem', fontFamily: 'var(--font-mono)' }}
+                    value={config?.landing_page?.hero_title_1 || ''}
+                    onChange={(e) => setConfig({ ...config, landing_page: { ...config?.landing_page, hero_title_1: e.target.value }})}
+                    placeholder="e.g. engineering the"
+                  />
+                </div>
+                <div className="form-group" style={{ marginBottom: '1.5rem' }}>
+                  <label className="eyebrow">Hero Title Line 2 (Emphasized)</label>
+                  <input 
+                    className="lumen-input"
+                    style={{ width: '100%', background: 'transparent', border: '1px solid var(--color-rule)', color: 'var(--color-paper-contrast)', padding: '0.5rem', fontFamily: 'var(--font-mono)' }}
+                    value={config?.landing_page?.hero_title_2 || ''}
+                    onChange={(e) => setConfig({ ...config, landing_page: { ...config?.landing_page, hero_title_2: e.target.value }})}
+                    placeholder="e.g. unknown."
+                  />
+                </div>
+              </div>
+            </motion.div>
+          )}
         </AnimatePresence>
       </main>
 

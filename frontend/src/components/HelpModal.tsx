@@ -96,7 +96,7 @@ const HelpModal: React.FC<HelpModalProps> = ({ isOpen, onClose, userEmail = '', 
               required 
               value={topic} 
               onChange={e => setTopic(e.target.value)}
-              style={{ width: '100%' }}
+              style={{ width: '100%', backgroundColor: 'var(--color-paper)', color: 'var(--color-ink)' }}
             >
               <option value="" disabled>select a topic</option>
               <option value="account">account issues</option>

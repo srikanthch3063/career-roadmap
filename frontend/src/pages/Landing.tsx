@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { ArrowRight, Terminal } from 'lucide-react';
 import LegalModal from '../components/LegalModal';
+import HelpModal from '../components/HelpModal';
 import './Landing.css';
 
 const STATS = [
@@ -14,6 +15,7 @@ const Landing = () => {
   const navigate = useNavigate();
   const [legalModalOpen, setLegalModalOpen] = useState(false);
   const [legalModalType, setLegalModalType] = useState<'privacy' | 'terms' | 'status' | null>(null);
+  const [helpModalOpen, setHelpModalOpen] = useState(false);
   const [landingConfig, setLandingConfig] = useState<any>(null);
 
   const openLegalModal = (e: React.MouseEvent, type: 'privacy' | 'terms' | 'status') => {
@@ -141,6 +143,7 @@ const Landing = () => {
             <a href="#" onClick={(e) => openLegalModal(e, 'privacy')}>privacy</a>
             <a href="#" onClick={(e) => openLegalModal(e, 'terms')}>terms</a>
             <a href="#" onClick={(e) => openLegalModal(e, 'status')}>system status</a>
+            <a href="#" onClick={(e) => { e.preventDefault(); setHelpModalOpen(true); }}>support</a>
           </div>
         </div>
       </footer>
@@ -149,6 +152,11 @@ const Landing = () => {
         isOpen={legalModalOpen} 
         onClose={() => setLegalModalOpen(false)} 
         type={legalModalType} 
+      />
+
+      <HelpModal 
+        isOpen={helpModalOpen} 
+        onClose={() => setHelpModalOpen(false)} 
       />
     </div>
   );
