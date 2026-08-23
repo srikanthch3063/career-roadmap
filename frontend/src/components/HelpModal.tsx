@@ -36,16 +36,22 @@ const HelpModal: React.FC<HelpModalProps> = ({ isOpen, onClose, userEmail = '', 
         body: JSON.stringify({ name, email, topic, problem })
       });
 
-      if (!response.ok) throw new Error('failed to submit ticket');
+      const data = await response.json();
+      if (!response.ok) throw new Error(data.error || 'failed to submit ticket');
       
-      toast.success('support ticket submitted. we will be in touch!');
+      if (data.emailError) {
+        toast.error(`Ticket saved, but email failed: ${data.emailError}`, { duration: 8000 });
+      } else {
+        toast.success('support ticket submitted. we will be in touch!');
+      }
+
       onClose();
       // Reset form
       setTopic('');
       setProblem('');
-    } catch (err) {
+    } catch (err: any) {
       console.error(err);
-      toast.error('failed to submit. please try again later.');
+      toast.error(err.message || 'failed to submit. please try again later.');
     } finally {
       setLoading(false);
     }
