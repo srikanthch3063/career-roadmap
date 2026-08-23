@@ -5,6 +5,7 @@ import dotenv from 'dotenv';
 import { rateLimit } from 'express-rate-limit';
 import roadmapRoutes from './routes/roadmap';
 import adminRoutes from './routes/admin';
+import authRoutes from './routes/auth';
 
 dotenv.config();
 
@@ -37,6 +38,7 @@ app.use(globalLimiter);
 // Routes
 app.use('/api', roadmapRoutes);
 app.use('/api/admin', adminRoutes);
+app.use('/api/auth', authRoutes);
 
 // Health check
 app.get('/health', (req, res) => {

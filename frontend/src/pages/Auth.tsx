@@ -8,8 +8,9 @@ const AuthPage = () => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [name, setName] = useState('');
+  const [otp, setOtp] = useState('');
   
-  // Magic Link State
+  // Verification State
   const [linkSent, setLinkSent] = useState(false);
 
   const [loading, setLoading] = useState(false);
@@ -55,13 +56,45 @@ const AuthPage = () => {
         if (data.session) {
           navigate('/dashboard');
         } else {
-          // Switch to magic link success mode
+          // Switch to OTP verification mode
           setLinkSent(true);
-          setMessage('a verification link has been sent to your email.');
+          setMessage('a 6-digit verification code has been sent to your email.');
         }
       }
     } catch (err: any) {
       setError(err.message || 'an error occurred');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleVerifyOtp = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setLoading(true);
+    setError(null);
+    setMessage(null);
+
+    try {
+      const { data, error } = await supabase.auth.verifyOtp({
+        email,
+        token: otp,
+        type: 'signup'
+      });
+      if (error) throw error;
+      
+      if (data.session) {
+        // Send welcome email in background
+        const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:5000';
+        fetch(`${apiUrl}/api/auth/send-welcome`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ email, name: name || 'Explorer' })
+        }).catch(err => console.error('Failed to trigger welcome email', err));
+        
+        navigate('/dashboard');
+      }
+    } catch (err: any) {
+      setError(err.message || 'verification failed. please check the code.');
     } finally {
       setLoading(false);
     }
@@ -113,7 +146,7 @@ const AuthPage = () => {
         <div className="auth-form__inner">
           <div className="auth-header">
             <h1>{linkSent ? 'verification' : (isLogin ? 'authenticate' : 'initialize account')}</h1>
-            <p>{linkSent ? 'check your inbox for the link.' : (isLogin ? 'enter credentials.' : 'create your identity.')}</p>
+            <p>{linkSent ? 'enter the 6-digit code sent to your inbox.' : (isLogin ? 'enter credentials.' : 'create your identity.')}</p>
           </div>
 
           {!linkSent && (
@@ -185,11 +218,29 @@ const AuthPage = () => {
               </button>
             </form>
           ) : (
-            <div className="auth-form" style={{ textAlign: 'center', marginTop: '2rem' }}>
-              <button type="button" className="btn btn--outline" onClick={() => { setLinkSent(false); setIsLogin(true); setMessage(null); }}>
-                return to login
+            <form onSubmit={handleVerifyOtp} className="auth-form">
+              <div className="form-group">
+                <label className="eyebrow">verification code</label>
+                <input 
+                  className="input"
+                  type="text" 
+                  value={otp}
+                  onChange={(e) => setOtp(e.target.value)}
+                  required
+                  placeholder="123456"
+                  maxLength={6}
+                  style={{ letterSpacing: '0.5em', textAlign: 'center', fontSize: '1.25rem' }}
+                />
+              </div>
+              <button type="submit" className="btn btn--primary auth-submit" disabled={loading}>
+                {loading ? 'verifying...' : 'verify account'}
               </button>
-            </div>
+              <div style={{ textAlign: 'center', marginTop: '1.5rem' }}>
+                <button type="button" className="btn-link" onClick={() => { setLinkSent(false); setIsLogin(true); setMessage(null); setOtp(''); }}>
+                  ← return to login
+                </button>
+              </div>
+            </form>
           )}
 
           {!linkSent && (
