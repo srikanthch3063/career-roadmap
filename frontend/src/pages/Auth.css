@@ -216,6 +216,12 @@
   }
 }
 
+@media (max-width: 480px) {
+  .auth-form-side {
+    padding: 1rem;
+  }
+}
+
 @media (max-width: 768px) {
   .lumen-auth {
     flex-direction: column;

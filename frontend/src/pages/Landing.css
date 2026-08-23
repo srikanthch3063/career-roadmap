@@ -4,6 +4,8 @@
   background: var(--color-paper);
   color: var(--color-ink-2);
   min-height: 100vh;
+  max-width: 100vw;
+  overflow-x: hidden;
 }
 
 .container {
@@ -329,5 +331,12 @@
     flex-direction: column;
     align-items: flex-start;
     gap: 2rem;
+  }
+  .footer-ft5__links {
+    flex-wrap: wrap;
+    gap: 1rem;
+  }
+  .nav-n5__inner {
+    gap: 1rem;
   }
 }

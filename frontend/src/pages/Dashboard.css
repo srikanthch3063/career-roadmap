@@ -284,4 +284,32 @@
     border-right: none;
     border-bottom: 1px solid var(--color-rule);
   }
+  .lumen-header {
+    flex-wrap: wrap;
+    gap: 1rem;
+    margin-bottom: 2rem;
+  }
+}
+
+@media (max-width: 768px) {
+  .lumen-table, .lumen-table tbody, .lumen-table tr, .lumen-table td {
+    display: block;
+    width: 100%;
+  }
+  .lumen-table thead {
+    display: none;
+  }
+  .lumen-table tr {
+    padding: 1.5rem 1rem;
+    border-bottom: 1px solid var(--color-rule);
+  }
+  .lumen-table td {
+    padding: 0.5rem 0;
+    border: none;
+    text-align: left !important;
+  }
+  .progress-cell {
+    justify-content: flex-start !important;
+    margin-top: 0.5rem;
+  }
 }

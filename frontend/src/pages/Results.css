@@ -243,9 +243,18 @@
 
 @media (max-width: 768px) {
   .lumen-document {
-    padding: 2rem;
+    padding: 1.5rem;
   }
   .document-grid {
     grid-template-columns: 1fr;
+  }
+  .lumen-check-item {
+    flex-wrap: wrap;
+  }
+  .btn-resource-action {
+    width: 100%;
+    margin-top: 0.25rem;
+    margin-left: 2rem;
+    text-align: center;
   }
 }

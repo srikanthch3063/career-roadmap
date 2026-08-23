@@ -210,6 +210,12 @@ button {
   background: #1A1D24;
 }
 
+@media (max-width: 768px) {
+  .lumen-chat-header {
+    padding-left: 60px; /* Space for the mobile-menu-toggle hamburger */
+  }
+}
+
 .lumen-chat-title {
   margin: 0;
   font-family: var(--font-body);
@@ -528,6 +534,8 @@ img, video, iframe {
     position: fixed;
     top: 0;
     left: -100%;
+    width: 100vw !important;
+    max-width: 100vw;
     height: 100dvh;
     z-index: 9999;
     transition: left 0.3s ease;
