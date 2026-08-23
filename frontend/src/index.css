@@ -446,15 +446,32 @@ button {
 
 /* --- Mobile Responsiveness --- */
 @media (max-width: 768px) {
+  html, body {
+    overflow-x: hidden !important;
+    width: 100%;
+    position: relative;
+  }
+  
+  :root {
+    --text-display: clamp(1.75rem, 5vw + 1rem, 2.25rem);
+  }
+  
+  .document-title {
+    font-size: clamp(1.75rem, 5vw + 1rem, 2.25rem) !important;
+    word-break: break-word;
+    line-height: 1.1;
+  }
+
   /* Sidebars act as off-canvas menus on mobile */
   .lumen-sidebar {
     position: fixed;
     top: 0;
     left: -100%;
-    height: 100vh;
+    height: 100dvh;
     z-index: 9999;
     transition: left 0.3s ease;
     box-shadow: 10px 0 30px rgba(0,0,0,0.5);
+    background: var(--color-paper-2) !important;
   }
 
   .lumen-sidebar.mobile-open {
@@ -465,7 +482,7 @@ button {
   .lumen-results-layout, .lumen-workbench {
     display: flex;
     flex-direction: column;
-    height: 100vh;
+    height: 100dvh;
     overflow: hidden;
   }
   
