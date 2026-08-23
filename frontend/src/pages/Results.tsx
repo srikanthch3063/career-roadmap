@@ -248,7 +248,7 @@ const Results = () => {
     return (
       <div className="lumen-workbench" style={{ display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
         <div className="loading-state">
-          <div className="lumen-loader" style={{ marginBottom: '1rem' }} />
+          <div className="round-loader" style={{ marginBottom: '1rem' }} />
           <h2 style={{ fontFamily: 'var(--font-serif)', fontSize: '2rem', margin: 0 }}>{loadingMessages[loadingPhase]}</h2>
           <p className="text-muted" style={{ fontFamily: 'var(--font-mono)', fontSize: '0.875rem' }}>this process requires intensive computation. please wait.</p>
         </div>
