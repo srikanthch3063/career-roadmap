@@ -3,5 +3,8 @@
   "version": "1.0.0",
   "scripts": {
     "build": "cd frontend && npm install && npm run build"
+  },
+  "dependencies": {
+    "exceljs": "^4.4.0"
   }
 }

@@ -47,6 +47,12 @@ const AuthPage = () => {
     setMessage(null);
 
     try {
+      if (!email.trim() || (!isForgotPassword && !password.trim())) {
+        setError('Email and password fields cannot be empty.');
+        setLoading(false);
+        return;
+      }
+
       if (isLogin && !isForgotPassword) {
         if (lockoutTime > 0) throw new Error(`too many attempts. try again in ${lockoutTime}s.`);
         const { error } = await supabase.auth.signInWithPassword({

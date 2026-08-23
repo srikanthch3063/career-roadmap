@@ -11,6 +11,7 @@ import { useEffect, useState } from 'react';
 import { supabase } from './supabase';
 import { Toaster } from 'react-hot-toast';
 import { ThemeProvider } from './theme/ThemeProvider';
+import { ErrorBoundary } from './components/ErrorBoundary';
 
 const App = () => {
   const [session, setSession] = useState<any>(null);
@@ -61,9 +62,9 @@ const App = () => {
           <Route path="/auth" element={!session ? <AuthPage /> : <Navigate to="/dashboard" />} />
           
           {/* Protected Student Routes (Admins can access too) */}
-          <Route path="/dashboard" element={session && (role === 'student' || role === 'admin') ? <Dashboard /> : <Navigate to="/auth" />} />
+          <Route path="/dashboard" element={session && (role === 'student' || role === 'admin') ? <ErrorBoundary><Dashboard /></ErrorBoundary> : <Navigate to="/auth" />} />
           <Route path="/quiz" element={session && (role === 'student' || role === 'admin') ? <Quiz /> : <Navigate to="/auth" />} />
-          <Route path="/results" element={session && (role === 'student' || role === 'admin') ? <Results /> : <Navigate to="/auth" />} />
+          <Route path="/results" element={session && (role === 'student' || role === 'admin') ? <ErrorBoundary><Results /></ErrorBoundary> : <Navigate to="/auth" />} />
           <Route path="/weekly-plan" element={session && (role === 'student' || role === 'admin') ? <WeeklyPlan /> : <Navigate to="/auth" />} />
           
           {/* Protected Admin Routes */}
