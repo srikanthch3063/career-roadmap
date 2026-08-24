@@ -29,8 +29,8 @@ const Landing = () => {
       {/* Nav N5 - Floating Pill */}
       <nav className="nav-n5">
         <div className="nav-n5__inner">
-          <div style={{ display: 'flex', alignItems: 'center', gap: '2px' }}>
-            <img src="/pathforge-logo.png" alt="P" style={{ width: 24, height: 24, objectFit: 'contain' }} />
+          <div style={{ display: 'flex', alignItems: 'center', gap: '1px', flexShrink: 0 }}>
+            <img src="/pathforge-logo.png" alt="P" style={{ height: '1.15rem', width: 'auto', objectFit: 'contain', display: 'block', transform: 'translateY(1px)' }} />
             <span className="wordmark">athforge</span>
           </div>
           <div className="nav-n5__links">
