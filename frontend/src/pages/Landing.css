@@ -251,20 +251,74 @@
   position: relative;
   transition: transform 0.2s var(--ease-soft);
 }
-.card--glow::before {
+.card--spotlight {
+  border: 1px solid transparent;
+  background: transparent;
+}
+.card--spotlight::before {
   content: "";
   position: absolute;
   inset: 0;
-  background: radial-gradient(circle at 50% 0%, oklch(76% 0.17 50 / 0.04) 0%, transparent 60%);
-  opacity: 0;
-  transition: opacity 0.2s;
-  pointer-events: none;
+  border-radius: inherit;
+  background: var(--color-paper-2);
+  z-index: 0;
 }
+.card__spotlight-border {
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  padding: 1px;
+  background: var(--color-rule);
+  -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+  -webkit-mask-composite: xor;
+  mask-composite: exclude;
+  pointer-events: none;
+  z-index: 1;
+  transition: background 0.3s ease;
+}
+.card__spotlight-inner {
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  pointer-events: none;
+  z-index: 1;
+  opacity: 0;
+  transition: opacity 0.3s ease;
+}
+.card__content {
+  position: relative;
+  z-index: 2;
+}
+
+@media (hover: hover) {
+  .card--spotlight:hover .card__spotlight-border {
+    background: radial-gradient(
+      600px circle at var(--mouse-x, 0) var(--mouse-y, 0),
+      rgba(237, 137, 54, 0.7),
+      var(--color-rule) 40%
+    );
+  }
+  .card--spotlight:hover .card__spotlight-inner {
+    opacity: 1;
+    background: radial-gradient(
+      800px circle at var(--mouse-x, 0) var(--mouse-y, 0),
+      rgba(237, 137, 54, 0.04),
+      transparent 40%
+    );
+  }
+}
+@media (hover: none) {
+  .card--spotlight:active .card__spotlight-border {
+    background: rgba(237, 137, 54, 0.5);
+  }
+  .card--spotlight:active .card__spotlight-inner {
+    opacity: 1;
+    background: radial-gradient(circle at center, rgba(237, 137, 54, 0.05), transparent 70%);
+  }
+}
+
 .card:hover {
   transform: translateY(-4px);
-}
-.card:hover::before {
-  opacity: 1;
 }
 .card h3 {
   font-size: var(--text-xl);

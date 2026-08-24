@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { ArrowRight, Terminal } from 'lucide-react';
 import LegalModal from '../components/LegalModal';
@@ -10,6 +10,48 @@ const STATS = [
   { value: '1.2', label: 'T DATA POINTS' },
   { value: '99.9', label: '% UPTIME' },
 ];
+
+function FeatureCard({ eyebrow, title, desc }: { eyebrow: string, title: string, desc: string }) {
+  const cardRef = useRef<HTMLDivElement>(null);
+  
+  const handleMove = (e: React.MouseEvent<HTMLDivElement> | React.TouchEvent<HTMLDivElement>) => {
+    if (!cardRef.current) return;
+    const rect = cardRef.current.getBoundingClientRect();
+    
+    let clientX, clientY;
+    if ('touches' in e) {
+      clientX = e.touches[0].clientX;
+      clientY = e.touches[0].clientY;
+    } else {
+      clientX = e.clientX;
+      clientY = e.clientY;
+    }
+
+    const x = clientX - rect.left;
+    const y = clientY - rect.top;
+    
+    cardRef.current.style.setProperty('--mouse-x', `${x}px`);
+    cardRef.current.style.setProperty('--mouse-y', `${y}px`);
+  };
+
+  return (
+    <div 
+      ref={cardRef}
+      className="card card--spotlight" 
+      onMouseMove={handleMove}
+      onTouchMove={handleMove}
+      onTouchStart={handleMove}
+    >
+      <div className="card__spotlight-border" />
+      <div className="card__spotlight-inner" />
+      <div className="card__content">
+        <span className="card__eyebrow">{eyebrow}</span>
+        <h3>{title}</h3>
+        <p>{desc}</p>
+      </div>
+    </div>
+  );
+}
 
 const Landing = () => {
   const navigate = useNavigate();
@@ -116,21 +158,21 @@ const Landing = () => {
           <h2 className="section-title">a single primitive.<br/>scales to any career.</h2>
           
           <div className="card-grid">
-            <div className="card card--glow">
-              <span className="card__eyebrow">PRECISION</span>
-              <h3>laser-focused goals.</h3>
-              <p>exact frameworks, languages, and milestones. no vague advice.</p>
-            </div>
-            <div className="card card--glow">
-              <span className="card__eyebrow">RESOURCES</span>
-              <h3>curated materials.</h3>
-              <p>project ideas and learning paths specific to your niche.</p>
-            </div>
-            <div className="card card--glow">
-              <span className="card__eyebrow">INSIGHTS</span>
-              <h3>market data.</h3>
-              <p>see real salary data and growth trends for your target path.</p>
-            </div>
+            <FeatureCard 
+              eyebrow="PRECISION"
+              title="laser-focused goals."
+              desc="exact frameworks, languages, and milestones. no vague advice."
+            />
+            <FeatureCard 
+              eyebrow="RESOURCES"
+              title="curated materials."
+              desc="project ideas and learning paths specific to your niche."
+            />
+            <FeatureCard 
+              eyebrow="INSIGHTS"
+              title="market data."
+              desc="see real salary data and growth trends for your target path."
+            />
           </div>
         </div>
       </section>
