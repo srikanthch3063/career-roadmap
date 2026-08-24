@@ -100,6 +100,10 @@ const AppContent = () => {
   const [role, setRole] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
 
+  // Track the current user and role in refs to avoid closure staleness and redundant fetches
+  const lastUserId = React.useRef<string | null>(null);
+  const lastRole = React.useRef<string | null>(null);
+
   useEffect(() => {
     let isMounted = true;
 
@@ -112,15 +116,16 @@ const AppContent = () => {
           .maybeSingle();
         
         if (isMounted) {
-          if (data && data.role) {
-            setRole(data.role);
-          } else {
-            setRole('student');
-          }
+          const newRole = (data && data.role) ? data.role : 'student';
+          setRole(newRole);
+          lastRole.current = newRole;
         }
       } catch (e) {
         console.error('Error fetching role:', e);
-        if (isMounted) setRole('student');
+        if (isMounted) {
+          setRole('student');
+          lastRole.current = 'student';
+        }
       } finally {
         if (isMounted) setLoading(false);
       }
@@ -131,10 +136,19 @@ const AppContent = () => {
       if (!isMounted) return;
       
       setSession(currentSession);
+      
       if (currentSession) {
+        // Prevent infinite loops on mobile if token refresh fires repeatedly
+        if (lastUserId.current === currentSession.user.id && lastRole.current !== null) {
+           return; // Already loaded role for this user, skip loading
+        }
+        
+        lastUserId.current = currentSession.user.id;
         setLoading(true);
         await fetchRole(currentSession.user.id);
       } else {
+        lastUserId.current = null;
+        lastRole.current = null;
         setRole(null);
         setLoading(false);
       }
