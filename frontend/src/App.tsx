@@ -11,6 +11,7 @@ import { supabase } from './supabase';
 import { Toaster } from 'react-hot-toast';
 import { ThemeProvider } from './theme/ThemeProvider';
 import { ErrorBoundary } from './components/ErrorBoundary';
+import SplashScreen from './components/SplashScreen';
 
 // Loading overlay component
 const FullPageSpinner = () => (
@@ -161,22 +162,25 @@ const AppContent = () => {
   }, []);
 
   return (
-    <Routes>
-      <Route path="/" element={<PublicOnlyRoute session={session} loading={loading}><Landing /></PublicOnlyRoute>} />
-      <Route path="/auth" element={<PublicOnlyRoute session={session} loading={loading}><AuthPage /></PublicOnlyRoute>} />
-      
-      {/* Protected Student Routes */}
-      <Route path="/dashboard" element={<ProtectedRoute session={session} role={role} loading={loading}><Dashboard /></ProtectedRoute>} />
-      <Route path="/quiz" element={<ProtectedRoute session={session} role={role} loading={loading}><Quiz /></ProtectedRoute>} />
-      <Route path="/results" element={<ProtectedRoute session={session} role={role} loading={loading}><Results /></ProtectedRoute>} />
-      <Route path="/weekly-plan" element={<ProtectedRoute session={session} role={role} loading={loading}><WeeklyPlan /></ProtectedRoute>} />
-      
-      {/* Protected Admin Routes */}
-      <Route path="/admin" element={<ProtectedRoute session={session} role={role} loading={loading} adminOnly><AdminDashboard /></ProtectedRoute>} />
+    <>
+      <SplashScreen isAppReady={!loading} />
+      <Routes>
+        <Route path="/" element={<PublicOnlyRoute session={session} loading={loading}><Landing /></PublicOnlyRoute>} />
+        <Route path="/auth" element={<PublicOnlyRoute session={session} loading={loading}><AuthPage /></PublicOnlyRoute>} />
+        
+        {/* Protected Student Routes */}
+        <Route path="/dashboard" element={<ProtectedRoute session={session} role={role} loading={loading}><Dashboard /></ProtectedRoute>} />
+        <Route path="/quiz" element={<ProtectedRoute session={session} role={role} loading={loading}><Quiz /></ProtectedRoute>} />
+        <Route path="/results" element={<ProtectedRoute session={session} role={role} loading={loading}><Results /></ProtectedRoute>} />
+        <Route path="/weekly-plan" element={<ProtectedRoute session={session} role={role} loading={loading}><WeeklyPlan /></ProtectedRoute>} />
+        
+        {/* Protected Admin Routes */}
+        <Route path="/admin" element={<ProtectedRoute session={session} role={role} loading={loading} adminOnly><AdminDashboard /></ProtectedRoute>} />
 
-      {/* Fallback */}
-      <Route path="*" element={<Navigate to="/" replace />} />
-    </Routes>
+        {/* Fallback */}
+        <Route path="*" element={<Navigate to="/" replace />} />
+      </Routes>
+    </>
   );
 };
 
