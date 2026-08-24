@@ -30,7 +30,7 @@ const Landing = () => {
       <nav className="nav-n5">
         <div className="nav-n5__inner">
           <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-            <img src="/pathforge-logo.jpg" alt="Pathforge Logo" style={{ width: 24, height: 24, borderRadius: 4 }} />
+            <img src="/pathforge-logo.png" alt="Pathforge Logo" style={{ width: 24, height: 24, borderRadius: 4 }} />
             <span className="wordmark">pathforge</span>
           </div>
           <div className="nav-n5__links">

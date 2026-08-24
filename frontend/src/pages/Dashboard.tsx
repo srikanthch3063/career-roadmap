@@ -166,7 +166,7 @@ const Dashboard = () => {
           ✕
         </button>
         <div className="lumen-sidebar__brand" onClick={() => navigate('/')}>
-          <img src="/pathforge-logo.jpg" alt="Pathforge Logo" style={{ width: 24, height: 24, borderRadius: 4 }} />
+          <img src="/pathforge-logo.png" alt="Pathforge Logo" style={{ width: 24, height: 24, borderRadius: 4 }} />
           <span className="wordmark">pathforge</span>
         </div>
         
