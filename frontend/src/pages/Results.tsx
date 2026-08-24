@@ -13,6 +13,7 @@ import { jsPDF } from 'jspdf';
 import ThemeToggle from '../components/ThemeToggle';
 import ChatDrawer from '../components/ChatDrawer';
 import salaryData from '../data/salaryData.json';
+import { generateResourceLinks } from '../utils/resourceResolver';
 import './Results.css';
 
 const Results = () => {
@@ -278,18 +279,6 @@ const Results = () => {
     </div>
   );
 
-  const formatQuery = (tech: string, destination: 'youtube' | 'github' | 'google') => {
-    let cleanTech = tech.replace(/\(or newer\)/gi, 'modern');
-    cleanTech = cleanTech.replace(/[^\w\s\+#.-]/g, ' ').replace(/\s+/g, ' ').trim();
-    
-    switch (destination) {
-      case 'youtube': return `${cleanTech} tutorial`;
-      case 'github': return `${cleanTech} examples`;
-      case 'google': return `${cleanTech} tutorial documentation`;
-      default: return cleanTech;
-    }
-  };
-
   return (
     <div className="lumen-workbench">
       {/* Mobile Sidebar Overlay/Toggle */}
@@ -445,27 +434,15 @@ const Results = () => {
               <p className="text-muted mb-6">select a destination to query knowledge paths.</p>
               
               <div className="resource-links" style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
-                <a href={`https://www.youtube.com/results?search_query=${encodeURIComponent(formatQuery(selectedResource, 'youtube'))}`} target="_blank" rel="noreferrer" className="btn btn--outline" style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', textAlign: 'left', padding: '0.75rem 1rem' }}>
-                  <div style={{ display: 'flex', flexDirection: 'column', gap: '0.25rem' }}>
-                    <span style={{ fontWeight: 'bold' }}>Videos</span>
-                    <span className="text-muted" style={{ fontSize: '0.75rem', textTransform: 'none', letterSpacing: 'normal' }}>tutorials/videos</span>
-                  </div>
-                  <ExternalLink size={16} />
-                </a>
-                <a href={`https://github.com/search?q=${encodeURIComponent(formatQuery(selectedResource, 'github'))}&type=repositories`} target="_blank" rel="noreferrer" className="btn btn--outline" style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', textAlign: 'left', padding: '0.75rem 1rem' }}>
-                  <div style={{ display: 'flex', flexDirection: 'column', gap: '0.25rem' }}>
-                    <span style={{ fontWeight: 'bold' }}>Projects</span>
-                    <span className="text-muted" style={{ fontSize: '0.75rem', textTransform: 'none', letterSpacing: 'normal' }}>real code/repositories</span>
-                  </div>
-                  <ExternalLink size={16} />
-                </a>
-                <a href={`https://www.google.com/search?q=${encodeURIComponent(formatQuery(selectedResource, 'google'))}`} target="_blank" rel="noreferrer" className="btn btn--outline" style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', textAlign: 'left', padding: '0.75rem 1rem' }}>
-                  <div style={{ display: 'flex', flexDirection: 'column', gap: '0.25rem' }}>
-                    <span style={{ fontWeight: 'bold' }}>Web</span>
-                    <span className="text-muted" style={{ fontSize: '0.75rem', textTransform: 'none', letterSpacing: 'normal' }}>general tutorials, documentation, articles</span>
-                  </div>
-                  <ExternalLink size={16} />
-                </a>
+                {generateResourceLinks(selectedResource).map((resource, i) => (
+                  <a key={i} href={resource.url} target="_blank" rel="noopener noreferrer" className="btn btn--outline" style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', textAlign: 'left', padding: '0.75rem 1rem' }}>
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: '0.25rem' }}>
+                      <span style={{ fontWeight: 'bold' }}>{resource.title}</span>
+                      <span className="text-muted" style={{ fontSize: '0.75rem', textTransform: 'none', letterSpacing: 'normal' }}>{resource.description}</span>
+                    </div>
+                    <ExternalLink size={16} />
+                  </a>
+                ))}
               </div>
             </motion.div>
           </div>
