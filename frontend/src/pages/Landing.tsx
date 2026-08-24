@@ -5,12 +5,6 @@ import LegalModal from '../components/LegalModal';
 import HelpModal from '../components/HelpModal';
 import './Landing.css';
 
-const STATS = [
-  { value: '4.2', label: 'M APP REQUESTS' },
-  { value: '1.2', label: 'T DATA POINTS' },
-  { value: '99.9', label: '% UPTIME' },
-];
-
 function FeatureCard({ eyebrow, title, desc }: { eyebrow: string, title: string, desc: string }) {
   const cardRef = useRef<HTMLDivElement>(null);
   
@@ -37,7 +31,7 @@ function FeatureCard({ eyebrow, title, desc }: { eyebrow: string, title: string,
   return (
     <div 
       ref={cardRef}
-      className="card card--spotlight" 
+      className="capabilities__card card--spotlight" 
       onMouseMove={handleMove}
       onTouchMove={handleMove}
       onTouchStart={handleMove}
@@ -56,7 +50,19 @@ function FeatureCard({ eyebrow, title, desc }: { eyebrow: string, title: string,
 export const DEFAULT_LANDING_CONFIG = {
   hero_eyebrow: '00 · ROADMAP INFERENCE',
   hero_title_1: 'career paths,',
-  hero_title_2: 'engineered by ai.'
+  hero_title_2: 'engineered by ai.',
+  hero_lede: 'answer six questions. get a precise, opinionated career roadmap in under 30 seconds. no vague advice.',
+  stat_1_val: '4.2',
+  stat_1_lbl: 'M APP REQUESTS',
+  stat_2_val: '1.2',
+  stat_2_lbl: 'T DATA POINTS',
+  stat_3_val: '99.9',
+  stat_3_lbl: '% UPTIME',
+  capabilities_cards: [
+    { eyebrow: "PRECISION", title: "laser-focused goals.", desc: "exact frameworks, languages, and milestones. no vague advice." },
+    { eyebrow: "RESOURCES", title: "curated materials.", desc: "project ideas and learning paths specific to your niche." },
+    { eyebrow: "INSIGHTS", title: "market data.", desc: "see real salary data and growth trends for your target path." }
+  ]
 };
 
 const Landing = ({ overrideConfig }: { overrideConfig?: any }) => {
@@ -92,6 +98,8 @@ const Landing = ({ overrideConfig }: { overrideConfig?: any }) => {
     setLegalModalOpen(true);
   };
 
+  const safeConfig = { ...DEFAULT_LANDING_CONFIG, ...(landingConfig || {}) };
+
   return (
     <div className="lumen-page">
       {/* Nav N5 - Floating Pill */}
@@ -113,13 +121,13 @@ const Landing = ({ overrideConfig }: { overrideConfig?: any }) => {
       <section className="hero">
         <div className="hero__content">
           <div className="hero__left">
-            <span className="eyebrow">{landingConfig?.hero_eyebrow || '00 · ROADMAP INFERENCE'}</span>
+            <span className="eyebrow">{safeConfig.hero_eyebrow}</span>
             <h1 className="hero__title">
-              {landingConfig?.hero_title_1 || 'career paths,'}<br />
-              <em>{landingConfig?.hero_title_2 || 'engineered by ai.'}</em>
+              {safeConfig.hero_title_1}<br />
+              <em>{safeConfig.hero_title_2}</em>
             </h1>
             <p className="hero__lede">
-              answer six questions. get a precise, opinionated career roadmap in under 30 seconds. no vague advice.
+              {safeConfig.hero_lede}
             </p>
             <button className="btn btn--primary" onClick={() => navigate('/auth')}>
               start for free
@@ -166,12 +174,16 @@ const Landing = ({ overrideConfig }: { overrideConfig?: any }) => {
       {/* Stats Section */}
       <section className="stats-row">
         <div className="stats-grid">
-          {STATS.map((s, i) => (
-            <div key={i} className="stat-cell">
-              <span className="stat__value">{s.value}</span>
-              <span className="stat__label">{s.label}</span>
-            </div>
-          ))}
+          {[1, 2, 3].map(i => {
+            const valKey = `stat_${i}_val` as keyof typeof DEFAULT_LANDING_CONFIG;
+            const lblKey = `stat_${i}_lbl` as keyof typeof DEFAULT_LANDING_CONFIG;
+            return (
+              <div key={i} className="stat-cell">
+                <span className="stat__value">{String(safeConfig[valKey] || '')}</span>
+                <span className="stat__label">{String(safeConfig[lblKey] || '')}</span>
+              </div>
+            );
+          })}
         </div>
       </section>
 
@@ -183,22 +195,15 @@ const Landing = ({ overrideConfig }: { overrideConfig?: any }) => {
           <span className="eyebrow" style={{marginBottom: '1rem', display: 'block'}}>01 · CAPABILITIES</span>
           <h2 className="section-title">a single primitive.<br/>scales to any career.</h2>
           
-          <div className="card-grid">
-            <FeatureCard 
-              eyebrow="PRECISION"
-              title="laser-focused goals."
-              desc="exact frameworks, languages, and milestones. no vague advice."
-            />
-            <FeatureCard 
-              eyebrow="RESOURCES"
-              title="curated materials."
-              desc="project ideas and learning paths specific to your niche."
-            />
-            <FeatureCard 
-              eyebrow="INSIGHTS"
-              title="market data."
-              desc="see real salary data and growth trends for your target path."
-            />
+          <div className="capabilities__grid">
+            {(safeConfig.capabilities_cards || []).map((card: any, idx: number) => (
+              <FeatureCard 
+                key={idx}
+                eyebrow={card.eyebrow}
+                title={card.title}
+                desc={card.desc}
+              />
+            ))}
           </div>
         </div>
       </section>

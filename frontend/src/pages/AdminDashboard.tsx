@@ -149,7 +149,7 @@ const AdminDashboard = () => {
     }
   };
 
-  const handleLandingChange = (key: string, value: string) => {
+  const handleLandingChange = (key: string, value: any) => {
     setConfig((prev: any) => ({
       ...prev,
       landing_page: {
@@ -167,6 +167,23 @@ const AdminDashboard = () => {
         ...DEFAULT_LANDING_CONFIG
       }
     }));
+  };
+
+  const handleAddCard = () => {
+    const currentCards = config?.landing_page?.capabilities_cards || [];
+    handleLandingChange('capabilities_cards', [...currentCards, { eyebrow: 'NEW CARD', title: 'title.', desc: 'description.' }]);
+  };
+
+  const handleUpdateCard = (idx: number, key: string, value: string) => {
+    const currentCards = [...(config?.landing_page?.capabilities_cards || [])];
+    currentCards[idx] = { ...currentCards[idx], [key]: value };
+    handleLandingChange('capabilities_cards', currentCards);
+  };
+
+  const handleDeleteCard = (idx: number) => {
+    const currentCards = [...(config?.landing_page?.capabilities_cards || [])];
+    currentCards.splice(idx, 1);
+    handleLandingChange('capabilities_cards', currentCards);
   };
 
   const handleDeleteStudent = async (studentId: string, e: React.MouseEvent) => {
@@ -636,11 +653,60 @@ const AdminDashboard = () => {
                       placeholder="e.g. unknown."
                     />
                   </div>
+                  <div className="form-group" style={{ marginBottom: '2.5rem' }}>
+                    <label className="eyebrow">Hero Lede</label>
+                    <textarea 
+                      className="lumen-input"
+                      style={{ width: '100%', minHeight: '80px', background: 'transparent', border: '1px solid var(--color-rule)', color: 'var(--color-paper-contrast)', padding: '0.5rem', fontFamily: 'var(--font-mono)' }}
+                      value={config?.landing_page?.hero_lede || ''}
+                      onChange={(e) => handleLandingChange('hero_lede', e.target.value)}
+                      placeholder="e.g. answer six questions..."
+                    />
+                  </div>
+
+                  <hr className="rule-thick" style={{ margin: '2rem 0' }} />
+                  <span className="eyebrow" style={{ display: 'block', marginBottom: '1rem' }}>STATS SECTION</span>
+                  {[1, 2, 3].map(i => (
+                    <div key={`stat_${i}`} style={{ display: 'flex', gap: '1rem', marginBottom: '1rem' }}>
+                      <div style={{ flex: 1 }}>
+                        <label className="eyebrow">Value {i}</label>
+                        <input className="lumen-input" style={{ width: '100%', background: 'transparent', border: '1px solid var(--color-rule)', color: 'var(--color-paper-contrast)', padding: '0.5rem', fontFamily: 'var(--font-mono)' }} value={config?.landing_page?.[`stat_${i}_val`] || ''} onChange={(e) => handleLandingChange(`stat_${i}_val`, e.target.value)} />
+                      </div>
+                      <div style={{ flex: 2 }}>
+                        <label className="eyebrow">Label {i}</label>
+                        <input className="lumen-input" style={{ width: '100%', background: 'transparent', border: '1px solid var(--color-rule)', color: 'var(--color-paper-contrast)', padding: '0.5rem', fontFamily: 'var(--font-mono)' }} value={config?.landing_page?.[`stat_${i}_lbl`] || ''} onChange={(e) => handleLandingChange(`stat_${i}_lbl`, e.target.value)} />
+                      </div>
+                    </div>
+                  ))}
+
+                  <hr className="rule-thick" style={{ margin: '2rem 0' }} />
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem' }}>
+                    <span className="eyebrow">CAPABILITIES CARDS</span>
+                    <button className="btn btn--outline" onClick={handleAddCard} style={{ padding: '0 0.75rem', height: '2rem' }}>+ ADD CARD</button>
+                  </div>
+                  {(config?.landing_page?.capabilities_cards || []).map((card: any, idx: number) => (
+                    <div key={idx} style={{ padding: '1rem', border: '1px solid var(--color-rule)', borderRadius: '8px', marginBottom: '1rem', background: 'var(--color-paper-2)' }}>
+                      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem' }}>
+                        <span className="eyebrow">CARD {idx + 1}</span>
+                        <button className="btn-icon hover-destructive" onClick={() => handleDeleteCard(idx)}><Trash2 size={16} /></button>
+                      </div>
+                      <div className="form-group" style={{ marginBottom: '0.75rem' }}>
+                        <input className="lumen-input" style={{ width: '100%', background: 'transparent', border: '1px solid var(--color-rule)', color: 'var(--color-paper-contrast)', padding: '0.5rem', fontFamily: 'var(--font-mono)' }} value={card.eyebrow} onChange={(e) => handleUpdateCard(idx, 'eyebrow', e.target.value)} placeholder="Eyebrow (e.g. PRECISION)" />
+                      </div>
+                      <div className="form-group" style={{ marginBottom: '0.75rem' }}>
+                        <input className="lumen-input" style={{ width: '100%', background: 'transparent', border: '1px solid var(--color-rule)', color: 'var(--color-paper-contrast)', padding: '0.5rem', fontFamily: 'var(--font-mono)' }} value={card.title} onChange={(e) => handleUpdateCard(idx, 'title', e.target.value)} placeholder="Title" />
+                      </div>
+                      <div className="form-group">
+                        <textarea className="lumen-input" style={{ width: '100%', minHeight: '60px', background: 'transparent', border: '1px solid var(--color-rule)', color: 'var(--color-paper-contrast)', padding: '0.5rem', fontFamily: 'var(--font-mono)' }} value={card.desc} onChange={(e) => handleUpdateCard(idx, 'desc', e.target.value)} placeholder="Description" />
+                      </div>
+                    </div>
+                  ))}
+
                 </div>
               </div>
 
               {/* Right Column: Live Preview */}
-              <div style={{ overflow: 'hidden', borderRadius: '12px', border: '1px solid var(--color-rule)', background: 'var(--color-paper)', position: 'relative', aspectRatio: '16/10' }}>
+              <div style={{ overflow: 'hidden', borderRadius: '8px', border: '1px solid rgba(255,255,255,0.1)', background: '#000', position: 'relative', aspectRatio: '16/10' }}>
                 <div style={{ transform: 'scale(0.5)', transformOrigin: 'top left', width: '200%', height: '200%', pointerEvents: 'none' }}>
                   <Landing overrideConfig={config?.landing_page} />
                 </div>
@@ -669,9 +735,19 @@ const AdminDashboard = () => {
             >
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '2rem' }}>
                 <span className="eyebrow">USER DOSSIER</span>
-                <button className="btn-icon" onClick={() => setSelectedStudentId(null)}>
-                  <Trash2 size={20} style={{ transform: 'rotate(45deg)' }} /> 
-                </button>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
+                  <button className="btn-icon hover-destructive" onClick={(e) => { 
+                    if(studentDetails) {
+                      handleDeleteStudent(studentDetails.profile.id, e);
+                      setSelectedStudentId(null);
+                    }
+                  }} title="delete student">
+                    <Trash2 size={18} />
+                  </button>
+                  <button className="btn-icon" onClick={() => setSelectedStudentId(null)} title="close">
+                    <X size={20} /> 
+                  </button>
+                </div>
               </div>
               
               {loadingDetails ? (
@@ -703,11 +779,14 @@ const AdminDashboard = () => {
                           <tbody>
                             {studentDetails.roadmaps.map((rm, idx) => (
                               <tr key={idx} className="lumen-row" style={{ flexDirection: 'column', alignItems: 'flex-start', padding: '1.5rem' }}>
-                                <div style={{ marginBottom: '1rem', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-                                  <Hexagon size={16} className="accent-icon" />
-                                  <span style={{ fontFamily: 'var(--font-mono)', color: 'var(--color-accent)' }}>{rm.primary_career.toLowerCase()}</span>
+                                <div style={{ width: '100%', display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem' }}>
+                                  <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                                    <Hexagon size={16} className="accent-icon" />
+                                    <span style={{ fontFamily: 'var(--font-mono)', color: 'var(--color-accent)' }}>{rm.primary_career.toLowerCase()}</span>
+                                  </div>
+                                  <button className="btn btn--outline" onClick={() => window.open(`/roadmap?id=${rm.id}`, '_blank')}>VIEW</button>
                                 </div>
-                                <div style={{ fontFamily: 'var(--font-mono)', color: 'var(--color-rule)', marginBottom: '1rem' }}>
+                                <div style={{ fontFamily: 'var(--font-mono)', color: 'var(--color-rule)' }}>
                                   {rm.roadmap_data?.reasoning || 'n/a'}
                                 </div>
                               </tr>
