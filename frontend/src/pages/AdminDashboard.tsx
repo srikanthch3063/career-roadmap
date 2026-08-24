@@ -5,6 +5,7 @@ import { Users, BookOpen, Target, LogOut, Shield, Key, Trash2, Eye, EyeOff, Term
 import { motion, AnimatePresence } from 'framer-motion';
 import toast from 'react-hot-toast';
 import ThemeToggle from '../components/ThemeToggle';
+import Landing, { DEFAULT_LANDING_CONFIG } from './Landing';
 import './Dashboard.css';
 
 interface Stats {
@@ -41,6 +42,7 @@ const AdminDashboard = () => {
   const [stats, setStats] = useState<Stats | null>(null);
   const [students, setStudents] = useState<Student[]>([]);
   const [config, setConfig] = useState<any>(null);
+  const [originalConfig, setOriginalConfig] = useState<any>(null);
   const [tickets, setTickets] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [savingConfig, setSavingConfig] = useState(false);
@@ -89,6 +91,7 @@ const AdminDashboard = () => {
       setStats(data.stats);
       setStudents(data.students);
       setConfig(configData);
+      setOriginalConfig(configData);
       setTickets(ticketsData || []);
     } catch (err: any) {
       setError(err.message);
@@ -138,6 +141,7 @@ const AdminDashboard = () => {
       });
       if (!res.ok) throw new Error('Failed to save configuration');
       toast.success('Configuration saved successfully');
+      setOriginalConfig(config);
     } catch (err) {
       toast.error('Failed to save config');
     } finally {
@@ -151,6 +155,16 @@ const AdminDashboard = () => {
       landing_page: {
         ...(prev?.landing_page || {}),
         [key]: value
+      }
+    }));
+  };
+
+  const handleRestoreDefaults = () => {
+    setConfig((prev: any) => ({
+      ...prev,
+      landing_page: {
+        ...(prev?.landing_page || {}),
+        ...DEFAULT_LANDING_CONFIG
       }
     }));
   };
@@ -577,45 +591,61 @@ const AdminDashboard = () => {
 
           {/* Landing CMS Tab */}
           {activeTab === 'landing' && (
-            <motion.div key="landing" initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0 }} className="lumen-data">
-              <div className="data-header">
-                <span className="eyebrow">01 · LANDING PAGE CONTENT</span>
-                <button className="btn btn--primary" onClick={saveConfig} disabled={savingConfig}>
-                  <Save size={16} style={{ marginRight: '0.5rem' }} /> {savingConfig ? 'COMMITTING...' : 'COMMIT CHANGES'}
-                </button>
+            <motion.div key="landing" initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0 }} className="lumen-data" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '2rem' }}>
+              
+              {/* Left Column: Form */}
+              <div style={{ display: 'flex', flexDirection: 'column' }}>
+                <div className="data-header">
+                  <span className="eyebrow">01 · LANDING PAGE CONTENT</span>
+                  <div style={{ display: 'flex', gap: '0.5rem' }}>
+                    <button className="btn btn--outline" onClick={() => setConfig(originalConfig)}>DISCARD CHANGES</button>
+                    <button className="btn btn--outline" onClick={handleRestoreDefaults}>RESTORE DEFAULTS</button>
+                    <button className="btn btn--primary" onClick={saveConfig} disabled={savingConfig}>
+                      <Save size={16} style={{ marginRight: '0.5rem' }} /> {savingConfig ? 'COMMITTING...' : 'COMMIT'}
+                    </button>
+                  </div>
+                </div>
+                <div style={{ padding: '2rem' }}>
+                  <div className="form-group" style={{ marginBottom: '1.5rem' }}>
+                    <label className="eyebrow">Hero Subtitle (Eyebrow)</label>
+                    <input 
+                      className="lumen-input"
+                      style={{ width: '100%', background: 'transparent', border: '1px solid var(--color-rule)', color: 'var(--color-paper-contrast)', padding: '0.5rem', fontFamily: 'var(--font-mono)' }}
+                      value={config?.landing_page?.hero_eyebrow || ''}
+                      onChange={(e) => handleLandingChange('hero_eyebrow', e.target.value)}
+                      placeholder="e.g. 01 · SYSTEM CALIBRATION"
+                    />
+                  </div>
+                  <div className="form-group" style={{ marginBottom: '1.5rem' }}>
+                    <label className="eyebrow">Hero Title Line 1</label>
+                    <input 
+                      className="lumen-input"
+                      style={{ width: '100%', background: 'transparent', border: '1px solid var(--color-rule)', color: 'var(--color-paper-contrast)', padding: '0.5rem', fontFamily: 'var(--font-mono)' }}
+                      value={config?.landing_page?.hero_title_1 || ''}
+                      onChange={(e) => handleLandingChange('hero_title_1', e.target.value)}
+                      placeholder="e.g. engineering the"
+                    />
+                  </div>
+                  <div className="form-group" style={{ marginBottom: '1.5rem' }}>
+                    <label className="eyebrow">Hero Title Line 2 (Emphasized)</label>
+                    <input 
+                      className="lumen-input"
+                      style={{ width: '100%', background: 'transparent', border: '1px solid var(--color-rule)', color: 'var(--color-paper-contrast)', padding: '0.5rem', fontFamily: 'var(--font-mono)' }}
+                      value={config?.landing_page?.hero_title_2 || ''}
+                      onChange={(e) => handleLandingChange('hero_title_2', e.target.value)}
+                      placeholder="e.g. unknown."
+                    />
+                  </div>
+                </div>
               </div>
-              <div style={{ padding: '2rem' }}>
-                <div className="form-group" style={{ marginBottom: '1.5rem' }}>
-                  <label className="eyebrow">Hero Subtitle (Eyebrow)</label>
-                  <input 
-                    className="lumen-input"
-                    style={{ width: '100%', background: 'transparent', border: '1px solid var(--color-rule)', color: 'var(--color-paper-contrast)', padding: '0.5rem', fontFamily: 'var(--font-mono)' }}
-                    value={config?.landing_page?.hero_eyebrow || ''}
-                    onChange={(e) => handleLandingChange('hero_eyebrow', e.target.value)}
-                    placeholder="e.g. 01 · SYSTEM CALIBRATION"
-                  />
-                </div>
-                <div className="form-group" style={{ marginBottom: '1.5rem' }}>
-                  <label className="eyebrow">Hero Title Line 1</label>
-                  <input 
-                    className="lumen-input"
-                    style={{ width: '100%', background: 'transparent', border: '1px solid var(--color-rule)', color: 'var(--color-paper-contrast)', padding: '0.5rem', fontFamily: 'var(--font-mono)' }}
-                    value={config?.landing_page?.hero_title_1 || ''}
-                    onChange={(e) => handleLandingChange('hero_title_1', e.target.value)}
-                    placeholder="e.g. engineering the"
-                  />
-                </div>
-                <div className="form-group" style={{ marginBottom: '1.5rem' }}>
-                  <label className="eyebrow">Hero Title Line 2 (Emphasized)</label>
-                  <input 
-                    className="lumen-input"
-                    style={{ width: '100%', background: 'transparent', border: '1px solid var(--color-rule)', color: 'var(--color-paper-contrast)', padding: '0.5rem', fontFamily: 'var(--font-mono)' }}
-                    value={config?.landing_page?.hero_title_2 || ''}
-                    onChange={(e) => handleLandingChange('hero_title_2', e.target.value)}
-                    placeholder="e.g. unknown."
-                  />
+
+              {/* Right Column: Live Preview */}
+              <div style={{ overflow: 'hidden', borderRadius: '12px', border: '1px solid var(--color-rule)', background: 'var(--color-paper)', position: 'relative', aspectRatio: '16/10' }}>
+                <div style={{ transform: 'scale(0.5)', transformOrigin: 'top left', width: '200%', height: '200%', pointerEvents: 'none' }}>
+                  <Landing overrideConfig={config?.landing_page} />
                 </div>
               </div>
+
             </motion.div>
           )}
         </AnimatePresence>

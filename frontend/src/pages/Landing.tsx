@@ -53,27 +53,38 @@ function FeatureCard({ eyebrow, title, desc }: { eyebrow: string, title: string,
   );
 }
 
-const Landing = () => {
+export const DEFAULT_LANDING_CONFIG = {
+  hero_eyebrow: '00 · ROADMAP INFERENCE',
+  hero_title_1: 'career paths,',
+  hero_title_2: 'engineered by ai.'
+};
+
+const Landing = ({ overrideConfig }: { overrideConfig?: any }) => {
   const navigate = useNavigate();
   const [legalModalOpen, setLegalModalOpen] = useState(false);
   const [legalModalType, setLegalModalType] = useState<'privacy' | 'terms' | 'status' | null>(null);
   const [helpModalOpen, setHelpModalOpen] = useState(false);
-  const [landingConfig, setLandingConfig] = useState<any>(null);
+  const [landingConfig, setLandingConfig] = useState<any>(overrideConfig || DEFAULT_LANDING_CONFIG);
 
   useEffect(() => {
+    if (overrideConfig) {
+      setLandingConfig({ ...DEFAULT_LANDING_CONFIG, ...overrideConfig });
+      return;
+    }
+
     const fetchConfig = async () => {
       try {
         const apiUrl = import.meta.env.VITE_API_BASE_URL || (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1' ? 'http://localhost:3000/api' : '/api');
         const res = await fetch(`${apiUrl}/config/landing`);
         if (!res.ok) throw new Error('Failed to fetch config');
         const data = await res.json();
-        setLandingConfig(data);
+        setLandingConfig({ ...DEFAULT_LANDING_CONFIG, ...data });
       } catch (err) {
         console.error('Error fetching landing config:', err);
       }
     };
     fetchConfig();
-  }, []);
+  }, [overrideConfig]);
 
   const openLegalModal = (e: React.MouseEvent, type: 'privacy' | 'terms' | 'status') => {
     e.preventDefault();
