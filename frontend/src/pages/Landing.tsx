@@ -60,6 +60,21 @@ const Landing = () => {
   const [helpModalOpen, setHelpModalOpen] = useState(false);
   const [landingConfig, setLandingConfig] = useState<any>(null);
 
+  useEffect(() => {
+    const fetchConfig = async () => {
+      try {
+        const apiUrl = import.meta.env.VITE_API_BASE_URL || (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1' ? 'http://localhost:3000/api' : '/api');
+        const res = await fetch(`${apiUrl}/config/landing`);
+        if (!res.ok) throw new Error('Failed to fetch config');
+        const data = await res.json();
+        setLandingConfig(data);
+      } catch (err) {
+        console.error('Error fetching landing config:', err);
+      }
+    };
+    fetchConfig();
+  }, []);
+
   const openLegalModal = (e: React.MouseEvent, type: 'privacy' | 'terms' | 'status') => {
     e.preventDefault();
     setLegalModalType(type);

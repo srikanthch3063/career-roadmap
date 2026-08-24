@@ -145,6 +145,16 @@ const AdminDashboard = () => {
     }
   };
 
+  const handleLandingChange = (key: string, value: string) => {
+    setConfig((prev: any) => ({
+      ...prev,
+      landing_page: {
+        ...(prev?.landing_page || {}),
+        [key]: value
+      }
+    }));
+  };
+
   const handleDeleteStudent = async (studentId: string, e: React.MouseEvent) => {
     e.stopPropagation();
     if (!confirm('Are you sure you want to delete this student and all their roadmaps?')) return;
@@ -581,7 +591,7 @@ const AdminDashboard = () => {
                     className="lumen-input"
                     style={{ width: '100%', background: 'transparent', border: '1px solid var(--color-rule)', color: 'var(--color-paper-contrast)', padding: '0.5rem', fontFamily: 'var(--font-mono)' }}
                     value={config?.landing_page?.hero_eyebrow || ''}
-                    onChange={(e) => setConfig({ ...config, landing_page: { ...config?.landing_page, hero_eyebrow: e.target.value }})}
+                    onChange={(e) => handleLandingChange('hero_eyebrow', e.target.value)}
                     placeholder="e.g. 01 · SYSTEM CALIBRATION"
                   />
                 </div>
@@ -591,7 +601,7 @@ const AdminDashboard = () => {
                     className="lumen-input"
                     style={{ width: '100%', background: 'transparent', border: '1px solid var(--color-rule)', color: 'var(--color-paper-contrast)', padding: '0.5rem', fontFamily: 'var(--font-mono)' }}
                     value={config?.landing_page?.hero_title_1 || ''}
-                    onChange={(e) => setConfig({ ...config, landing_page: { ...config?.landing_page, hero_title_1: e.target.value }})}
+                    onChange={(e) => handleLandingChange('hero_title_1', e.target.value)}
                     placeholder="e.g. engineering the"
                   />
                 </div>
@@ -601,7 +611,7 @@ const AdminDashboard = () => {
                     className="lumen-input"
                     style={{ width: '100%', background: 'transparent', border: '1px solid var(--color-rule)', color: 'var(--color-paper-contrast)', padding: '0.5rem', fontFamily: 'var(--font-mono)' }}
                     value={config?.landing_page?.hero_title_2 || ''}
-                    onChange={(e) => setConfig({ ...config, landing_page: { ...config?.landing_page, hero_title_2: e.target.value }})}
+                    onChange={(e) => handleLandingChange('hero_title_2', e.target.value)}
                     placeholder="e.g. unknown."
                   />
                 </div>
