@@ -4,7 +4,8 @@
   "scripts": {
     "build": "cd frontend && npm install && npm run build"
   },
-  "dependencies": {
+  "devDependencies": {
+    "autocannon": "^8.0.0",
     "exceljs": "^4.4.0"
   }
 }

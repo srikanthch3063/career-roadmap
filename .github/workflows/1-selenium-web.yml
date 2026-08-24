@@ -1,0 +1,31 @@
+name: "React JS Web Selenium E2E Automation"
+
+on:
+  push:
+    branches: [ "main" ]
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node 20
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: Install dependencies
+        run: |
+          npm install
+          npm install exceljs
+
+      - name: Run Selenium E2E Web Tests
+        run: node selenium-tests/tests/login-tests.js
+
+      - name: Upload Selenium Report Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: selenium-test-results
+          path: "**/*.xlsx"

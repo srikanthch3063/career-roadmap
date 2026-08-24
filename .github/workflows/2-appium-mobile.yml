@@ -1,0 +1,31 @@
+name: "React Native Android Appium 2.x Automation"
+
+on:
+  push:
+    branches: [ "main" ]
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node 20
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: Install dependencies
+        run: |
+          npm install
+          npm install exceljs
+
+      - name: Run Appium Mobile E2E Tests
+        run: node appium-tests/tests/app-tests.js
+
+      - name: Upload Appium Report Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: appium-test-results
+          path: "**/*.xlsx"
