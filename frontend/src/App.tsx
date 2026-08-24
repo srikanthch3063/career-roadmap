@@ -31,6 +31,7 @@ const App = () => {
     supabase.auth.onAuthStateChange((_event, session) => {
       setSession(session);
       if (session) {
+        setLoading(true);
         fetchRole(session.user.id);
       } else {
         setRole(null);
@@ -40,14 +41,25 @@ const App = () => {
   }, []);
 
   const fetchRole = async (userId: string) => {
-    const { data, error } = await supabase
-      .from('profiles')
-      .select('role')
-      .eq('id', userId)
-      .single();
-    
-    if (data) setRole(data.role);
-    setLoading(false);
+    try {
+      const { data, error } = await supabase
+        .from('profiles')
+        .select('role')
+        .eq('id', userId)
+        .single();
+      
+      if (data && data.role) {
+        setRole(data.role);
+      } else {
+        // Fallback to prevent loops
+        setRole('student'); 
+      }
+    } catch (e) {
+      console.error('Error fetching role:', e);
+      setRole('student');
+    } finally {
+      setLoading(false);
+    }
   };
 
   if (loading) {
