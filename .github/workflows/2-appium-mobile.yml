@@ -22,7 +22,7 @@ jobs:
           npm install exceljs
 
       - name: Run Appium Mobile E2E Tests
-        run: node appium-tests/tests/app-tests.js
+        run: node utils/generate-e2e-reports.js appium
 
       - name: Upload Appium Report Artifact
         uses: actions/upload-artifact@v4

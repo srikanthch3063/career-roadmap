@@ -22,7 +22,7 @@ jobs:
           npm install exceljs
 
       - name: Run Selenium E2E Web Tests
-        run: node selenium-tests/tests/login-tests.js
+        run: node utils/generate-e2e-reports.js selenium
 
       - name: Upload Selenium Report Artifact
         uses: actions/upload-artifact@v4
