@@ -1,4 +1,4 @@
-name: "React Native Android Appium 2.x Automation"
+name: "PWA Mobile Appium 2.x Automation"
 
 on:
   push:

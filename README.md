@@ -70,36 +70,11 @@ The frontend will be available at `http://localhost:5173` and backend at `http:/
 
 ---
 
-## 📱 Building the Android APK with Capacitor
+## 📱 Progressive Web App (PWA)
 
-When you are ready to build the Android APK, you must point the frontend to the deployed backend so the physical phone can reach it (a phone cannot reach `localhost:3000`).
+This application is built as a Progressive Web App (PWA) using standard web technologies. It does not use Capacitor or React Native to generate an APK. Instead, it utilizes a Web Manifest and a Service Worker for offline caching and native-like installation.
 
-**Steps to build:**
-
-1. **Update Environment Variable for Production**
-   In `frontend/.env.production` (or just your `.env`), set:
-   ```env
-   VITE_API_BASE_URL=https://your-deployed-backend-url.com/api
-   ```
-
-2. **Build the Web App**
-   ```bash
-   cd frontend
-   npm run build
-   ```
-
-3. **Sync to Capacitor**
-   ```bash
-   npx cap sync
-   ```
-
-4. **Open in Android Studio to Build APK**
-   ```bash
-   npx cap open android
-   ```
-   - In Android Studio, wait for Gradle to sync.
-   - Go to **Build > Build Bundle(s) / APK(s) > Build APK(s)**.
-   - Once finished, you will find your `app-debug.apk` in `frontend/android/app/build/outputs/apk/debug/`.
-
-**Note on Network Security:** 
-If your backend is deployed with HTTPS, Android will allow the connection automatically. If you attempt to connect to a cleartext HTTP backend on a local network for testing, you will need to add `android:usesCleartextTraffic="true"` to your `AndroidManifest.xml`.
+**How to Install the App Natively:**
+1. Open the deployed frontend URL in your mobile or desktop browser (e.g., Chrome, Safari).
+2. Follow the browser prompt to **"Add to Home Screen"** or click the install icon in the URL bar.
+3. The app will install directly to your device and run in a standalone, immersive window without browser UI, functioning exactly like a native application!
