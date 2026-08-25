@@ -1,8 +1,9 @@
 const { Builder, By, until } = require('selenium-webdriver');
+const chrome = require('selenium-webdriver/chrome');
 const fs = require('fs');
 const xlsx = require('xlsx');
 
-const TARGET_URL = 'http://localhost:5173/login';
+const TARGET_URL = 'https://career-roadmap-phi.vercel.app/login';
 
 // Boundary Edge Cases
 const testCases = [
@@ -20,7 +21,13 @@ async function runSeleniumTests() {
     // We try to create a driver
     let driver;
     try {
-        driver = await new Builder().forBrowser('chrome').build();
+        let options = new chrome.Options();
+        options.addArguments('--headless', '--no-sandbox', '--disable-dev-shm-usage');
+        
+        driver = await new Builder()
+            .forBrowser('chrome')
+            .setChromeOptions(options)
+            .build();
     } catch (e) {
         console.error('Failed to start Chrome WebDriver:', e.message);
         console.log('Continuing script in mock simulation mode to generate Excel output for CI.');
