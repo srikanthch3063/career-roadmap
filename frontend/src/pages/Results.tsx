@@ -6,7 +6,7 @@ import toast from 'react-hot-toast';
 import { 
   Map, Printer, CheckCircle2, Circle, 
   Search, Code2, Briefcase, GraduationCap,
-  Loader2, X, ExternalLink, Lightbulb, Share2, MessageSquare, Calendar, ChevronRight, Download, Hexagon, Menu
+  Loader2, X, ExternalLink, Lightbulb, Share2, MessageSquare, Calendar, ChevronRight, Download, Hexagon, Menu, Copy
 } from 'lucide-react';
 import html2canvas from 'html2canvas';
 import { jsPDF } from 'jspdf';
@@ -162,7 +162,7 @@ const Results = () => {
           'Content-Type': 'application/json',
           'Authorization': `Bearer ${session.access_token}`
         },
-        body: JSON.stringify({ checkedItems: checkedArray })
+        body: JSON.stringify({ checkedItems: checkedArray, roadmapId: roadmapId || undefined })
       });
     } catch (e) {
       console.error("Failed to save progress", e);
@@ -195,9 +195,10 @@ const Results = () => {
       // Wait for layout recalculation
       await new Promise(resolve => setTimeout(resolve, 50));
 
+      const bg = getComputedStyle(document.documentElement).getPropertyValue('--color-paper').trim() || '#0a0a0a';
       const canvas = await html2canvas(originalElement, { 
         scale: 2, 
-        backgroundColor: '#0a0a0a',
+        backgroundColor: bg.startsWith('#') || bg.startsWith('rgb') ? bg : '#1a1a24',
         useCORS: true,
         logging: false,
         windowWidth: 794,
@@ -236,13 +237,28 @@ const Results = () => {
     }
   };
 
+  const roadmapId = new URLSearchParams(location.search).get('id');
   const handleShare = async () => {
     try {
-      await navigator.clipboard.writeText(window.location.href);
+      const url = roadmapId ? `${window.location.origin}/results?id=${roadmapId}` : window.location.href;
+      await navigator.clipboard.writeText(url);
       toast.success('link copied.');
     } catch {
       toast.error('clipboard error.');
     }
+  };
+  const handleDuplicate = async () => {
+    try {
+      const { data: { session } } = await supabase.auth.getSession();
+      if (!session) throw new Error('Not authenticated');
+      const apiUrl = import.meta.env.VITE_API_BASE_URL || (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1' ? 'http://localhost:3000/api' : '/api');
+      const res = await fetch(`${apiUrl}/generate-roadmap`, { method: 'POST', headers: { 'Authorization': `Bearer ${session.access_token}` } });
+      if (!res.ok) throw new Error('duplicate failed');
+      const data = await res.json();
+      setRoadmap(data);
+      toast.success('duplicated - new variant generated');
+      navigate('/results', { replace: true });
+    } catch (e:any){ toast.error(e.message); }
   };
 
   if (loading) {
@@ -323,8 +339,11 @@ const Results = () => {
 
         <div className="lumen-sidebar__footer">
           <ThemeToggle />
-          <button className="nav-item" onClick={handleShare}>
+          <button className="nav-item" onClick={handleShare} data-testid="share-button">
             <Share2 size={16} /> <span>share link</span>
+          </button>
+          <button className="nav-item" onClick={handleDuplicate} data-testid="duplicate-button">
+            <Copy size={16} /> <span>duplicate</span>
           </button>
           <button className="nav-item" onClick={handleExportPDF}>
             <Download size={16} /> <span>export pdf</span>

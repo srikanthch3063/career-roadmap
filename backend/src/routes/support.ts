@@ -9,12 +9,12 @@ const supabaseKey = process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.SUPABAS
 
 const supabase = createClient(supabaseUrl, supabaseKey);
 
-// Setup Nodemailer transporter
+// Setup Nodemailer transporter (unified env: EMAIL_APP_PASSWORD)
 const transporter = nodemailer.createTransport({
   service: 'gmail',
   auth: {
     user: process.env.EMAIL_USER,
-    pass: process.env.EMAIL_PASS
+    pass: process.env.EMAIL_APP_PASSWORD || process.env.EMAIL_PASS
   }
 });
 

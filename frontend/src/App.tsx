@@ -7,6 +7,7 @@ import Quiz from './pages/Quiz';
 import Results from './pages/Results';
 import WeeklyPlan from './pages/WeeklyPlan';
 import AdminDashboard from './pages/AdminDashboard';
+import Profile from './pages/Profile';
 import { supabase } from './supabase';
 import { Toaster } from 'react-hot-toast';
 import { ThemeProvider } from './theme/ThemeProvider';
@@ -173,6 +174,7 @@ const AppContent = () => {
         <Route path="/quiz" element={<ProtectedRoute session={session} role={role} loading={loading}><Quiz /></ProtectedRoute>} />
         <Route path="/results" element={<ProtectedRoute session={session} role={role} loading={loading}><Results /></ProtectedRoute>} />
         <Route path="/weekly-plan" element={<ProtectedRoute session={session} role={role} loading={loading}><WeeklyPlan /></ProtectedRoute>} />
+        <Route path="/profile" element={<ProtectedRoute session={session} role={role} loading={loading}><Profile /></ProtectedRoute>} />
         
         {/* Protected Admin Routes */}
         <Route path="/admin" element={<ProtectedRoute session={session} role={role} loading={loading} adminOnly><AdminDashboard /></ProtectedRoute>} />

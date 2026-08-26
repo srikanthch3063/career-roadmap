@@ -240,4 +240,26 @@ router.patch('/tickets/:id', requireAuth, requireAdmin, async (req: any, res: an
   }
 });
 
+// Secure student deletion via service_role (replaces client-side delete)
+router.delete('/student/:id', requireAuth, requireAdmin, async (req: any, res: any) => {
+  try {
+    const studentId = req.params.id;
+    // Delete roadmaps + quiz first (FK cascade but explicit)
+    await supabase.from('roadmaps').delete().eq('user_id', studentId);
+    await supabase.from('quiz_responses').delete().eq('user_id', studentId);
+    const { error: profileError } = await supabase.from('profiles').delete().eq('id', studentId);
+    if (profileError) throw profileError;
+    // Also delete auth user via admin API
+    try {
+      await supabase.auth.admin.deleteUser(studentId);
+    } catch (e) {
+      console.warn('Auth admin delete failed (non-critical):', e);
+    }
+    res.json({ success: true });
+  } catch (error) {
+    console.error('Error deleting student:', error);
+    res.status(500).json({ error: 'Failed to delete student' });
+  }
+});
+
 export default router;

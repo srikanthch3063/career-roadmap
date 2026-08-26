@@ -193,9 +193,12 @@ const AdminDashboard = () => {
     try {
       const { data: { session } } = await supabase.auth.getSession();
       if (!session) return;
-
-      await supabase.from('roadmaps').delete().eq('user_id', studentId);
-      await supabase.from('profiles').delete().eq('id', studentId);
+      const apiUrl = import.meta.env.VITE_API_BASE_URL || (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1' ? 'http://localhost:3000/api' : '/api');
+      const res = await fetch(`${apiUrl}/admin/student/${studentId}`, {
+        method: 'DELETE',
+        headers: { 'Authorization': `Bearer ${session.access_token}` }
+      });
+      if (!res.ok) throw new Error('delete failed');
       
       setStudents(prev => prev.filter(s => s.id !== studentId));
       if (selectedStudentId === studentId) setSelectedStudentId(null);

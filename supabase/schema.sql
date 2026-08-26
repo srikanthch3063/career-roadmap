@@ -81,3 +81,36 @@ CREATE TRIGGER on_auth_user_created
 
 -- To make admin@careerroadmap.test an admin (run this manually after registering the user):
 -- UPDATE public.profiles SET role = 'admin' WHERE email = 'admin@careerroadmap.test';
+
+-- 5. System Config (for landing CMS + AI prompts + quiz)
+CREATE TABLE IF NOT EXISTS public.system_config (
+  id int PRIMARY KEY,
+  config jsonb NOT NULL DEFAULT '{}'::jsonb,
+  updated_at timestamptz DEFAULT now()
+);
+INSERT INTO public.system_config (id, config)
+VALUES (1, '{}'::jsonb)
+ON CONFLICT (id) DO NOTHING;
+ALTER TABLE public.system_config ENABLE ROW LEVEL SECURITY;
+-- Allow authenticated read for landing/config, admin write via service_role
+DROP POLICY IF EXISTS "Anyone can read config" ON public.system_config;
+CREATE POLICY "Anyone can read config" ON public.system_config FOR SELECT USING (true);
+-- Writes only via service_role (bypasses RLS), no public update policy
+
+-- 6. Support Tickets
+CREATE TABLE IF NOT EXISTS public.support_tickets (
+  id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
+  name text NOT NULL,
+  email text NOT NULL,
+  topic text NOT NULL,
+  problem text NOT NULL CHECK (char_length(problem) <= 500),
+  status text NOT NULL DEFAULT 'open' CHECK (status IN ('open','in_progress','resolved')),
+  created_at timestamptz DEFAULT now()
+);
+ALTER TABLE public.support_tickets ENABLE ROW LEVEL SECURITY;
+DROP POLICY IF EXISTS "Anyone can insert tickets" ON public.support_tickets;
+CREATE POLICY "Anyone can insert tickets" ON public.support_tickets FOR INSERT WITH CHECK (true);
+DROP POLICY IF EXISTS "Admin can read tickets" ON public.support_tickets;
+CREATE POLICY "Admin can read tickets" ON public.support_tickets FOR SELECT USING (true);
+DROP POLICY IF EXISTS "Admin can update tickets" ON public.support_tickets;
+CREATE POLICY "Admin can update tickets" ON public.support_tickets FOR UPDATE USING (true);

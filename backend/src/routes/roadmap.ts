@@ -105,7 +105,7 @@ router.post('/generate-roadmap', requireAuth, generateLimiter, async (req: AuthR
           messages: [
             { role: 'system', content: systemPrompt }
           ],
-          model: 'openai/gpt-oss-120b',
+          model: process.env.GROQ_MODEL || 'openai/gpt-oss-120b',
           temperature: 0.85,
           response_format: { type: 'json_object' }
         });
@@ -174,6 +174,11 @@ router.post('/chat', requireAuth, async (req: any, res: any) => {
   res.flushHeaders();
 
   try {
+    if (!groq) {
+      res.write(`data: ${JSON.stringify({ error: 'AI service offline. Please try fallback resources.' })}\n\n`);
+      res.write(`data: [DONE]\n\n`);
+      return res.end();
+    }
     const { question, roadmapContext } = req.body;
 
     if (!question || !roadmapContext) {
@@ -209,12 +214,13 @@ IMPORTANT RULES:
       }
     }
 
+    const model = process.env.GROQ_MODEL || 'openai/gpt-oss-120b';
     const stream = await groq.chat.completions.create({
       messages: [
         { role: 'system', content: systemPrompt },
         { role: 'user', content: question }
       ],
-      model: 'openai/gpt-oss-120b',
+      model,
       temperature: 0.7,
       max_tokens: maxTokens,
       stream: true,
@@ -239,6 +245,9 @@ IMPORTANT RULES:
 // Weekly Plan Generator Endpoint
 router.post('/plan', requireAuth, async (req: any, res: any) => {
   try {
+    if (!groq) {
+      return res.status(503).json({ error: 'AI service offline. Weekly plan unavailable, use fallback checklist.' });
+    }
     const { roadmapContext } = req.body;
 
     if (!roadmapContext) {
@@ -261,11 +270,12 @@ Return ONLY a valid JSON object matching this schema exactly:
   ]
 }`;
 
+    const model = process.env.GROQ_MODEL || 'openai/gpt-oss-120b';
     const chatCompletion = await groq.chat.completions.create({
       messages: [
         { role: 'system', content: systemPrompt }
       ],
-      model: 'openai/gpt-oss-120b',
+      model,
       temperature: 0.7,
       response_format: { type: 'json_object' }
     });
@@ -278,38 +288,49 @@ Return ONLY a valid JSON object matching this schema exactly:
   }
 });
 
-// Update Progress Endpoint
+// Update Progress Endpoint (backward compat: supports roadmapId)
 router.put('/progress', requireAuth, async (req: any, res: any) => {
   try {
     const userId = req.user.id;
-    const { checkedItems } = req.body; // array of strings (item names)
+    const { checkedItems, roadmapId } = req.body; // roadmapId optional
 
     if (!Array.isArray(checkedItems)) {
       return res.status(400).json({ error: 'checkedItems must be an array' });
     }
 
-    // Since users might have multiple roadmaps, we'll update the most recent one for now
-    // Or we could pass roadmap_id if we had it on the frontend.
-    const { data: latestRoadmaps } = await supabase
-      .from('roadmaps')
-      .select('id, roadmap')
-      .eq('user_id', userId)
-      .order('created_at', { ascending: false })
-      .limit(1);
+    let targetId: string | null = roadmapId || null;
+    let targetRoadmap: any = null;
 
-    if (latestRoadmaps && latestRoadmaps.length > 0) {
-      const latest = latestRoadmaps[0];
-      const updatedRoadmap = { ...latest.roadmap, checked_items: checkedItems };
-
-      await supabase
+    if (targetId) {
+      const { data, error } = await supabase
         .from('roadmaps')
-        .update({ roadmap: updatedRoadmap })
-        .eq('id', latest.id);
-
-      res.json({ success: true });
+        .select('id, roadmap')
+        .eq('id', targetId)
+        .eq('user_id', userId)
+        .single();
+      if (error || !data) return res.status(404).json({ error: 'Roadmap not found' });
+      targetRoadmap = data;
+      targetId = data.id;
     } else {
-      res.status(404).json({ error: 'No roadmap found' });
+      const { data: latestRoadmaps } = await supabase
+        .from('roadmaps')
+        .select('id, roadmap')
+        .eq('user_id', userId)
+        .order('created_at', { ascending: false })
+        .limit(1);
+      if (!latestRoadmaps || latestRoadmaps.length === 0) return res.status(404).json({ error: 'No roadmap found' });
+      targetRoadmap = latestRoadmaps[0];
+      targetId = targetRoadmap.id;
     }
+
+    const updatedRoadmap = { ...targetRoadmap.roadmap, checked_items: checkedItems };
+    const { error: updateError } = await supabase
+      .from('roadmaps')
+      .update({ roadmap: updatedRoadmap })
+      .eq('id', targetId);
+    if (updateError) throw updateError;
+
+    res.json({ success: true, roadmapId: targetId });
   } catch (error: any) {
     console.error('Error updating progress:', error);
     res.status(500).json({ error: 'Failed to update progress' });

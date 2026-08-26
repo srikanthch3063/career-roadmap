@@ -7,6 +7,7 @@ import roadmapRoutes from './routes/roadmap';
 import adminRoutes from './routes/admin';
 import authRoutes from './routes/auth';
 import supportRoutes from './routes/support';
+import { errorHandler, notFoundHandler } from './middleware/error';
 
 dotenv.config();
 
@@ -63,6 +64,10 @@ app.get('/api/config/landing', async (req, res) => {
     res.status(500).json({ error: 'Failed to read config' });
   }
 });
+
+// 404 + global error handler (must be after routes)
+app.use(notFoundHandler);
+app.use(errorHandler);
 
 // Only listen on a port during local development
 // Vercel imports this file as a serverless function

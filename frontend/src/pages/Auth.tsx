@@ -126,7 +126,7 @@ const AuthPage = () => {
       
       if (data.session) {
         // Send welcome email in background
-        const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:5000';
+        const apiUrl = import.meta.env.VITE_API_BASE_URL?.replace(/\/api\/?$/, '') || 'http://localhost:3000';
         fetch(`${apiUrl}/api/auth/send-welcome`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
@@ -208,14 +208,16 @@ const AuthPage = () => {
             </>
           )}
 
-          {error && <div className="alert alert--error">{error}</div>}
-          {message && <div className="alert alert--success">{message}</div>}
+          {error && <div className="error-message alert alert--error" role="alert" data-testid="error-message">{error}</div>}
+          {message && <div className="alert alert--success" role="status" data-testid="success-message">{message}</div>}
 
           {isForgotPassword ? (
-            <form onSubmit={handleAuth} className="auth-form">
+            <form onSubmit={handleAuth} className="auth-form" data-testid="forgot-form">
               <div className="form-group">
-                <label className="eyebrow">email address</label>
+                <label className="eyebrow" htmlFor="email">email address</label>
                 <input 
+                  id="email"
+                  data-testid="email-input"
                   className="input"
                   type="email" 
                   value={email}
@@ -226,7 +228,7 @@ const AuthPage = () => {
                   autoCorrect="off"
                 />
               </div>
-              <button type="submit" className="btn btn--primary auth-submit" disabled={loading}>
+              <button type="submit" className="btn btn--primary auth-submit" disabled={loading} data-testid="submit-button">
                 {loading ? 'processing...' : 'send reset link'}
               </button>
               <div style={{ textAlign: 'center', marginTop: '1.5rem' }}>
@@ -236,11 +238,13 @@ const AuthPage = () => {
               </div>
             </form>
           ) : !linkSent ? (
-            <form onSubmit={handleAuth} className="auth-form">
+            <form onSubmit={handleAuth} className="auth-form" data-testid="auth-form">
               {!isLogin && (
                 <div className="form-group">
-                  <label className="eyebrow">full name</label>
+                  <label className="eyebrow" htmlFor="fullName">full name</label>
                   <input 
+                    id="fullName"
+                    data-testid="name-input"
                     className="input"
                     type="text" 
                     value={name}
@@ -253,8 +257,10 @@ const AuthPage = () => {
               )}
               
               <div className="form-group">
-                <label className="eyebrow">email address</label>
+                <label className="eyebrow" htmlFor="email">email address</label>
                   <input 
+                    id="email"
+                    data-testid="email-input"
                     className="input"
                     type="email" 
                     value={email}
@@ -269,10 +275,12 @@ const AuthPage = () => {
               
               <div className="form-group">
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                  <label className="eyebrow">password</label>
+                  <label className="eyebrow" htmlFor="password">password</label>
                 </div>
                 <div style={{ position: 'relative' }}>
                   <input 
+                    id="password"
+                    data-testid="password-input"
                     className="input"
                     type={showPassword ? "text" : "password"} 
                     value={password}
@@ -297,10 +305,12 @@ const AuthPage = () => {
               {!isLogin && (
                 <div className="form-group">
                   <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                    <label className="eyebrow">confirm password</label>
+                    <label className="eyebrow" htmlFor="confirmPassword">confirm password</label>
                   </div>
                   <div style={{ position: 'relative' }}>
                     <input 
+                      id="confirmPassword"
+                      data-testid="confirm-password-input"
                       className="input"
                       type={showPassword ? "text" : "password"} 
                       value={confirmPassword}
@@ -322,15 +332,17 @@ const AuthPage = () => {
                 </div>
               )}
 
-              <button type="submit" className="btn btn--primary auth-submit" disabled={loading || lockoutTime > 0}>
+              <button type="submit" className="btn btn--primary auth-submit" disabled={loading || lockoutTime > 0} data-testid="submit-button" id="submit-button">
                 {loading ? 'processing...' : (lockoutTime > 0 ? `locked (${lockoutTime}s)` : (isLogin ? 'authorize' : 'register'))}
               </button>
             </form>
           ) : (
-            <form onSubmit={handleVerifyOtp} className="auth-form">
+            <form onSubmit={handleVerifyOtp} className="auth-form" data-testid="otp-form">
               <div className="form-group">
-                <label className="eyebrow">verification code</label>
+                <label className="eyebrow" htmlFor="otp">verification code</label>
                 <input 
+                  id="otp"
+                  data-testid="otp-input"
                   className="input"
                   type="text" 
                   value={otp}
@@ -341,7 +353,7 @@ const AuthPage = () => {
                   style={{ letterSpacing: '0.5em', textAlign: 'center', fontSize: '1.25rem' }}
                 />
               </div>
-              <button type="submit" className="btn btn--primary auth-submit" disabled={loading}>
+              <button type="submit" className="btn btn--primary auth-submit" disabled={loading} data-testid="verify-button">
                 {loading ? 'verifying...' : 'verify account'}
               </button>
               <div style={{ textAlign: 'center', marginTop: '1.5rem' }}>

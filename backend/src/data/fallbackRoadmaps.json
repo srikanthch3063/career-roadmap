@@ -3,31 +3,31 @@
     "branch": "Computer Science & Engineering (CSE)",
     "roadmap": {
       "primary_career": "Full Stack Developer",
-      "reasoning": "Based on a preference for hands-on coding and building things, full-stack development offers the perfect mix of creating user-facing features and designing robust backend architectures.",
-      "recommended_careers": ["Full Stack Developer", "Frontend Developer", "Software Engineer"],
+      "reasoning": "CSE maps to hands-on coding; full-stack offers end-to-end ownership. Tailored for building shippable products fast.",
+      "recommended_careers": ["Full Stack Developer", "Backend Engineer", "Software Engineer"],
       "roadmap": {
-        "skills_to_learn": ["React", "Node.js", "TypeScript", "SQL/PostgreSQL", "Git & GitHub"],
-        "technologies": ["Vite", "Express", "Supabase", "Tailwind CSS"],
-        "project_ideas": ["Build a task management app with real-time updates", "Create a personal portfolio website with a blog", "Develop an e-commerce storefront mock"],
-        "certifications": ["AWS Certified Cloud Practitioner", "Meta Front-End Developer Professional Certificate"],
-        "internship_advice": "Look for early-stage startups where you can touch multiple parts of the codebase. Focus on demonstrating a working project rather than just theoretical knowledge.",
-        "job_titles": ["Frontend Developer", "Backend Engineer", "Full Stack Engineer"]
+        "skills_to_learn": ["TypeScript fundamentals", "REST & GraphQL design", "PostgreSQL + indexing", "Auth (JWT/OAuth)", "Testing (Vitest)"],
+        "technologies": ["React + Vite", "Node + Express", "Supabase", "Tailwind CSS", "Drizzle ORM"],
+        "project_ideas": ["Task board with real-time Supabase Realtime", "Portfolio + MDX blog with ISR", "E-commerce cart with Stripe mock"],
+        "certifications": ["AWS Certified Cloud Practitioner", "Meta Front-End Developer"],
+        "internship_advice": "Apply to product startups (20-80 eng). Ship one project with migrations + seed + live URL.",
+        "job_titles": ["Full Stack Engineer", "Backend Engineer", "Frontend Developer"]
       }
     }
   },
   {
-    "branch": "Mechanical Engineering",
+    "branch": "Information Technology (IT)",
     "roadmap": {
-      "primary_career": "Robotics Engineer",
-      "reasoning": "Combining mechanical knowledge with an interest in logic and systems leads naturally to robotics, bridging the physical and digital worlds.",
-      "recommended_careers": ["Robotics Engineer", "Automation Engineer", "Systems Engineer"],
+      "primary_career": "Cloud / DevOps Engineer",
+      "reasoning": "IT leans to systems + networks; Cloud/DevOps monetizes that with infra-as-code and SRE breadth.",
+      "recommended_careers": ["DevOps Engineer", "Cloud Architect", "Site Reliability Engineer"],
       "roadmap": {
-        "skills_to_learn": ["Python", "C++", "Kinematics", "Control Systems", "Machine Vision basics"],
-        "technologies": ["ROS (Robot Operating System)", "AutoCAD/SolidWorks", "MATLAB"],
-        "project_ideas": ["Build a line-following robot with Arduino", "Simulate a robotic arm in ROS", "Create a computer vision model to detect objects"],
-        "certifications": ["Coursera Robotics Specialization (UPenn)"],
-        "internship_advice": "Seek roles at manufacturing companies, automotive firms, or drone startups. Hardware experience is hard to fake, so build physical projects.",
-        "job_titles": ["Robotics Engineer", "Mechatronics Engineer", "Automation Engineer"]
+        "skills_to_learn": ["Linux + networking", "Docker & Kubernetes", "CI/CD (GitHub Actions)", "IaC (Terraform)", "Observability (Prometheus/Grafana)"],
+        "technologies": ["AWS (EC2, S3, RDS)", "Docker", "Kubernetes", "Terraform", "Nginx + Cloudflare"],
+        "project_ideas": ["Dockerize this Pathforge stack with compose", "K8s deploy with rolling update + liveness probe", "Terraform VPC + ALB + autoscaling"],
+        "certifications": ["AWS Solutions Architect - Associate", "CKA (Certified Kubernetes Administrator)"],
+        "internship_advice": "Target MSPs / SaaS infra teams. Demo a repo with infra/ folder, not just app/.",
+        "job_titles": ["DevOps Engineer", "Cloud Engineer", "SRE"]
       }
     }
   },
@@ -35,15 +35,127 @@
     "branch": "Electronics & Communication Engineering (ECE)",
     "roadmap": {
       "primary_career": "Embedded Systems Engineer",
-      "reasoning": "A strong foundation in hardware combined with an interest in programming points directly to embedded systems, where you write software that runs on custom hardware.",
-      "recommended_careers": ["Embedded Systems Engineer", "Firmware Engineer", "Hardware Engineer"],
+      "reasoning": "ECE hardware + C maps to firmware at the edge where software meets silicon.",
+      "recommended_careers": ["Embedded Systems Engineer", "Firmware Engineer", "IoT Developer"],
       "roadmap": {
-        "skills_to_learn": ["C/C++", "Microcontrollers (ARM, AVR)", "RTOS", "PCB Design basics", "I2C/SPI protocols"],
-        "technologies": ["Arduino", "Raspberry Pi", "KiCad", "FreeRTOS"],
-        "project_ideas": ["Build a smart home weather station", "Develop a custom mechanical keyboard controller", "Create a simple IoT device sending data to the cloud"],
-        "certifications": ["Embedded Systems Certificate (Coursera/CU Boulder)"],
-        "internship_advice": "Target semiconductor companies, consumer electronics makers, or IoT startups. Showcase a portfolio of microcontroller projects.",
+        "skills_to_learn": ["C/C++ (misra-lite)", "ARM Cortex-M", "RTOS (FreeRTOS)", "I2C/SPI/UART", "PCB basics"],
+        "technologies": ["STM32 / Arduino", "Raspberry Pi", "KiCad", "FreeRTOS", "MQTT"],
+        "project_ideas": ["Weather station with MQTT to Supabase", "Custom keyboard firmware (QMK fork)", "BLE sensor node with OTA"],
+        "certifications": ["Embedded Systems - CU Boulder (Coursera)"],
+        "internship_advice": "Semicon + consumer electronics + IoT startups. Bring hardware demo, not just repo.",
         "job_titles": ["Embedded Software Engineer", "Firmware Engineer", "IoT Developer"]
+      }
+    }
+  },
+  {
+    "branch": "Electrical & Electronics Engineering (EEE)",
+    "roadmap": {
+      "primary_career": "Power Systems + Embedded Engineer",
+      "reasoning": "EEE straddles power + control; hybrid role in EV/energy pays and is scarce.",
+      "recommended_careers": ["Power Electronics Engineer", "Embedded Systems Engineer", "Control Systems Engineer"],
+      "roadmap": {
+        "skills_to_learn": ["Power electronics (converters)", "MATLAB/Simulink", "Control theory (PID)", "PLC basics", "Python for test rigs"],
+        "technologies": ["LTspice", "MATLAB/Simulink", "Arduino/ESP32", "PLCs (Siemens)", "CAN bus"],
+        "project_ideas": ["Solar MPPT charge controller prototype", "PID motor controller with encoder", "Smart energy meter with ESP32"],
+        "certifications": ["NPTEL Power System Engineering", "PLC Programming (Udemy)"],
+        "internship_advice": "EV, renewables, industrial automation. Show bench test data, not slides.",
+        "job_titles": ["Power Electronics Engineer", "Control Systems Engineer", "Embedded Engineer"]
+      }
+    }
+  },
+  {
+    "branch": "Mechanical Engineering",
+    "roadmap": {
+      "primary_career": "Robotics Engineer",
+      "reasoning": "Mech + logic maps to ROS + kinematics where physical meets digital.",
+      "recommended_careers": ["Robotics Engineer", "Mechatronics Engineer", "Automation Engineer"],
+      "roadmap": {
+        "skills_to_learn": ["Python + C++", "Kinematics & dynamics", "Control (PID/LQR)", "CAD tolerance", "Machine vision basics"],
+        "technologies": ["ROS2", "SolidWorks/AutoCAD", "MATLAB", "OpenCV", "Gazebo"],
+        "project_ideas": ["Line-follower with PID + vision", "6-DoF arm sim in ROS2/Gazebo", "Pick-place with ArUco"],
+        "certifications": ["Robotics Specialization - Penn (Coursera)"],
+        "internship_advice": "Automotive/drone/manufacturing. Video demos beat resumes.",
+        "job_titles": ["Robotics Engineer", "Automation Engineer", "Mechatronics Engineer"]
+      }
+    }
+  },
+  {
+    "branch": "Civil Engineering",
+    "roadmap": {
+      "primary_career": "BIM / Computational Design Engineer",
+      "reasoning": "Civil + software = BIM automation where hand drafting becomes code.",
+      "recommended_careers": ["BIM Engineer", "Structural Design Engineer", "GIS Analyst"],
+      "roadmap": {
+        "skills_to_learn": ["AutoCAD/Revit API", "Python for AEC", "GIS (QGIS)", "Structural analysis (STAAD)", "Computational geometry"],
+        "technologies": ["Revit + Dynamo", "AutoCAD", "QGIS", "STAAD.Pro", "Python + IFC.js"],
+        "project_ideas": ["Revit schedule exporter (Revit API)", "Site cut/fill estimator with QGIS", "IFC viewer with quantity takeoff"],
+        "certifications": ["Autodesk Certified Professional - Revit", "QGIS Certified"],
+        "internship_advice": "AEC tech + infra consultancies + proptech. Portfolio = .rvt + script repo.",
+        "job_titles": ["BIM Engineer", "Civil Design Engineer", "GIS Analyst"]
+      }
+    }
+  },
+  {
+    "branch": "Chemical Engineering",
+    "roadmap": {
+      "primary_career": "Process Simulation Engineer",
+      "reasoning": "ChemE + Python = digital twin for plants; scarce and high-leverage.",
+      "recommended_careers": ["Process Engineer", "Simulation Engineer", "Data Engineer (Manufacturing)"],
+      "roadmap": {
+        "skills_to_learn": ["Thermodynamics re-refresh", "Aspen Plus / DWSIM", "Python (pandas, scipy)", "DOE + optimization", "SPC"],
+        "technologies": ["DWSIM/Aspen", "Python", "MATLAB", "Power BI", "OSIsoft PI (concept)"],
+        "project_ideas": ["Distillation column DWSIM model + python optimizer", "Batch reactor kinetic fit (scipy)", "SPC dashboard for pilot plant CSV"],
+        "certifications": ["AspenTech Certified User", "Six Sigma Yellow Belt"],
+        "internship_advice": "Pharma, chemicals, FMCG. Show converged sim + sensitivity, not theory.",
+        "job_titles": ["Process Engineer", "Simulation Engineer", "Manufacturing Data Analyst"]
+      }
+    }
+  },
+  {
+    "branch": "Aerospace Engineering",
+    "roadmap": {
+      "primary_career": "Avionics / GNC Engineer",
+      "reasoning": "Aero controls + code = flight software; GNC is the bottleneck.",
+      "recommended_careers": ["GNC Engineer", "Avionics Engineer", "Flight Software Engineer"],
+      "roadmap": {
+        "skills_to_learn": ["Flight dynamics", "C/C++ for embedded", "Kalman filtering", "MATLAB/Simulink autocode", "DO-178C basics"],
+        "technologies": ["MATLAB/Simulink", "C", "ArduPilot/PX4", "STK/GMAT", "Git + CI"],
+        "project_ideas": ["Quad attitude EKF on STM32", "PX4 SITL mission with offboard control", "Orbit propagator in Python"],
+        "certifications": ["AIAA short course GNC", "MATLAB Onramp + Simulink"],
+        "internship_advice": "Drones, UAV startups, ISRO ecosystem. Flight log > GPA.",
+        "job_titles": ["GNC Engineer", "Avionics Engineer", "Flight Software Engineer"]
+      }
+    }
+  },
+  {
+    "branch": "Biotechnology",
+    "roadmap": {
+      "primary_career": "Bioinformatics Engineer",
+      "reasoning": "Bio + CS = pipelines for omics where wet-lab alone doesn't scale.",
+      "recommended_careers": ["Bioinformatics Analyst", "Computational Biologist", "Data Engineer (Bio)"],
+      "roadmap": {
+        "skills_to_learn": ["Molecular biology refresh", "Python (Biopython)", "NGS pipelines (Nextflow)", "R + tidyverse", "SQL for LIMS"],
+        "technologies": ["Python + Biopython", "Nextflow", "R", "Galaxy", "PostgreSQL"],
+        "project_ideas": ["16S amplicon pipeline (fastq → taxa)", "Variant calling toy pipeline", "LIMS-lite with Supabase"],
+        "certifications": ["Genomic Data Science - JHU (Coursera)"],
+        "internship_advice": "Genomics CROs + agri-biotech + health SaaS. Reproducible pipeline repo.",
+        "job_titles": ["Bioinformatics Analyst", "Computational Biologist", "Bio Data Engineer"]
+      }
+    }
+  },
+  {
+    "branch": "Other",
+    "roadmap": {
+      "primary_career": "Product Manager (Technical)",
+      "reasoning": "Unspecified branch defaults to leverage generalist strength: ship thinking + stakeholder breadth.",
+      "recommended_careers": ["Product Manager", "UX Engineer", "Business Analyst"],
+      "roadmap": {
+        "skills_to_learn": ["Product sense", "SQL + Sheets", "Figma basics", "User interviews", "Agile/Scrum"],
+        "technologies": ["Notion/Linear", "Figma", "SQL", "PostHog", "Vercel"],
+        "project_ideas": ["Case study: redesign Pathforge onboarding (PRD + prototype)", "Analytics for quiz funnel (events)", "Landing CMS A/B doc"],
+        "certifications": ["Digital Product Management - UVA", "Google Project Management"],
+        "internship_advice": "Early-stage SaaS; ship PRD + prototype, not just ideas.",
+        "job_titles": ["Associate PM", "Product Analyst", "UX Engineer"]
       }
     }
   }

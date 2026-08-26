@@ -18,6 +18,10 @@ const WeeklyPlan = () => {
   const contentRef = React.useRef<HTMLDivElement>(null);
 
   const roadmap = location.state?.roadmap;
+  const [weeklyChecked, setWeeklyChecked] = useState<Record<string, boolean>>(()=> {
+    try { return JSON.parse(localStorage.getItem('weeklyChecked')||'{}'); } catch { return {}; }
+  });
+  useEffect(()=> { localStorage.setItem('weeklyChecked', JSON.stringify(weeklyChecked)); }, [weeklyChecked]);
 
   useEffect(() => {
     if (!roadmap) {
@@ -79,9 +83,10 @@ const WeeklyPlan = () => {
       // Wait for layout recalculation
       await new Promise(resolve => setTimeout(resolve, 50));
 
+      const bg2 = getComputedStyle(document.documentElement).getPropertyValue('--color-paper').trim() || '#0a0a0a';
       const canvas = await html2canvas(originalElement, { 
         scale: 2, 
-        backgroundColor: '#0a0a0a',
+        backgroundColor: bg2.startsWith('#') || bg2.startsWith('rgb') ? bg2 : '#1a1a24',
         useCORS: true,
         logging: false,
         windowWidth: 794,
@@ -212,12 +217,15 @@ const WeeklyPlan = () => {
                       {week.focus.toLowerCase()}
                     </h3>
                     <ul className="lumen-checklist" style={{ gap: '0.75rem' }}>
-                      {week.tasks?.map((task: string, i: number) => (
-                        <li key={i} style={{ display: 'flex', gap: '1rem', alignItems: 'flex-start' }}>
-                          <ChevronRight size={16} className="text-rule" style={{ marginTop: '2px', flexShrink: 0 }} />
-                          <span style={{ fontFamily: 'var(--font-mono)', fontSize: '0.875rem', lineHeight: '1.5', color: 'var(--color-paper-contrast)' }}>{task}</span>
+                      {week.tasks?.map((task: string, i: number) => {
+                        const tid = `${week.week_number}-${i}`;
+                        const checked = !!weeklyChecked[tid];
+                        return (
+                        <li key={i} onClick={()=> setWeeklyChecked(p=> ({...p, [tid]: !p[tid]}))} style={{ display: 'flex', gap: '1rem', alignItems: 'flex-start', cursor:'pointer', opacity: checked?0.55:1 }} data-testid={`weekly-${tid}`}>
+                          <div style={{ width:16, height:16, border: checked?'2px solid var(--color-accent)':'1px solid var(--color-rule)', background: checked?'var(--color-accent)':'transparent', marginTop:2, flexShrink:0, display:'flex', alignItems:'center', justifyContent:'center' }}>{checked ? '✓' : ''}</div>
+                          <span style={{ fontFamily: 'var(--font-mono)', fontSize: '0.875rem', lineHeight: '1.5', color: 'var(--color-paper-contrast)', textDecoration: checked?'line-through':undefined }}>{task}</span>
                         </li>
-                      ))}
+                      );})}
                     </ul>
                   </div>
                 </motion.div>

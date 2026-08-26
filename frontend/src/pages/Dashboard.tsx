@@ -1,7 +1,7 @@
 import { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { supabase } from '../supabase';
-import { Map, LogOut, FileText, ChevronRight, Compass, Trash2, Plus, Terminal, Settings, Hexagon, Menu, HelpCircle } from 'lucide-react';
+import { Map, LogOut, FileText, ChevronRight, Compass, Trash2, Plus, Terminal, Settings, Hexagon, Menu, HelpCircle, Search, Copy, User } from 'lucide-react';
 import { motion } from 'framer-motion';
 import toast from 'react-hot-toast';
 import ThemeToggle from '../components/ThemeToggle';
@@ -17,6 +17,8 @@ const Dashboard = () => {
   const [stats, setStats] = useState({ totalChecked: 0, level: 'init', totalRoadmaps: 0 });
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [isHelpOpen, setIsHelpOpen] = useState(false);
+  const [search, setSearch] = useState('');
+  const [sort, setSort] = useState<'newest'|'oldest'|'progress'>('newest');
   const hasGreeted = useRef(false);
 
   useEffect(() => {
@@ -125,6 +127,20 @@ const Dashboard = () => {
     }
   };
 
+  const filtered = history.filter(h => !search || h.primary_career?.toLowerCase().includes(search.toLowerCase()));
+  const sorted = [...filtered].sort((a,b)=>{
+    if (sort==='oldest') return new Date(a.created_at).getTime() - new Date(b.created_at).getTime();
+    if (sort==='progress') return getProgress(b.roadmap) - getProgress(a.roadmap);
+    return new Date(b.created_at).getTime() - new Date(a.created_at).getTime();
+  });
+
+  const copyLink = async (id: string, e: React.MouseEvent) => {
+    e.stopPropagation();
+    const url = `${window.location.origin}/results?id=${id}`;
+    await navigator.clipboard.writeText(url);
+    toast.success('link copied');
+  };
+
   const handleLogout = async () => {
     await supabase.auth.signOut();
     navigate('/');
@@ -177,6 +193,9 @@ const Dashboard = () => {
           <button className="nav-item" onClick={() => { setIsMobileMenuOpen(false); navigate('/quiz'); }}>
             <Plus size={16} /> <span>generate</span>
           </button>
+          <button className="nav-item" onClick={() => { setIsMobileMenuOpen(false); navigate('/profile'); }}>
+            <User size={16} /> <span>profile</span>
+          </button>
           {profile?.role === 'admin' && (
             <button className="nav-item" onClick={() => { setIsMobileMenuOpen(false); navigate('/admin'); }}>
               <Settings size={16} /> <span>system admin</span>
@@ -228,8 +247,19 @@ const Dashboard = () => {
         </section>
 
         <section className="lumen-data">
-          <div className="data-header">
+          <div className="data-header" style={{ display:'flex', justifyContent:'space-between', alignItems:'center', flexWrap:'wrap', gap:'0.75rem' }}>
             <span className="eyebrow">01 · DEPLOYMENT HISTORY</span>
+            <div style={{ display:'flex', gap:'0.5rem', alignItems:'center' }}>
+              <div style={{ position:'relative' }}>
+                <Search size={14} style={{ position:'absolute', left:8, top:'50%', transform:'translateY(-50%)', color:'var(--color-rule)' }}/>
+                <input data-testid="history-search" value={search} onChange={e=>setSearch(e.target.value)} placeholder="filter career" style={{ padding:'0.4rem 0.75rem 0.4rem 1.6rem', background:'transparent', border:'1px solid var(--color-rule)', color:'var(--color-ink)', fontFamily:'var(--font-mono)', fontSize:'0.75rem', borderRadius:4 }} />
+              </div>
+              <select value={sort} onChange={e=>setSort(e.target.value as any)} style={{ padding:'0.4rem', background:'transparent', border:'1px solid var(--color-rule)', color:'var(--color-ink)', fontFamily:'var(--font-mono)', fontSize:'0.75rem' }}>
+                <option value="newest">newest</option>
+                <option value="oldest">oldest</option>
+                <option value="progress">progress</option>
+              </select>
+            </div>
           </div>
 
           {history.length > 0 ? (
@@ -244,7 +274,7 @@ const Dashboard = () => {
                   </tr>
                 </thead>
                 <tbody>
-                  {history.map((item, index) => (
+                  {sorted.map((item, index) => (
                     <motion.tr 
                       key={item.id}
                       initial={{ opacity: 0, y: 10 }}
@@ -274,6 +304,9 @@ const Dashboard = () => {
                       </td>
                       <td className="text-right">
                         <div className="action-cell">
+                          <button className="btn-icon" onClick={(e)=>copyLink(item.id, e)} title="copy link" data-testid="copy-link">
+                            <Copy size={14} />
+                          </button>
                           <button 
                             className="btn-icon hover-destructive"
                             onClick={(e) => deleteRoadmap(e, item.id)}
