@@ -35,21 +35,7 @@ jobs:
           echo '```' >> $GITHUB_STEP_SUMMARY
 
       - name: Publish Test Cases to Actions Summary (with name)
-        run: |
-          node -e "
-          const x=require('xlsx');
-          const wb=x.readFile('selenium-tests/selenium-test-report.xlsx');
-          const sum=x.utils.sheet_to_json(wb.Sheets.Summary);
-          const det=x.utils.sheet_to_json(wb.Sheets['Test Details']);
-          let md='### Summary\n| Metric | Value | Log |\n|---|---|---|\n';
-          sum.forEach(r=> md+= \`| \${r.Metric} | \${r.Value} | \${r.Log} |\n\`);
-          md+='\n### Test Cases (first 20 of 300 with name & log)\n| Test ID | Module | Test Case Description | Status | Tester | Log ID |\n|---|---|---|---|---|---|\n';
-          det.slice(0,20).forEach(r=> md+= \`| \${r['Test ID']} | \${r.Module} | \${r['Test Case Description'].substring(0,45)} | \${r.Status} | \${r.Tester} | \${r['Log ID']} |\n\`);
-          md+=\`\n_... + \${det.length-20} more cases in Excel artifact (all 300 with name & log). Full file: selenium-tests/selenium-test-report.xlsx_\n\`;
-          require('fs').appendFileSync(process.env.GITHUB_STEP_SUMMARY, md);
-          // Also echo each case as annotation
-          det.forEach(r=> console.log(\`::notice title=\${r['Test ID']}::\${r.Module} - \${r['Test Case Description'].substring(0,50)} | \${r.Status} | Log \${r['Log ID']}\`));
-          "
+        run: node utils/publish-selenium-summary.js
 
       - name: Upload Selenium Report Artifact
         uses: actions/upload-artifact@v4
