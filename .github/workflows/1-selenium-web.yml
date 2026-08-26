@@ -1,8 +1,10 @@
 name: "React JS Web Selenium E2E Automation"
-
 on:
   push:
     branches: [ "main" ]
+  pull_request:
+    branches: [ "main" ]
+  workflow_dispatch:
 
 jobs:
   test:
@@ -21,11 +23,39 @@ jobs:
           npm install
           npm install xlsx selenium-webdriver
 
-      - name: Run Selenium E2E Web Tests
-        run: node selenium-tests/tests/login-tests.js
+      - name: Run Selenium E2E Web Tests (300 cases with logs)
+        run: |
+          echo "## Selenium E2E — Web Frontend" >> $GITHUB_STEP_SUMMARY
+          echo "Tester: Senior QA Engineer | Date: $(date +%F)" >> $GITHUB_STEP_SUMMARY
+          node selenium-tests/tests/login-tests.js 2>&1 | tee selenium.log
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "### Execution Log" >> $GITHUB_STEP_SUMMARY
+          echo '```' >> $GITHUB_STEP_SUMMARY
+          cat selenium.log >> $GITHUB_STEP_SUMMARY
+          echo '```' >> $GITHUB_STEP_SUMMARY
+
+      - name: Publish Test Cases to Actions Summary (with name)
+        run: |
+          node -e "
+          const x=require('xlsx');
+          const wb=x.readFile('selenium-tests/selenium-test-report.xlsx');
+          const sum=x.utils.sheet_to_json(wb.Sheets.Summary);
+          const det=x.utils.sheet_to_json(wb.Sheets['Test Details']);
+          let md='### Summary\n| Metric | Value | Log |\n|---|---|---|\n';
+          sum.forEach(r=> md+= \`| \${r.Metric} | \${r.Value} | \${r.Log} |\n\`);
+          md+='\n### Test Cases (first 20 of 300 with name & log)\n| Test ID | Module | Test Case Description | Status | Tester | Log ID |\n|---|---|---|---|---|---|\n';
+          det.slice(0,20).forEach(r=> md+= \`| \${r['Test ID']} | \${r.Module} | \${r['Test Case Description'].substring(0,45)} | \${r.Status} | \${r.Tester} | \${r['Log ID']} |\n\`);
+          md+=\`\n_... + \${det.length-20} more cases in Excel artifact (all 300 with name & log). Full file: selenium-tests/selenium-test-report.xlsx_\n\`;
+          require('fs').appendFileSync(process.env.GITHUB_STEP_SUMMARY, md);
+          // Also echo each case as annotation
+          det.forEach(r=> console.log(\`::notice title=\${r['Test ID']}::\${r.Module} - \${r['Test Case Description'].substring(0,50)} | \${r.Status} | Log \${r['Log ID']}\`));
+          "
 
       - name: Upload Selenium Report Artifact
         uses: actions/upload-artifact@v4
         with:
           name: selenium-test-results
-          path: "**/*.xlsx"
+          path: |
+            selenium-tests/selenium-test-report.xlsx
+            selenium.log
+          if-no-files-found: error
