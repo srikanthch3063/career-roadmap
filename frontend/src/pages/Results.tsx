@@ -14,6 +14,7 @@ import ThemeToggle from '../components/ThemeToggle';
 import ChatDrawer from '../components/ChatDrawer';
 import salaryData from '../data/salaryData.json';
 import { generateResourceLinks } from '../utils/resourceResolver';
+import { track } from '../utils/tracker';
 import './Results.css';
 
 const Results = () => {
@@ -76,6 +77,7 @@ const Results = () => {
 
       if (data) {
         setRoadmap(data.roadmap);
+        track('roadmap_view', { roadmap_id: data.id, career: data.primary_career });
         if (data.roadmap.checked_items) {
           const initialChecked: Record<string, boolean> = {};
           data.roadmap.checked_items.forEach((item: string) => {
@@ -103,6 +105,7 @@ const Results = () => {
 
       if (error) throw error;
       setRoadmap(data.roadmap);
+      track('roadmap_view', { roadmap_id: id, career: data.primary_career });
       if (data.roadmap.checked_items) {
         const initialChecked: Record<string, boolean> = {};
         data.roadmap.checked_items.forEach((item: string) => {

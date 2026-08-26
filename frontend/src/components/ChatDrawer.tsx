@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { X, MessageSquare, Send, Loader2 } from 'lucide-react';
 import { supabase } from '../supabase';
+import { track } from '../utils/tracker';
 
 interface ChatDrawerProps {
   isOpen: boolean;
@@ -45,6 +46,7 @@ const ChatDrawer: React.FC<ChatDrawerProps> = ({ isOpen, onClose, roadmapContext
     setMessages(prev => [...prev, { role: 'user', content: userMessage }]);
     setInput('');
     setLoading(true);
+    track('mentor_message', { question: userMessage.substring(0,120) });
     setThinkingMessage('looking into preferences...');
 
     try {

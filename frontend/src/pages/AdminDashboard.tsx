@@ -377,10 +377,23 @@ const AdminDashboard = () => {
                 </div>
               </section>
 
+              {/* Mentor Funnel */}
+              <section className="lumen-data" style={{ marginTop: '2rem' }}>
+                <div className="data-header">
+                  <span className="eyebrow">02 · MENTOR FUNNEL</span>
+                </div>
+                <div className="data-table-wrap" style={{ padding: '2rem', display:'flex', flexDirection:'column', gap:'1rem' }}>
+                  <div style={{ display:'flex', justifyContent:'space-between' }}><span className="eyebrow">roadmap views</span><span style={{ fontFamily:'var(--font-mono)' }}>{(stats as any).events?.roadmap_views ?? 0}</span></div>
+                  <div style={{ display:'flex', justifyContent:'space-between' }}><span className="eyebrow">mentor messages</span><span style={{ fontFamily:'var(--font-mono)' }}>{(stats as any).events?.mentor_messages ?? 0}</span></div>
+                  <div style={{ display:'flex', justifyContent:'space-between' }}><span className="eyebrow">unique mentor users</span><span style={{ fontFamily:'var(--font-mono)' }}>{(stats as any).events?.unique_mentor_users ?? 0}</span></div>
+                  <div style={{ display:'flex', justifyContent:'space-between' }}><span className="eyebrow">avg per user</span><span style={{ fontFamily:'var(--font-mono)', color:'var(--color-accent)' }}>{(stats as any).events?.avg_mentor_per_user ?? 0}</span></div>
+                </div>
+              </section>
+
               {/* Word Cloud */}
               <section className="lumen-data" style={{ marginTop: '2rem' }}>
                 <div className="data-header">
-                  <span className="eyebrow">02 · KEYWORD CLOUD</span>
+                  <span className="eyebrow">03 · KEYWORD CLOUD</span>
                 </div>
                 <div className="data-table-wrap" style={{ padding: '3rem 2rem', display: 'flex', flexWrap: 'wrap', gap: '1rem', justifyContent: 'center' }}>
                     {stats.word_cloud.length > 0 ? stats.word_cloud.map((w, idx) => {

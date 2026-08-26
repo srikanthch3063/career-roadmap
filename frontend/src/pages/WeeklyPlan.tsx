@@ -7,6 +7,7 @@ import toast from 'react-hot-toast';
 import html2canvas from 'html2canvas';
 import { jsPDF } from 'jspdf';
 import ThemeToggle from '../components/ThemeToggle';
+import { track } from '../utils/tracker';
 
 const WeeklyPlan = () => {
   const location = useLocation();
@@ -29,6 +30,7 @@ const WeeklyPlan = () => {
       return;
     }
     generatePlan();
+    track('weekly_view', { career: roadmap?.primary_career });
   }, [roadmap]);
 
   const generatePlan = async () => {

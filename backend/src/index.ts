@@ -7,6 +7,7 @@ import roadmapRoutes from './routes/roadmap';
 import adminRoutes from './routes/admin';
 import authRoutes from './routes/auth';
 import supportRoutes from './routes/support';
+import eventsRoutes from './routes/events';
 import { errorHandler, notFoundHandler } from './middleware/error';
 
 dotenv.config();
@@ -42,6 +43,7 @@ app.use('/api', roadmapRoutes);
 app.use('/api/admin', adminRoutes);
 app.use('/api/auth', authRoutes);
 app.use('/api/support', supportRoutes);
+app.use('/api', eventsRoutes);
 
 // Health check
 app.get('/health', (req, res) => {

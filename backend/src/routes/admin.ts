@@ -124,6 +124,23 @@ router.get('/stats', requireAuth, requireAdmin, async (req: AuthRequest, res: an
       }
     }
 
+    // Phase 8: events funnel (roadmap_view + mentor)
+    let eventsStats: any = { mentor_messages: 0, roadmap_views: 0, unique_mentor_users: 0, avg_mentor_per_user: 0 };
+    try {
+      const { data: events } = await supabase.from('events').select('user_id, event_type');
+      if (events) {
+        const mentorEvents = events.filter(e=> e.event_type==='mentor_message');
+        const roadmapViews = events.filter(e=> e.event_type==='roadmap_view');
+        const uniqMentor = new Set(mentorEvents.map(e=> e.user_id)).size;
+        eventsStats = {
+          mentor_messages: mentorEvents.length,
+          roadmap_views: roadmapViews.length,
+          unique_mentor_users: uniqMentor,
+          avg_mentor_per_user: uniqMentor ? Number((mentorEvents.length/uniqMentor).toFixed(1)) : 0,
+        };
+      }
+    } catch (e) { console.warn('events stats failed', e); }
+
     res.json({
       stats: {
         total_students: studentCount || 0,
@@ -131,12 +148,14 @@ router.get('/stats', requireAuth, requireAdmin, async (req: AuthRequest, res: an
         funnel: {
           signed_up: studentCount || 0,
           took_quiz: uniqueQuizUsers,
-          generated_roadmap: uniqueRoadmapUsers
+          generated_roadmap: uniqueRoadmapUsers,
+          ...eventsStats,
         },
         daily_signups,
         word_cloud,
         most_common_branch: mostCommonBranch,
         most_common_career: mostCommonCareer,
+        events: eventsStats,
       },
       students: enrichedStudents
     });

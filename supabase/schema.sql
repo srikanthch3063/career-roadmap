@@ -120,3 +120,18 @@ DROP POLICY IF EXISTS "Admin can update tickets" ON public.support_tickets;
 CREATE POLICY "Admin can update tickets" ON public.support_tickets FOR UPDATE USING (true);
 -- Phase 7: link tickets to user (grouped view)
 ALTER TABLE public.support_tickets ADD COLUMN IF NOT EXISTS user_id uuid REFERENCES auth.users(id) ON DELETE SET NULL;
+
+-- Phase 8: tracking events (time in roadmap + mentor funnel)
+CREATE TABLE IF NOT EXISTS public.events (
+  id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
+  user_id uuid REFERENCES auth.users(id) ON DELETE CASCADE,
+  event_type text NOT NULL CHECK (event_type IN ('page_view','roadmap_view','mentor_message','weekly_view')),
+  metadata jsonb DEFAULT '{}'::jsonb,
+  created_at timestamptz DEFAULT now()
+);
+ALTER TABLE public.events ENABLE ROW LEVEL SECURITY;
+DROP POLICY IF EXISTS "Users can insert own events" ON public.events;
+CREATE POLICY "Users can insert own events" ON public.events FOR INSERT WITH CHECK (auth.uid() = user_id);
+DROP POLICY IF EXISTS "Users can select own events" ON public.events;
+CREATE POLICY "Users can select own events" ON public.events FOR SELECT USING (auth.uid() = user_id);
+-- Admin read via service_role (bypasses RLS)
