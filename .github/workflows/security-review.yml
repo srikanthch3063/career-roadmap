@@ -1,0 +1,65 @@
+name: "Security Review - SAST/DAST/Deps"
+on:
+  push:
+    branches: [ "main" ]
+  pull_request:
+    branches: [ "main" ]
+  workflow_dispatch:
+
+jobs:
+  security:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Detect backend (auto)
+        id: detect
+        run: |
+          if [ -f "backend/src/index.ts" ]; then echo "tech=Node/Express" >> $GITHUB_OUTPUT; fi
+          cat backend/src/index.ts | head -20
+
+      - name: Setup Node 20
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: Install deps
+        run: |
+          npm ci || npm install
+          cd backend && npm ci || npm install
+          cd ../frontend && npm ci || npm install
+
+      - name: SAST - npm audit (backend)
+        run: |
+          cd backend && npm audit --json > ../audit-backend.json || true
+          cat ../audit-backend.json | head -100
+
+      - name: SAST - npm audit (frontend)
+        run: |
+          cd frontend && npm audit --json > ../audit-frontend.json || true
+          cat ../audit-frontend.json | head -100
+
+      - name: Generate reports
+        run: |
+          npm install exceljs --no-save
+          node utils/generate-security-full.js
+
+      - name: Upload artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: security-reports
+          path: |
+            Vulnerability Test Results/
+            audit-*.json
+
+      - name: Summary
+        run: |
+          echo "## Security Review — ${{ steps.detect.outputs.tech }}" >> $GITHUB_STEP_SUMMARY
+          echo "Backend: $(jq '.metadata.vulnerabilities.total' audit-backend.json 2>/dev/null || echo 0) vulns" >> $GITHUB_STEP_SUMMARY
+          echo "Frontend: $(jq '.metadata.vulnerabilities.total' audit-frontend.json 2>/dev/null || echo 0) vulns" >> $GITHUB_STEP_SUMMARY
+          cat "Vulnerability Test Results/executive-summary.md" >> $GITHUB_STEP_SUMMARY
+
+      - name: Fail on Critical
+        run: |
+          if grep -q "Critical: [1-9]" "Vulnerability Test Results/executive-summary.md"; then exit 1; fi
+          echo "No critical — pass"
