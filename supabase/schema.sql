@@ -79,6 +79,10 @@ CREATE TRIGGER on_auth_user_created
   AFTER INSERT ON auth.users
   FOR EACH ROW EXECUTE PROCEDURE public.handle_new_user();
 
+-- 4b. Add blocked flag (Phase 6) - safe for existing DB
+ALTER TABLE public.profiles ADD COLUMN IF NOT EXISTS is_blocked boolean DEFAULT false;
+ALTER TABLE public.profiles ADD COLUMN IF NOT EXISTS blocked_at timestamptz;
+
 -- To make admin@careerroadmap.test an admin (run this manually after registering the user):
 -- UPDATE public.profiles SET role = 'admin' WHERE email = 'admin@careerroadmap.test';
 
@@ -114,3 +118,5 @@ DROP POLICY IF EXISTS "Admin can read tickets" ON public.support_tickets;
 CREATE POLICY "Admin can read tickets" ON public.support_tickets FOR SELECT USING (true);
 DROP POLICY IF EXISTS "Admin can update tickets" ON public.support_tickets;
 CREATE POLICY "Admin can update tickets" ON public.support_tickets FOR UPDATE USING (true);
+-- Phase 7: link tickets to user (grouped view)
+ALTER TABLE public.support_tickets ADD COLUMN IF NOT EXISTS user_id uuid REFERENCES auth.users(id) ON DELETE SET NULL;

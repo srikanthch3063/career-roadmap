@@ -1,9 +1,10 @@
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { supabase } from '../supabase';
-import { ArrowLeft, Save, User, Mail, Layers } from 'lucide-react';
+import { ArrowLeft, Save, User, Mail, Layers, HelpCircle } from 'lucide-react';
 import toast from 'react-hot-toast';
 import { branches } from '../quizConfig';
+import HelpModal from '../components/HelpModal';
 
 const Profile = () => {
   const navigate = useNavigate();
@@ -13,6 +14,7 @@ const Profile = () => {
   const [email, setEmail] = useState('');
   const [saving, setSaving] = useState(false);
   const [loading, setLoading] = useState(true);
+  const [helpOpen, setHelpOpen] = useState(false);
 
   useEffect(() => {
     fetchProfile();
@@ -71,6 +73,10 @@ const Profile = () => {
             <div className="form-group">
               <label className="eyebrow"><Mail size={12} style={{ display:'inline', marginRight:6 }}/>email (read-only)</label>
               <input className="input" value={email} disabled style={{ opacity:0.6 }} data-testid="email-display" />
+              <button type="button" className="btn btn--outline" onClick={()=> setHelpOpen(true)} style={{ marginTop:'0.5rem', fontSize:'0.75rem', padding:'0.4rem 0.75rem', height:'auto' }} data-testid="request-email-change">
+                <HelpCircle size={14} style={{ marginRight:6 }}/> request email change
+              </button>
+              <p className="small text-muted" style={{ marginTop:'0.35rem', fontSize:'0.7rem' }}>email change needs verification — use support ticket (topic: account).</p>
             </div>
             <div className="form-group">
               <label className="eyebrow" htmlFor="name"><User size={12} style={{ display:'inline', marginRight:6 }}/>full name</label>
@@ -89,6 +95,7 @@ const Profile = () => {
           </div>
         </section>
       </main>
+      <HelpModal isOpen={helpOpen} onClose={()=> setHelpOpen(false)} userEmail={email} userName={name} />
     </div>
   );
 };

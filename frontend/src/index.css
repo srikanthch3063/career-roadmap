@@ -444,6 +444,8 @@ button {
   background: var(--color-paper-emit);
 }
 
+.lumen-loader--inline { width:12px; height:12px; border-width:1px; animation-duration:1.2s; }
+
 .round-loader {
   width: 48px;
   height: 48px;
@@ -463,6 +465,12 @@ button {
   border-bottom: 2px solid var(--color-accent-2);
   border-radius: 50%;
   animation: spin-reverse 1.5s linear infinite;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .lumen-loader, .round-loader, .round-loader::before, .chamber__filament { animation: none !important; }
+  .lumen-loader { opacity:0.7; }
+  .round-loader { border-top-color: var(--color-accent); }
 }
 
 @keyframes spin {
@@ -485,6 +493,26 @@ button {
   50% { transform: scale(1.1) rotate(90deg); border-color: var(--color-accent); background: var(--color-glow); }
   100% { transform: scale(0.8) rotate(180deg); border-color: var(--color-rule-2); background: transparent; }
 }
+
+/* --- Global Input/Select fix (light+dark + mobile) --- */
+.input, input, select, textarea {
+  background: var(--color-paper-2);
+  color: var(--color-ink);
+  border: 1px solid var(--color-rule-2);
+  border-radius: 6px;
+}
+.input:focus, input:focus, select:focus, textarea:focus {
+  outline: 2px solid var(--color-accent);
+  outline-offset: 1px;
+  border-color: var(--color-accent);
+}
+select {
+  appearance: auto;
+  min-height: 2.5rem;
+  padding-right: 2rem;
+}
+/* fix dropdown option colors (Chrome/FF respect these) */
+select option { background: var(--color-paper-2); color: var(--color-ink); }
 
 /* --- Global Ergonomics & Accessibility --- */
 button, a, input, select, textarea {

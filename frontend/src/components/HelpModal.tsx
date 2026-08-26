@@ -27,11 +27,20 @@ const HelpModal: React.FC<HelpModalProps> = ({ isOpen, onClose, userEmail = '', 
     
     setLoading(true);
     try {
-      const apiUrl = import.meta.env.VITE_API_URL || (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1' ? 'http://localhost:3000' : '');
+      const apiBase = import.meta.env.VITE_API_BASE_URL || (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1' ? 'http://localhost:3000/api' : '/api');
+      const apiUrl = apiBase.replace(/\/api\/?$/, '');
+      // attach auth if logged in for user_id linking
+      let authHeader: any = {};
+      try {
+        const { supabase } = await import('../supabase');
+        const { data: { session } } = await supabase.auth.getSession();
+        if (session?.access_token) authHeader['Authorization'] = `Bearer ${session.access_token}`;
+      } catch {}
       const response = await fetch(`${apiUrl}/api/support`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
+          ...authHeader,
         },
         body: JSON.stringify({ name, email, topic, problem })
       });
@@ -102,7 +111,7 @@ const HelpModal: React.FC<HelpModalProps> = ({ isOpen, onClose, userEmail = '', 
               required 
               value={topic} 
               onChange={e => setTopic(e.target.value)}
-              style={{ width: '100%', backgroundColor: 'var(--color-paper)', color: 'var(--color-ink)' }}
+              style={{ width: '100%', backgroundColor: 'var(--color-paper-2)', color: 'var(--color-ink)', border: '1px solid var(--color-rule-2)' }}
             >
               <option value="" disabled>select a topic</option>
               <option value="account">account issues</option>

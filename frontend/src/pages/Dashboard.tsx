@@ -252,9 +252,9 @@ const Dashboard = () => {
             <div style={{ display:'flex', gap:'0.5rem', alignItems:'center' }}>
               <div style={{ position:'relative' }}>
                 <Search size={14} style={{ position:'absolute', left:8, top:'50%', transform:'translateY(-50%)', color:'var(--color-rule)' }}/>
-                <input data-testid="history-search" value={search} onChange={e=>setSearch(e.target.value)} placeholder="filter career" style={{ padding:'0.4rem 0.75rem 0.4rem 1.6rem', background:'transparent', border:'1px solid var(--color-rule)', color:'var(--color-ink)', fontFamily:'var(--font-mono)', fontSize:'0.75rem', borderRadius:4 }} />
+                <input data-testid="history-search" value={search} onChange={e=>setSearch(e.target.value)} placeholder="filter career" style={{ padding:'0.4rem 0.75rem 0.4rem 1.6rem', background:'var(--color-paper-2)', border:'1px solid var(--color-rule-2)', color:'var(--color-ink)', fontFamily:'var(--font-mono)', fontSize:'0.75rem', borderRadius:4 }} />
               </div>
-              <select value={sort} onChange={e=>setSort(e.target.value as any)} style={{ padding:'0.4rem', background:'transparent', border:'1px solid var(--color-rule)', color:'var(--color-ink)', fontFamily:'var(--font-mono)', fontSize:'0.75rem' }}>
+              <select value={sort} onChange={e=>setSort(e.target.value as any)} style={{ padding:'0.4rem', background:'var(--color-paper-2)', border:'1px solid var(--color-rule-2)', color:'var(--color-ink)', fontFamily:'var(--font-mono)', fontSize:'0.75rem', borderRadius:4 }}>
                 <option value="newest">newest</option>
                 <option value="oldest">oldest</option>
                 <option value="progress">progress</option>

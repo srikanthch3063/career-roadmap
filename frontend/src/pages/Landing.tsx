@@ -52,6 +52,7 @@ export const DEFAULT_LANDING_CONFIG = {
   hero_title_1: 'career paths,',
   hero_title_2: 'engineered by ai.',
   hero_lede: 'answer six questions. get a precise, opinionated career roadmap in under 30 seconds. no vague advice.',
+  hero_cta: 'start for free',
   stat_1_val: '4.2',
   stat_1_lbl: 'M APP REQUESTS',
   stat_2_val: '1.2',
@@ -62,7 +63,10 @@ export const DEFAULT_LANDING_CONFIG = {
     { eyebrow: "PRECISION", title: "laser-focused goals.", desc: "exact frameworks, languages, and milestones. no vague advice." },
     { eyebrow: "RESOURCES", title: "curated materials.", desc: "project ideas and learning paths specific to your niche." },
     { eyebrow: "INSIGHTS", title: "market data.", desc: "see real salary data and growth trends for your target path." }
-  ]
+  ],
+  footer_statement: 'the instrument is dark. the output is yours.',
+  seo_title: 'Pathforge — Career Roadmap AI',
+  seo_desc: 'AI-powered career roadmap for engineering students.'
 };
 
 const Landing = ({ overrideConfig }: { overrideConfig?: any }) => {
@@ -130,7 +134,7 @@ const Landing = ({ overrideConfig }: { overrideConfig?: any }) => {
               {safeConfig.hero_lede}
             </p>
             <button className="btn btn--primary" onClick={() => navigate('/auth')}>
-              start for free
+              {safeConfig.hero_cta || 'start for free'}
             </button>
           </div>
           
@@ -212,7 +216,7 @@ const Landing = ({ overrideConfig }: { overrideConfig?: any }) => {
       <footer className="footer-ft5">
         <div className="footer-ft5__inner">
           <div className="footer-ft5__statement">
-            <p>the instrument is dark. the output is yours.</p>
+            <p>{safeConfig.footer_statement || 'the instrument is dark. the output is yours.'}</p>
             <span className="wordmark">pathforge © 2026</span>
           </div>
           <div className="footer-ft5__links">

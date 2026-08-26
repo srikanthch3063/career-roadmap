@@ -18,9 +18,19 @@ const transporter = nodemailer.createTransport({
   }
 });
 
-router.post('/', async (req, res) => {
+router.post('/', async (req: any, res) => {
   try {
     const { name, email, topic, problem } = req.body;
+    // try to link ticket to user if token present (optional)
+    let userId: string | null = null;
+    try {
+      const auth = req.headers.authorization as string;
+      if (auth?.startsWith('Bearer ')) {
+        const token = auth.split(' ')[1];
+        const { data } = await supabase.auth.getUser(token);
+        userId = data.user?.id || null;
+      }
+    } catch {}
     
     if (!name || !email || !topic || !problem) {
       return res.status(400).json({ error: 'missing fields' });
@@ -30,11 +40,11 @@ router.post('/', async (req, res) => {
       return res.status(400).json({ error: 'problem exceeds 500 characters' });
     }
 
-    // 1. Insert into database
+    // 1. Insert into database (link user_id if known)
     const { error: dbError } = await supabase
       .from('support_tickets')
       .insert([
-        { name, email, topic, problem }
+        { name, email, topic, problem, user_id: userId }
       ]);
       
     if (dbError) {

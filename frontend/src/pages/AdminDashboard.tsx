@@ -559,55 +559,53 @@ const AdminDashboard = () => {
             </motion.div>
           )}
 
-          {/* Support Tickets Tab */}
-          {activeTab === 'tickets' && (
+          {/* Support Tickets Tab - grouped per user */}
+          {activeTab === 'tickets' && (()=> {
+            const grouped: Record<string, any[]> = {};
+            tickets.forEach((t:any)=> { const k = t.email || 'unknown'; (grouped[k] = grouped[k]||[]).push(t); });
+            const entries = Object.entries(grouped);
+            return (
             <motion.div key="tickets" initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0 }} className="lumen-data">
-              <div className="data-header">
-                <span className="eyebrow">01 · SUPPORT TICKETS</span>
+              <div className="data-header" style={{ display:'flex', justifyContent:'space-between', alignItems:'center' }}>
+                <span className="eyebrow">01 · SUPPORT TICKETS — {tickets.length} total, {entries.length} users</span>
               </div>
-              <div className="data-table-wrap">
-                <table className="lumen-table">
-                  <thead>
-                    <tr>
-                      <th>USER</th>
-                      <th>TOPIC</th>
-                      <th>STATUS</th>
-                      <th>DATE</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {tickets.length > 0 ? tickets.map(ticket => (
-                      <tr key={ticket.id} className="lumen-row" onClick={() => alert(`Problem:\n${ticket.problem}`)} style={{ cursor: 'pointer' }}>
-                        <td>
-                          <div style={{ display: 'flex', flexDirection: 'column' }}>
-                            <span>{ticket.name}</span>
-                            <span style={{ fontSize: '0.75rem', color: 'var(--color-rule)', fontFamily: 'var(--font-mono)' }}>{ticket.email}</span>
+              <div style={{ display:'flex', flexDirection:'column', gap:'1rem', padding:'1rem' }}>
+                {entries.length>0 ? entries.map(([email, list]: any)=> (
+                  <details key={email} open style={{ border:'1px solid var(--color-rule)', borderRadius:8, background:'var(--color-paper-2)', overflow:'hidden' }}>
+                    <summary style={{ cursor:'pointer', padding:'0.85rem 1rem', display:'flex', justifyContent:'space-between', alignItems:'center', listStyle:'none', flexWrap:'wrap', gap:'0.5rem' }}>
+                      <span style={{ display:'flex', flexDirection:'column' }}>
+                        <span style={{ fontFamily:'var(--font-mono)', color:'var(--color-ink)' }}>{list[0].name} — {email}</span>
+                        <span className="eyebrow" style={{ opacity:0.6 }}>{list.length} ticket{list.length>1?'s':''}</span>
+                      </span>
+                      <span className="eyebrow" style={{ background:'var(--color-accent)', color:'#000', padding:'0.15rem 0.5rem', borderRadius:99 }}>{list.filter((x:any)=> x.status!=='resolved').length} open</span>
+                    </summary>
+                    <div style={{ borderTop:'1px solid var(--color-rule)', padding:'0.5rem' }}>
+                      {list.map((ticket:any)=> (
+                        <div key={ticket.id} onClick={()=> alert(`Problem:\n${ticket.problem}`)} style={{ display:'flex', flexWrap:'wrap', gap:'0.75rem', alignItems:'center', justifyContent:'space-between', padding:'0.65rem 0.75rem', borderBottom:'1px solid var(--color-rule)', cursor:'pointer' }}>
+                          <div style={{ flex:'1 1 200px' }}>
+                            <span style={{ fontFamily:'var(--font-mono)', fontSize:'0.85rem', color:'var(--color-ink)' }}>[{ticket.topic}] — {ticket.problem.substring(0,70)}{ticket.problem.length>70?'…':''}</span>
+                            <span style={{ fontFamily:'var(--font-mono)', fontSize:'0.7rem', color:'var(--color-rule)', marginLeft:'0.5rem' }}>{new Date(ticket.created_at).toLocaleDateString()}</span>
                           </div>
-                        </td>
-                        <td style={{ fontFamily: 'var(--font-mono)' }}>{ticket.topic}</td>
-                        <td style={{ fontFamily: 'var(--font-mono)' }} onClick={(e) => e.stopPropagation()}>
                           <select 
                             value={ticket.status} 
+                            onClick={(e)=> e.stopPropagation()}
                             onChange={(e) => updateTicketStatus(ticket.id, e.target.value)}
-                            style={{ backgroundColor: 'var(--color-paper)', color: 'var(--color-ink)', border: '1px solid var(--color-rule)', padding: '0.25rem', fontFamily: 'var(--font-mono)' }}
+                            style={{ backgroundColor: 'var(--color-paper)', color: 'var(--color-ink)', border: '1px solid var(--color-rule-2)', padding: '0.25rem', fontFamily: 'var(--font-mono)', fontSize:'0.8rem' }}
                           >
                             <option value="open">open</option>
                             <option value="in_progress">in_progress</option>
                             <option value="resolved">resolved</option>
                           </select>
-                        </td>
-                        <td style={{ fontFamily: 'var(--font-mono)', color: 'var(--color-rule)' }}>
-                          {new Date(ticket.created_at).toLocaleDateString()}
-                        </td>
-                      </tr>
-                    )) : (
-                      <tr><td colSpan={4} style={{ textAlign: 'center', padding: '2rem', fontFamily: 'var(--font-mono)', color: 'var(--color-rule)' }}>no support tickets found.</td></tr>
-                    )}
-                  </tbody>
-                </table>
+                        </div>
+                      ))}
+                    </div>
+                  </details>
+                )) : (
+                  <div style={{ textAlign: 'center', padding: '2rem', fontFamily: 'var(--font-mono)', color: 'var(--color-rule)' }}>no support tickets found.</div>
+                )}
               </div>
             </motion.div>
-          )}
+            ); })()}
 
           {/* Landing CMS Tab */}
           {activeTab === 'landing' && (
@@ -656,6 +654,16 @@ const AdminDashboard = () => {
                       placeholder="e.g. unknown."
                     />
                   </div>
+                  <div className="form-group" style={{ marginBottom: '1.5rem' }}>
+                    <label className="eyebrow">Hero CTA Label</label>
+                    <input 
+                      className="lumen-input"
+                      style={{ width: '100%', background: 'transparent', border: '1px solid var(--color-rule)', color: 'var(--color-paper-contrast)', padding: '0.5rem', fontFamily: 'var(--font-mono)' }}
+                      value={config?.landing_page?.hero_cta || ''}
+                      onChange={(e) => handleLandingChange('hero_cta', e.target.value)}
+                      placeholder="e.g. start for free"
+                    />
+                  </div>
                   <div className="form-group" style={{ marginBottom: '2.5rem' }}>
                     <label className="eyebrow">Hero Lede</label>
                     <textarea 
@@ -664,6 +672,33 @@ const AdminDashboard = () => {
                       value={config?.landing_page?.hero_lede || ''}
                       onChange={(e) => handleLandingChange('hero_lede', e.target.value)}
                       placeholder="e.g. answer six questions..."
+                    />
+                  </div>
+                  <div className="form-group" style={{ marginBottom: '1.5rem' }}>
+                    <label className="eyebrow">Footer Statement</label>
+                    <input 
+                      className="lumen-input"
+                      style={{ width: '100%', background: 'transparent', border: '1px solid var(--color-rule)', color: 'var(--color-paper-contrast)', padding: '0.5rem', fontFamily: 'var(--font-mono)' }}
+                      value={config?.landing_page?.footer_statement || ''}
+                      onChange={(e) => handleLandingChange('footer_statement', e.target.value)}
+                      placeholder="e.g. the instrument is dark..."
+                    />
+                  </div>
+                  <div className="form-group" style={{ marginBottom: '1rem' }}>
+                    <label className="eyebrow">SEO Title / Desc (optional)</label>
+                    <input 
+                      className="lumen-input"
+                      style={{ width: '100%', background: 'transparent', border: '1px solid var(--color-rule)', color: 'var(--color-paper-contrast)', padding: '0.5rem', fontFamily: 'var(--font-mono)', marginBottom:'0.5rem' }}
+                      value={config?.landing_page?.seo_title || ''}
+                      onChange={(e) => handleLandingChange('seo_title', e.target.value)}
+                      placeholder="SEO title"
+                    />
+                    <input 
+                      className="lumen-input"
+                      style={{ width: '100%', background: 'transparent', border: '1px solid var(--color-rule)', color: 'var(--color-paper-contrast)', padding: '0.5rem', fontFamily: 'var(--font-mono)' }}
+                      value={config?.landing_page?.seo_desc || ''}
+                      onChange={(e) => handleLandingChange('seo_desc', e.target.value)}
+                      placeholder="SEO description"
                     />
                   </div>
 
@@ -732,21 +767,36 @@ const AdminDashboard = () => {
               onClick={e => e.stopPropagation()}
               style={{ 
                 position: 'absolute', right: 0, top: 0, bottom: 0, width: '100%', maxWidth: '600px', 
-                backgroundColor: 'var(--color-paper)', borderLeft: '1px solid var(--color-rule)', 
+                backgroundColor: 'var(--color-paper-2)', borderLeft: '1px solid var(--color-rule-2)', 
                 padding: '2rem', overflowY: 'auto', display: 'flex', flexDirection: 'column'
               }}
             >
-              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '2rem' }}>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '2rem', flexWrap:'wrap', gap:'0.75rem' }}>
                 <span className="eyebrow">USER DOSSIER</span>
-                <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
-                  <button className="btn-icon hover-destructive" onClick={(e) => { 
-                    if(studentDetails) {
-                      handleDeleteStudent(studentDetails.profile.id, e);
-                      setSelectedStudentId(null);
-                    }
-                  }} title="delete student">
-                    <Trash2 size={18} />
-                  </button>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', flexWrap:'wrap' }}>
+                  {studentDetails && (
+                    <button
+                      className={`btn ${studentDetails.profile.is_blocked ? 'btn--outline' : 'btn--primary'}`}
+                      onClick={async (e)=>{
+                        e.stopPropagation();
+                        const next = !studentDetails.profile.is_blocked;
+                        if (!confirm(next ? 'Block this user?' : 'Unblock this user?')) return;
+                        try{
+                          const { data:{session} } = await supabase.auth.getSession();
+                          const apiUrl = import.meta.env.VITE_API_BASE_URL || '/api';
+                          const res = await fetch(`${apiUrl}/admin/block/${studentDetails.profile.id}`, { method:'POST', headers:{ 'Authorization':`Bearer ${session?.access_token}`, 'Content-Type':'application/json' }, body: JSON.stringify({ blocked: next }) });
+                          if(!res.ok) throw new Error('block failed');
+                          toast.success(next ? 'user blocked' : 'user unblocked');
+                          setStudentDetails((p:any)=> ({...p, profile:{...p.profile, is_blocked: next}}));
+                          setStudents(prev=> prev.map(s=> s.id===studentDetails.profile.id ? {...s, is_blocked: next} as any : s));
+                        }catch{ toast.error('block toggle failed'); }
+                      }}
+                      style={{ fontSize:'0.75rem', padding:'0.4rem 0.75rem', height:'auto' }}
+                      data-testid="block-toggle"
+                    >
+                      {studentDetails.profile.is_blocked ? 'unblock' : 'block'}
+                    </button>
+                  )}
                   <button className="btn-icon" onClick={() => setSelectedStudentId(null)} title="close">
                     <X size={20} /> 
                   </button>
@@ -764,7 +814,8 @@ const AdminDashboard = () => {
                     <h2 style={{ fontSize: '2rem', fontFamily: 'var(--font-serif)', color: 'var(--color-paper-contrast)', marginBottom: '0.5rem' }}>
                       {studentDetails.profile.name?.toLowerCase() || 'anonymous'}
                     </h2>
-                    <p style={{ fontFamily: 'var(--font-mono)', color: 'var(--color-rule)', marginBottom: '1.5rem' }}>{studentDetails.profile.email}</p>
+                    <p style={{ fontFamily: 'var(--font-mono)', color: 'var(--color-rule)', marginBottom: '1rem' }}>{studentDetails.profile.email}</p>
+                    {studentDetails.profile.is_blocked && <span style={{ display:'inline-block', background:'var(--color-accent-2)', color:'#fff', padding:'0.2rem 0.5rem', borderRadius:4, fontFamily:'var(--font-mono)', fontSize:'0.7rem', marginBottom:'1rem' }}>BLOCKED</span>}
                     <div style={{ display: 'flex', gap: '1rem', flexWrap: 'wrap', fontFamily: 'var(--font-mono)', fontSize: '0.75rem' }}>
                       <span style={{ border: '1px solid var(--color-rule)', padding: '0.25rem 0.75rem', borderRadius: '4px' }}>ROLE: {studentDetails.profile.role}</span>
                       <span style={{ border: '1px solid var(--color-rule)', padding: '0.25rem 0.75rem', borderRadius: '4px' }}>BRANCH: {studentDetails.profile.branch || 'N/A'}</span>

@@ -240,6 +240,20 @@ router.patch('/tickets/:id', requireAuth, requireAdmin, async (req: any, res: an
   }
 });
 
+// Block / Unblock student (Phase 6) - toggles is_blocked
+router.post('/block/:id', requireAuth, requireAdmin, async (req: any, res: any) => {
+  try {
+    const studentId = req.params.id;
+    const { blocked } = req.body; // true = block, false = unblock
+    const { error } = await supabase.from('profiles').update({ is_blocked: !!blocked, blocked_at: blocked ? new Date().toISOString() : null }).eq('id', studentId);
+    if (error) throw error;
+    res.json({ success: true, is_blocked: !!blocked });
+  } catch (error) {
+    console.error('Error toggling block:', error);
+    res.status(500).json({ error: 'Failed to toggle block' });
+  }
+});
+
 // Secure student deletion via service_role (replaces client-side delete)
 router.delete('/student/:id', requireAuth, requireAdmin, async (req: any, res: any) => {
   try {

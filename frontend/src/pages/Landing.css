@@ -166,6 +166,15 @@
   50%      { opacity: 0.86; }
 }
 
+@media (prefers-reduced-motion: reduce) {
+  .chamber__filament { animation: none !important; opacity:0.9; }
+  .meter__bars > span { opacity:0.6 !important; }
+}
+
+@media (max-width: 768px) {
+  .chamber__filament { animation-duration: 6s; } /* slower on mobile, less jank */
+}
+
 /* Callouts */
 .callouts {
   list-style: none;

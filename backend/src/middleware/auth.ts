@@ -39,15 +39,20 @@ export const requireAuth = async (req: AuthRequest, res: Response, next: NextFun
 
     const userId = user.id;
 
-    // Read the role FROM THE DATABASE using service_role, never trust the frontend payload for role
+    // Read the role + blocked status FROM DB using service_role
     const { data: profile, error } = await supabase
       .from('profiles')
-      .select('role')
+      .select('role, is_blocked')
       .eq('id', userId)
       .single();
 
     if (error || !profile) {
       res.status(401).json({ error: 'User profile not found in database' });
+      return;
+    }
+
+    if ((profile as any).is_blocked) {
+      res.status(403).json({ error: 'Your account has been blocked. Contact support.' });
       return;
     }
 
