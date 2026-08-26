@@ -125,7 +125,7 @@ ALTER TABLE public.support_tickets ADD COLUMN IF NOT EXISTS user_id uuid REFEREN
 CREATE TABLE IF NOT EXISTS public.events (
   id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
   user_id uuid REFERENCES auth.users(id) ON DELETE CASCADE,
-  event_type text NOT NULL CHECK (event_type IN ('page_view','roadmap_view','mentor_message','weekly_view')),
+    event_type text NOT NULL CHECK (event_type IN ('page_view','roadmap_view','mentor_message','weekly_view','time_spent','task_completed')),
   metadata jsonb DEFAULT '{}'::jsonb,
   created_at timestamptz DEFAULT now()
 );

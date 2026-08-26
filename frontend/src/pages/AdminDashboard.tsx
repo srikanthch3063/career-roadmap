@@ -387,6 +387,10 @@ const AdminDashboard = () => {
                   <div style={{ display:'flex', justifyContent:'space-between' }}><span className="eyebrow">mentor messages</span><span style={{ fontFamily:'var(--font-mono)' }}>{(stats as any).events?.mentor_messages ?? 0}</span></div>
                   <div style={{ display:'flex', justifyContent:'space-between' }}><span className="eyebrow">unique mentor users</span><span style={{ fontFamily:'var(--font-mono)' }}>{(stats as any).events?.unique_mentor_users ?? 0}</span></div>
                   <div style={{ display:'flex', justifyContent:'space-between' }}><span className="eyebrow">avg per user</span><span style={{ fontFamily:'var(--font-mono)', color:'var(--color-accent)' }}>{(stats as any).events?.avg_mentor_per_user ?? 0}</span></div>
+                  <div style={{ borderTop:'1px solid var(--color-rule)', margin:'0.5rem 0' }} />
+                  <div style={{ display:'flex', justifyContent:'space-between' }}><span className="eyebrow">tasks completed</span><span style={{ fontFamily:'var(--font-mono)' }}>{(stats as any).events?.total_task_completed ?? 0}</span></div>
+                  <div style={{ display:'flex', justifyContent:'space-between' }}><span className="eyebrow">total time (sec)</span><span style={{ fontFamily:'var(--font-mono)' }}>{(stats as any).events?.total_time_sec ?? 0}</span></div>
+                  <div style={{ display:'flex', justifyContent:'space-between' }}><span className="eyebrow">avg time / user (sec)</span><span style={{ fontFamily:'var(--font-mono)', color:'var(--color-accent)' }}>{(stats as any).events?.avg_time_sec ?? 0}</span></div>
                 </div>
               </section>
 

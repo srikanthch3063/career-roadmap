@@ -1,6 +1,6 @@
 import { supabase } from '../supabase';
 
-export async function track(event_type: 'page_view'|'roadmap_view'|'mentor_message'|'weekly_view', metadata: any = {}) {
+export async function track(event_type: 'page_view'|'roadmap_view'|'mentor_message'|'weekly_view'|'time_spent'|'task_completed', metadata: any = {}) {
   try {
     const { data: { session } } = await supabase.auth.getSession();
     if (!session) return;

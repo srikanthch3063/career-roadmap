@@ -15,6 +15,7 @@ import ChatDrawer from '../components/ChatDrawer';
 import salaryData from '../data/salaryData.json';
 import { generateResourceLinks } from '../utils/resourceResolver';
 import { track } from '../utils/tracker';
+import { useTimeTracker } from '../hooks/useTimeTracker';
 import './Results.css';
 
 const Results = () => {
@@ -29,6 +30,7 @@ const Results = () => {
   const [isChatOpen, setIsChatOpen] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const contentRef = useRef<HTMLDivElement>(null);
+  useTimeTracker('results');
 
   const loadingMessages = [
     "calibrating constraints...",
@@ -151,6 +153,7 @@ const Results = () => {
 
   const toggleCheck = async (id: string) => {
     const newChecked = { ...checkedItems, [id]: !checkedItems[id] };
+    if (!checkedItems[id]) track('task_completed', { task_id: id });
     setCheckedItems(newChecked);
 
     try {

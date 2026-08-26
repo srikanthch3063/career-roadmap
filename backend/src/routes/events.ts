@@ -10,7 +10,7 @@ router.post('/events', requireAuth, async (req: AuthRequest, res: any) => {
   try {
     const userId = req.user!.id;
     const { event_type, metadata } = req.body;
-    if (!event_type || !['page_view','roadmap_view','mentor_message','weekly_view'].includes(event_type)) {
+    if (!event_type || !['page_view','roadmap_view','mentor_message','weekly_view','time_spent','task_completed'].includes(event_type)) {
       return res.status(400).json({ error: 'invalid event_type' });
     }
     const { error } = await supabase.from('events').insert({ user_id: userId, event_type, metadata: metadata || {} });

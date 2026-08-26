@@ -8,6 +8,7 @@ import html2canvas from 'html2canvas';
 import { jsPDF } from 'jspdf';
 import ThemeToggle from '../components/ThemeToggle';
 import { track } from '../utils/tracker';
+import { useTimeTracker } from '../hooks/useTimeTracker';
 
 const WeeklyPlan = () => {
   const location = useLocation();
@@ -19,6 +20,7 @@ const WeeklyPlan = () => {
   const contentRef = React.useRef<HTMLDivElement>(null);
 
   const roadmap = location.state?.roadmap;
+  useTimeTracker('weekly_plan');
   const [weeklyChecked, setWeeklyChecked] = useState<Record<string, boolean>>(()=> {
     try { return JSON.parse(localStorage.getItem('weeklyChecked')||'{}'); } catch { return {}; }
   });
@@ -223,7 +225,7 @@ const WeeklyPlan = () => {
                         const tid = `${week.week_number}-${i}`;
                         const checked = !!weeklyChecked[tid];
                         return (
-                        <li key={i} onClick={()=> setWeeklyChecked(p=> ({...p, [tid]: !p[tid]}))} style={{ display: 'flex', gap: '1rem', alignItems: 'flex-start', cursor:'pointer', opacity: checked?0.55:1 }} data-testid={`weekly-${tid}`}>
+                        <li key={i} onClick={()=> { const next = !checked; if(next) track('task_completed', { task_id: tid, page:'weekly' }); setWeeklyChecked(p=> ({...p, [tid]: next})); }} style={{ display: 'flex', gap: '1rem', alignItems: 'flex-start', cursor:'pointer', opacity: checked?0.55:1 }} data-testid={`weekly-${tid}`}>
                           <div style={{ width:16, height:16, border: checked?'2px solid var(--color-accent)':'1px solid var(--color-rule)', background: checked?'var(--color-accent)':'transparent', marginTop:2, flexShrink:0, display:'flex', alignItems:'center', justifyContent:'center' }}>{checked ? '✓' : ''}</div>
                           <span style={{ fontFamily: 'var(--font-mono)', fontSize: '0.875rem', lineHeight: '1.5', color: 'var(--color-paper-contrast)', textDecoration: checked?'line-through':undefined }}>{task}</span>
                         </li>

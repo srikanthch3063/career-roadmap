@@ -124,19 +124,25 @@ router.get('/stats', requireAuth, requireAdmin, async (req: AuthRequest, res: an
       }
     }
 
-    // Phase 8: events funnel (roadmap_view + mentor)
-    let eventsStats: any = { mentor_messages: 0, roadmap_views: 0, unique_mentor_users: 0, avg_mentor_per_user: 0 };
+    // Phase 8: events funnel (roadmap_view + mentor + time_spent)
+    let eventsStats: any = { mentor_messages: 0, roadmap_views: 0, unique_mentor_users: 0, avg_mentor_per_user: 0, total_task_completed: 0, avg_time_sec: 0, total_time_sec: 0 };
     try {
-      const { data: events } = await supabase.from('events').select('user_id, event_type');
+      const { data: events } = await supabase.from('events').select('user_id, event_type, metadata');
       if (events) {
         const mentorEvents = events.filter(e=> e.event_type==='mentor_message');
         const roadmapViews = events.filter(e=> e.event_type==='roadmap_view');
+        const timeEvents = events.filter(e=> e.event_type==='time_spent');
+        const taskEvents = events.filter(e=> e.event_type==='task_completed');
         const uniqMentor = new Set(mentorEvents.map(e=> e.user_id)).size;
+        const totalTime = timeEvents.reduce((s,e)=> s + Number((e.metadata as any)?.duration_sec||0), 0);
         eventsStats = {
           mentor_messages: mentorEvents.length,
           roadmap_views: roadmapViews.length,
           unique_mentor_users: uniqMentor,
           avg_mentor_per_user: uniqMentor ? Number((mentorEvents.length/uniqMentor).toFixed(1)) : 0,
+          total_task_completed: taskEvents.length,
+          total_time_sec: totalTime,
+          avg_time_sec: events.length ? Math.round(totalTime / new Set(events.map(e=> e.user_id)).size) : 0,
         };
       }
     } catch (e) { console.warn('events stats failed', e); }
