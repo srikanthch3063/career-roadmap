@@ -15,6 +15,11 @@ export default defineConfig({
         theme_color: '#1A1D24',
         background_color: '#0D0F12',
         display: 'standalone',
+        // Only show "access other apps" prompt when installed as PWA
+        related_applications: [],
+        prefer_related_applications: false,
+        handle_links: 'preferred',
+        launch_handler: { client_mode: 'navigate-existing' },
         icons: [
           {
             src: 'favicon.svg',

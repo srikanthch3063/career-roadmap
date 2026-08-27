@@ -143,6 +143,14 @@ const AuthPage = () => {
   };
 
   const handleGoogleLogin = async () => {
+    // Only allow Google OAuth when installed as PWA or on desktop; on mobile web show guidance
+    const isStandalone = window.matchMedia('(display-mode: standalone)').matches || (navigator as any).standalone;
+    const isMobileWeb = /Android|iPhone|iPad/.test(navigator.userAgent) && !isStandalone;
+    if (isMobileWeb) {
+      // Avoid triggering "access other apps" permission on mobile web — guide to use email or install first
+      setError('For Google login on mobile, please Add to Home Screen to install the app first, then login with Google. Or use email.');
+      return;
+    }
     setLoading(true);
     setError(null);
     try {
@@ -150,6 +158,8 @@ const AuthPage = () => {
         provider: 'google',
         options: {
           redirectTo: getURL(),
+          scopes: 'openid email profile',
+          queryParams: { prompt: 'select_account' }
         }
       });
       if (error) throw error;
